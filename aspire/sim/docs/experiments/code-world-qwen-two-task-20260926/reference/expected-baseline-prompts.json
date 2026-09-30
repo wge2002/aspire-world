@@ -1,0 +1,54 @@
+{
+  "bowldrawer_A": {
+    "oracle": "pristine Sep-14 A1 native_world_campaign.py + original template",
+    "source": "/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b/aspire/sim/docs/experiments/code-world-judgment-two-task-20260917/reference/native-A1-source",
+    "render_fields": {
+      "id": "bowldrawer_A",
+      "condition": "A",
+      "suite": "libero_goal_swap",
+      "task": "open_the_top_drawer_and_put_the_bowl_inside",
+      "gpu": 6,
+      "sim": "/mnt/home/gewang/code/ASPIRE-code-world-qwen-two-task-20260926/cells/bowldrawer_A/aspire/sim",
+      "skill_library_dir": "docs/experiments/code-world-qwen-two-task-20260926/cells/bowldrawer_A/skills"
+    },
+    "sha256": {
+      "worker-prompt.md": "d5afa4ac256ef3ef131322cdf6ce6facd387322880c92bba5d8982297322037a",
+      "coordinator-prompt.md": "c866436c53831418e5cff7f226428bf64f1b69d2b3309c9ba77c56957e886d37"
+    },
+    "worker_words": 1595,
+    "command": [
+      "/mnt/home/gewang/code/ASPIRE/aspire/sim/.venv-libero/bin/python3",
+      "/mnt/home/gewang/experiments/code-world-qwen-two-task-20260926/support/pristine_a_render.py",
+      "--case",
+      "/mnt/home/gewang/experiments/code-world-qwen-two-task-20260926/bowldrawer_A/case.json",
+      "--engineering",
+      "/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b/aspire/sim"
+    ]
+  },
+  "drawer_A": {
+    "oracle": "pristine Sep-14 A1 native_world_campaign.py + original template",
+    "source": "/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b/aspire/sim/docs/experiments/code-world-judgment-two-task-20260917/reference/native-A1-source",
+    "render_fields": {
+      "id": "drawer_A",
+      "condition": "A",
+      "suite": "libero_goal_swap",
+      "task": "open_the_middle_drawer_of_the_cabinet",
+      "gpu": 6,
+      "sim": "/mnt/home/gewang/code/ASPIRE-code-world-qwen-two-task-20260926/cells/drawer_A/aspire/sim",
+      "skill_library_dir": "docs/experiments/code-world-qwen-two-task-20260926/cells/drawer_A/skills"
+    },
+    "sha256": {
+      "worker-prompt.md": "6661d3f227ea7d4f7d41550f621317c40da70be94f72553efebfd7ac773cfd02",
+      "coordinator-prompt.md": "cf812de4d9ac685bcd590a6eacf03ad6051e53632325eb0ddcdcb8ac5a05fe56"
+    },
+    "worker_words": 1595,
+    "command": [
+      "/mnt/home/gewang/code/ASPIRE/aspire/sim/.venv-libero/bin/python3",
+      "/mnt/home/gewang/experiments/code-world-qwen-two-task-20260926/support/pristine_a_render.py",
+      "--case",
+      "/mnt/home/gewang/experiments/code-world-qwen-two-task-20260926/drawer_A/case.json",
+      "--engineering",
+      "/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b/aspire/sim"
+    ]
+  }
+}

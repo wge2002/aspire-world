@@ -1,0 +1,3349 @@
+{
+  "snapshot_date": "2026-09-30",
+  "source_upstream": "https://github.com/NVlabs/ASPIRE",
+  "source_base_commit": "7ba73d3bcac8f6b6d4a7d67ed4040988f768d282",
+  "includes_uncommitted_working_tree_changes": true,
+  "files": [
+    {
+      "path": "CC_USAGE.md",
+      "size": 10391,
+      "sha256": "3603cb32f9c2fff025c11c7141c5da0be6374df44c39312d90919e4884acd4d0"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/code-world/INSTRUCTIONS.md",
+      "size": 9530,
+      "sha256": "57cd70ee0c570ce5d0491c9dfb43d3fabf16aa8dadc9231da63db7d489ee20a5"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/code-world/SKILL.md",
+      "size": 4027,
+      "sha256": "da851dbb8976252a0cfa905ed48a23e00a1558477c0101b7c94b2c09b7790222"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/code-world/main-agent-prompt.md",
+      "size": 3404,
+      "sha256": "2b8cfe79eeead62126ea876df0419fe394fc606654be26f574e3a36c634a9ae6"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/README.md",
+      "size": 6014,
+      "sha256": "8d10094ad320f7d3cb07f5778db82a63a9bad323dada2312ea5197794833ad11"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/__init__.py",
+      "size": 348,
+      "sha256": "0f314f1889b4e29b01661d7874d9a6db98cb88f04022835cec06d168aaac0ede"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/evidence_state.py",
+      "size": 5993,
+      "sha256": "994ad032989d0073b4268d6dac226f24b58a1f6cce6a9fa56871903a21cf4f3b"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/executable_world.py",
+      "size": 22492,
+      "sha256": "812953860ad3f4be57c182fadf4d638bbe327c9896d24c1fa6475992b00015ea"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/fix_loop_scene_broker.py",
+      "size": 13273,
+      "sha256": "62ea203d8da6134c10957bc8e917d25880cf8ddaecbed88f00a57f9712c660dc"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/foundation_audit.py",
+      "size": 3812,
+      "sha256": "3d6749f33a62e14abcb3494f37b80c5d12189bc08675edc7634a676283127229"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/judgment_world.py",
+      "size": 8199,
+      "sha256": "c5fe598738b85e4069f97b666630dc4f0086691990afd2536eea12c8f2f54309"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/libero_capture.py",
+      "size": 27491,
+      "sha256": "b21b88474369262fcfb10a8622cfd9ae356596866f32e381d6b156b332b66f3c"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/live_broker.py",
+      "size": 47270,
+      "sha256": "a9156a273d27070c87d0f4eb0835d4c56a1c583367d3ef69cf8a899eac371107"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/native_world_broker.py",
+      "size": 20306,
+      "sha256": "29482e53e30b49c8a6172ec03679876a2857c3adcdb9d55ed6ba35685ec861d1"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/ordinary_fix_loop_guard.py",
+      "size": 23445,
+      "sha256": "827d4b2cf9286d0af5bacbc8e61a58b31999cd5466eb82324ad2062ae6571b37"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/program.py",
+      "size": 5581,
+      "sha256": "8e120a2e818f092584564fff97f45aa29917f149df9c93b68e05927fa03e53d2"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/reference_relational_world.py",
+      "size": 42588,
+      "sha256": "63696bbf74bb1e3cf025a1f2d3518c6bc70699e9599b368f60f5e3c76621b4ab"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/reference_scene_broker.py",
+      "size": 14001,
+      "sha256": "e8aaf87da3ac5d80ece0376a6788e5eb08249616e31c3386a73e70ea9e1a88ec"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/relational_scene_broker.py",
+      "size": 26526,
+      "sha256": "8938325623bfadb8df884d314cab7cad2de22fe5d73fef17297204cf007ef437"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/runtime.py",
+      "size": 16426,
+      "sha256": "3a50b12f603a4961c467ff25941ef9aaffa487d10bb05f45ec5bcd364e6a1d49"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/scene_broker.py",
+      "size": 18774,
+      "sha256": "19a141968cd8e4cca967934627e7845c3718a40df6f675aae64cac8d873d8074"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/simple_world.py",
+      "size": 9569,
+      "sha256": "7b364f1445cab2ec3475a9568e6d7ef435df2c0c575e2c8fa6c17b32916bf32e"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/world_use_audit.py",
+      "size": 35056,
+      "sha256": "0b5272f084126bd0559492eb7016fcc37792ee46e7a50d048f2d14eeffd136d1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/claude-code-local-models.md",
+      "size": 12999,
+      "sha256": "44cfcff1f813871427da80b152c703c7014092101d78fb8f6a8d1b73b4cdcd8c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/NATIVE_WORLD_INTERFACE.md",
+      "size": 5929,
+      "sha256": "58f191a9c7f250706f1ce428f8b026a0bdf728c4a7c104e82b0d9d328fcaba30"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/PROTOCOL.md",
+      "size": 7223,
+      "sha256": "b9c3b7e6cf127ddacc10227c110e0ffb63fe46b78f7e3baa94cbb74bb71b4852"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/collect.py",
+      "size": 6003,
+      "sha256": "e11617dee20c93ace23c92c1335153238a2f4e4ccc8f6b33e9396f125fa00e71"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/engineering-base/scripts/libero/native_world_campaign.py",
+      "size": 40319,
+      "sha256": "712abe6f7cf1870d6b65ab0f7263efc8ba7e2fcae6e6808d49d5717bba39e18b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/integrate.py",
+      "size": 4816,
+      "sha256": "c06358a75186866fda3da080ed308d79a647de36df5cb7dcdfa75f59754e1683"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-and-launch.py",
+      "size": 11665,
+      "sha256": "704072a9c9d2e3ff98a9b47834524a4cef6239d4faaa29cc50391f5069f93f5a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-r2.py",
+      "size": 12001,
+      "sha256": "8258c9e536081c4fe8bdbded8c1ffbd0c0de66fbaac4885f1a6086b414acef77"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/resume-bowl-eval.py",
+      "size": 5812,
+      "sha256": "6ef147fbe1f98add93920aa357deeee935f117f5608b15c25df62e19b6f9d378"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/cell_read_guard.py",
+      "size": 4738,
+      "sha256": "bb80880b8041cecd18c51343c2ab459e8d338997d4ec484c9ef8b771c215214f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/evaluate.py",
+      "size": 3656,
+      "sha256": "e0b9dabff6da22b3b3a6746279520c922f1f0f3f10c1deb322a895eac11920c1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/infra_guard.py",
+      "size": 2933,
+      "sha256": "dc04d617a254ec2d95ceabd90bbb1421ee87c80a7a60a1e02eaf782629ae7589"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/run_cell.py",
+      "size": 8955,
+      "sha256": "e8a5e33075cba6fbf839a66b2eb128c3b7ba9984d0de07dfeb484782d3672665"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/PLAN.md",
+      "size": 3617,
+      "sha256": "d16bf962d783c761288e3a0558f554279e16718eebb426e69bce891930110ce1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-entry.sh",
+      "size": 651,
+      "sha256": "f97a49d25e70b7811c477d0a8c27cc5a74388dca275a5f1ae545036583796641"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-supervisor.py",
+      "size": 14026,
+      "sha256": "4ec5f48417926131051135aafaa6dd821402d037ee562db62d33dc54ded93386"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/prepare-pilot.py",
+      "size": 20803,
+      "sha256": "5104362c03f3918be21ab2d4b5d5379cf192a1d1b2c1ba3a251ce106467d47f1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/qwen-native-compat.py",
+      "size": 8402,
+      "sha256": "7e9cd4509efee2c6da7976767b471b54dac65e755915149f99de494e3284d67b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/model-server.json",
+      "size": 2143,
+      "sha256": "22c61284fd39db1310bc7cecbb09ec06ddcb417aeb4156fbea8a163829985c67"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_compat.py",
+      "size": 7630,
+      "sha256": "9e2afa4e9a95b7c8541234dab43f5e525c05d930e52c7798ec12a4f220b8fa1d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_runtime.py",
+      "size": 5789,
+      "sha256": "36a1d1d118faaec4f30723aff02b804b83fabf3cae94b1891df7d308bb32edda"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/run-dsw-preflight.py",
+      "size": 4780,
+      "sha256": "ccfa258216f7b7fcac845908badabf408131cf458ba94460841defeb98d5bb9e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_import.py",
+      "size": 16138,
+      "sha256": "2987a80ba2c880c6a3676553e84c73bc0a09c5dccb215070a5d2a86a777199b4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_render.py",
+      "size": 2066,
+      "sha256": "dbfa227456fe03947abb5cf28d8849680c98089387fbe7970373421fff1da4a3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_scope.py",
+      "size": 11982,
+      "sha256": "b4c01356d79886ac03ba52a5286be91dd1bc06e976659aadfd3c3c44d2cc2afa"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/run_cell.py",
+      "size": 11401,
+      "sha256": "1533310a0fecd4d3eee3ce29c9a96d6ad7e3551f6ac21a5df2fe88c73028419a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_local_vllm_provider.py",
+      "size": 11106,
+      "sha256": "c3cf48b6a73792e32001e483f83e2c8f7503cb07f4804121ec6c774b8377b27f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_pilot_helpers.py",
+      "size": 21508,
+      "sha256": "48df32e72f282cbcfdbd35e3d93020109f38082593f15f778bdaf4f9ba921b37"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/ACCEPTANCE.md",
+      "size": 2449,
+      "sha256": "bb3a7447a846fc9eb965e6342fad74da6362d73275aa2f38caed8b9ba6027ade"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/IMPLEMENTATION.md",
+      "size": 4168,
+      "sha256": "dd6bd3ff190ecf393c941c1110b3a14ed304d5fc8cfaaf0c50ca08fba1406949"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/NATIVE_WORLD_INTERFACE.md",
+      "size": 11611,
+      "sha256": "20836585286b5245d640241f10d42a92461f2c9e04863204b9777598979d495f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/PLAN.md",
+      "size": 4569,
+      "sha256": "959d63bed98f9651e67e85148887fbdd4d91844c0ba9e382da3a5b2699c5c9b2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/prepare-foundation.py",
+      "size": 32072,
+      "sha256": "99b44af060148b9429042da3e45c84ba2cb0e7a90a205480aac56508bc8b038d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowl-c.py",
+      "size": 17521,
+      "sha256": "e3833377a92ee9df0c59993c43febd1e8e567d44a521f5b8f5233bb02c1b6d3d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowldrawer-c.py",
+      "size": 17659,
+      "sha256": "b5a51d5433082d9c86b0aa5403c3279df64434ff6afcd9be10c2e61b568f8472"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-drawer-c.py",
+      "size": 17591,
+      "sha256": "6e486c10f2bb4d00f5c5f63ded8b649eca393ef9ca199f91514762c370203179"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/submit-foundation.py",
+      "size": 2992,
+      "sha256": "69b788df515b8272eb987c05233f8b36ca4f23f979296f052d1ec1ded93023f5"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/dlc-supervisor.py",
+      "size": 23946,
+      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/run_two_task_cell.py",
+      "size": 30424,
+      "sha256": "68baf4460a5aee8b2a693d4e3298381e1ac3bfebad51df2b870a541f12749733"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_scope.py",
+      "size": 8266,
+      "sha256": "70220ccf9278845947f981bd89e493b43db6893ad6a0750fb3d7639227f422b8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/NATIVE_WORLD_INTERFACE.md",
+      "size": 5929,
+      "sha256": "58f191a9c7f250706f1ce428f8b026a0bdf728c4a7c104e82b0d9d328fcaba30"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/PLAN.md",
+      "size": 5128,
+      "sha256": "0462eb6815a60b28f1c989bcc538f1c5cc381573b3d3d44c63a6d06863b8469e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/prepare-full.py",
+      "size": 24170,
+      "sha256": "edd7e71c5bc6c78c69d947d28df60f89cb3bc70e2374ff563dbcabb224e7d7f1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/replay-fixture-check.py",
+      "size": 5180,
+      "sha256": "c334e32e4ddc13ab2ea4b79910b35f28d33a478a77a9f15ef7362d252ff5a862"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/run-dsw-preflight.py",
+      "size": 4814,
+      "sha256": "f15916138c7dbac684b7a9343f8cce709db749924f0ebbb6fdcef989ebf132f9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/dlc-supervisor.py",
+      "size": 23488,
+      "sha256": "7222e51cea76bda336e65b4d4613950633e41bb2dc7c41332c13da61be5e2d49"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "f7f3caf6b62ff79dc484c9f1b7ef1fe08f5d7be4f263eb6b24d6469d10d46295"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_import.py",
+      "size": 16723,
+      "sha256": "b3832c2c4047dc6f3dc10f522556ee544ccfb957c551f31c1d66e592cedd2fd0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_render.py",
+      "size": 1899,
+      "sha256": "883c58abbace7797092c6969f4dc960abb0f7080b8cf1d51afb70a59ad90fb2d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_scope.py",
+      "size": 9674,
+      "sha256": "150e34720d313e36317ce26f812fcadd5f5ff77626f0d586325ea99581a89bd0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/run_full_cell.py",
+      "size": 33232,
+      "sha256": "782fb6678347788047e94088a7b72da1dd113ee5ce6554d9713cee00a26152a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_core_acceptance.py",
+      "size": 6433,
+      "sha256": "84049d7efd759808d34a86cedb3cb55fb4ff0af1f55a025d3967cd81d6f31677"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_driver.py",
+      "size": 16407,
+      "sha256": "2eea34e38470c3a37f72b142a813c7cff7e0546f81e4ecdeac94a67793d62517"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_stager.py",
+      "size": 3138,
+      "sha256": "cdd6ff50ddad3f937b8c49acce28dcdf251b7974db461b1da6b0601b61af1144"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_output_ownership.py",
+      "size": 3124,
+      "sha256": "a3e84d807bcef8de5f1a2ae327e3caf27e23a9d2f7ef1064f66cd29647d8cbf2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_qwen_capacity_acceptance.py",
+      "size": 1802,
+      "sha256": "6e5aabf0bc9aafe6233fc2b731c30788b1250d8d5d5d0185bd6696671c9d4ed0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/wait-checkpoint.py",
+      "size": 1236,
+      "sha256": "9ab5900c7d058bb6822c63a9fa292a0d74f2b6670f786a58943a6236a844260e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/NATIVE_WORLD_INTERFACE.md",
+      "size": 6039,
+      "sha256": "d02a19f7c9590807e0268a4e8f929c6efe7f20e77615367755c49b3bb4faecef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/PLAN.md",
+      "size": 3798,
+      "sha256": "df0bf8faa70c739a97380d852b1af76949542d323b704091aac0cf921459e23b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/drawer-pair-dlc-entry.sh",
+      "size": 1516,
+      "sha256": "b9622684ec632471c4af64615ba2b7a79328e1e13c1c5495291e459f07962b0d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/make-c-r2-driver.py",
+      "size": 15962,
+      "sha256": "bd2795b49178ec07a4f0e6b2d2a0a30b42afa7605910efb44f57972e9630c774"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/prepare-two-task.py",
+      "size": 32160,
+      "sha256": "21d02e5c1f0f09351bcf6845e7e5fc5ecdb45a3c9e569e0031f81a727ea17dd7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-bowldrawer-c-r2.sh",
+      "size": 3502,
+      "sha256": "fa20b1de863daaac8c427b0516dbaaf897942f3c80e272eec42641116c6127d8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-drawers.sh",
+      "size": 3892,
+      "sha256": "ff85c196c0577f1e13167e051638951eb702a0b45c8592709919bf20891c8ff4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/reference/expected-baseline-prompts.json",
+      "size": 2659,
+      "sha256": "5a52a73485d96bb3b624c2dd5d58ed274a3ffbf35e5499add6026568a652a273"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/rescue-c-job-marker.sh",
+      "size": 1864,
+      "sha256": "4c2d0c703bdcc8742e8fc1503bf565246b3f765096daaa05e102b88b877caf8d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-a.py",
+      "size": 7838,
+      "sha256": "a8695b61f5b7edba616192000c8dcf655fe1468cbbc6099aee0038b60c51512a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-c.py",
+      "size": 18292,
+      "sha256": "ed489ac41ee281775db0808b7bd584c7e1c151807458530b66d5c14b499b3137"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-import-bowldrawer-a-r2.py",
+      "size": 1361,
+      "sha256": "dde286614bb4ccaf32eec676e3f56e84a02b56fb744a29e825b38418c98b9b05"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-a-r2.py",
+      "size": 14519,
+      "sha256": "4b2a8544e334202918e76f836c33844fdb287bc31fd192d34117f8e0ad8dc633"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-c-r2.py",
+      "size": 21384,
+      "sha256": "33d884068e11e443ff625dc4657443052da59b173106b9a9cbf231505db78cb9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume.py",
+      "size": 27401,
+      "sha256": "9144c60f3908e920f8deac422a751b1b806a417c2135dfd1b3722672b7be56a2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume2.py",
+      "size": 28308,
+      "sha256": "76a2c79089bd5d016f1449b6fd94aa19998737190ac3aab7e5933962966d25d7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-two-task.py",
+      "size": 25650,
+      "sha256": "88ad390b157d230dedf8e6ad3eb7b1a6e3bdfe714223bc257f2aeb041af46f66"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor.py",
+      "size": 23488,
+      "sha256": "7222e51cea76bda336e65b4d4613950633e41bb2dc7c41332c13da61be5e2d49"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "f7f3caf6b62ff79dc484c9f1b7ef1fe08f5d7be4f263eb6b24d6469d10d46295"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines.py",
+      "size": 1022,
+      "sha256": "9d8f14d02ca0871ba3680736e9c96c48c6b38cdec79f8184da827da57aeb9879"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines2.py",
+      "size": 1245,
+      "sha256": "1a82901e8e03fc932f76a37f294f5dfcbaeb31a6ca87c9bcdfd92c93b9101f72"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell.py",
+      "size": 34140,
+      "sha256": "11f5b9c790cc454c05b06e63bf5c217f1bb6920a943f81dc89e13ea0305159fb"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2.py",
+      "size": 41934,
+      "sha256": "941ee185c08a35c726d7f15610daebc7ac4b5c62056814261475312325282a7e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2_resume.py",
+      "size": 41345,
+      "sha256": "09e754d2e949685ce7028a22a1c938c151b9cb010ba1d22be21c9739969bb16b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_r2.py",
+      "size": 37869,
+      "sha256": "89856895b328425012573715b3aae50511721bdce407314af018b677eeffada2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import.py",
+      "size": 13755,
+      "sha256": "5c6a6af0fd1797c98961f913c3f3cc58a9317772e28e46cc4132ed1e0cb386ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import_c.py",
+      "size": 31820,
+      "sha256": "be74852f6100f75b2a9b741e94239964bd223668f75fdc2bead51858ec94abbf"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render_r2.py",
+      "size": 2052,
+      "sha256": "8a187f892fa07bb1853f17267cea902d1987d6d26ad378467b7424aa40cb9be1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope.py",
+      "size": 8844,
+      "sha256": "d7204b0786575c844258e88928f7593fe4f5bf2599fd5c7138e999700223bd66"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope_r2.py",
+      "size": 8188,
+      "sha256": "86376a28b2b8b04d7f4b989143363826e259d6e07767abed7a8206940d4e78b4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/tests/test_lineage_default.py",
+      "size": 6554,
+      "sha256": "946f2836fe1080700c1a915457caf0fde99097d13bd9fb3eaeab3fce2d3f9ce9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-rerun-20260919/baseline-contract.json",
+      "size": 5651,
+      "sha256": "9f2db337b9f88369f3aaf0b5320a2d30afa075443d055344dd5b30418300b1cd"
+    },
+    {
+      "path": "aspire/sim/env_configs/libero/code_world/capture.example.json",
+      "size": 462,
+      "sha256": "a7dc36067e0d7678cf82a1c2e49c33e5085b043207f36c1f16aaed2877e33459"
+    },
+    {
+      "path": "aspire/sim/scripts/common/claude_with_local_model.sh",
+      "size": 3834,
+      "sha256": "b77f6bcc1e860ae6a97734ed22e5cf5ca297583e53bb01f03c415c361dd85f1e"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_compat.py",
+      "size": 7630,
+      "sha256": "9e2afa4e9a95b7c8541234dab43f5e525c05d930e52c7798ec12a4f220b8fa1d"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_dlc_entry.sh",
+      "size": 589,
+      "sha256": "a3db4afd1b7ddc9e218131285bb1db314ffda9b3ef12e20caaf0fabbbecd1ada"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_freeze.py",
+      "size": 4961,
+      "sha256": "1436f108c077ff7651eb0d71cc1decabd8d1e53fa18335f5d486e3f22677789e"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_group.py",
+      "size": 5912,
+      "sha256": "4e77ec46a49f192afc01db4e2ee4beb35a3416aa7ef44ba2e9690d3678caf57b"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_guard.py",
+      "size": 4409,
+      "sha256": "da3b3174c49a607da99b1603e23034dadd094360e3bc2b459cbb8ce96b1bb2bc"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_permissions.py",
+      "size": 884,
+      "sha256": "abaedbbc2ce31777ef0364940c7e121199d90706b0fd631f855bb6eb35d07d05"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_runtime.py",
+      "size": 5789,
+      "sha256": "36a1d1d118faaec4f30723aff02b804b83fabf3cae94b1891df7d308bb32edda"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_skill_probe.py",
+      "size": 5571,
+      "sha256": "b441e44d6af2bb99f5bba3193f587a4754a801e5c2589b2909f6dfba994b5c31"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_stream.py",
+      "size": 6451,
+      "sha256": "aae166f204dec2d5c5182956dad42cdf09e86e2f19d224b804d17ff2e5f4f843"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_trial_process.py",
+      "size": 3008,
+      "sha256": "158d96e79f850c8075929b1b9dfe021caf6ddd90bfdfb5da1ab22b29f79620d2"
+    },
+    {
+      "path": "aspire/sim/scripts/common/serve_deepseek_v4_flash_0731.sh",
+      "size": 6145,
+      "sha256": "d2a9d4586eb6339edc71441b773f550ee7e2618f4d08b45e9b628b3ff0f2177a"
+    },
+    {
+      "path": "aspire/sim/scripts/common/serve_deepseek_v4_flash_vision_exp.sh",
+      "size": 9067,
+      "sha256": "626011eb0293aecb5830acb6da61d777d249a825f14f3964e0910ed060b8f3d1"
+    },
+    {
+      "path": "aspire/sim/scripts/common/serve_qwen3_8_flash_next.sh",
+      "size": 6086,
+      "sha256": "3d8f35b97549b5a2e9e2d3507d640b174445da597bd933b044d47c289d8bc84d"
+    },
+    {
+      "path": "aspire/sim/scripts/common/smoke_deepseek_v4_flash_0731.py",
+      "size": 4414,
+      "sha256": "e4b7861fc337eb929cd2fb375236cc6dbeae65af8c6e16238c854b1e98bc7c72"
+    },
+    {
+      "path": "aspire/sim/scripts/common/smoke_deepseek_v4_flash_vision_exp.py",
+      "size": 6239,
+      "sha256": "b2b04bbd0ca62c4276305488b349b4c24d917da6e9d0e06eb8ae8d60b9dd04b4"
+    },
+    {
+      "path": "aspire/sim/scripts/common/smoke_qwen3_8_flash_next.py",
+      "size": 6878,
+      "sha256": "5c6145834fed2a5156968d295045896a587067380f79af6ae28f1c0b6c411700"
+    },
+    {
+      "path": "aspire/sim/scripts/common/submit_dlc_once.py",
+      "size": 2863,
+      "sha256": "0a1e97c00c9ba3dd46de3f908a441eb96397204cc8eaf4e5c1647e28e8229acf"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/audit_scene_bowl.py",
+      "size": 11472,
+      "sha256": "d2ac46be4d4246a7e9055e0f693ceec02932579b6053a8215b89cb241aa445c3"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/audit_scene_world_smoke.py",
+      "size": 9429,
+      "sha256": "d0bc2d7ded3b0fd1971aaef29a13bbf94e9f9fca7a12a724042d4aa2de0a581a"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/code_world.py",
+      "size": 16423,
+      "sha256": "adfb9a03a595bd282e0ba428eeec1a2e17a28300d8babb59079e3dc68aa1a4fb"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/deepseek_fix_loop_worker.py",
+      "size": 216,
+      "sha256": "8a074b70bb9e22d119ed76fe8f94254931d42c7eed43e318e7d8ea12e7a3402f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/executable_world_profile.py",
+      "size": 17417,
+      "sha256": "b21fa8151bb28a1796924a607c8703584d52bfef5e47b109f0204673b95f3c5b"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/fix_loop_state.py",
+      "size": 11354,
+      "sha256": "1f772c4016425dc49abafb669e7ce2a1ed89c44d9c95f75fd4f7f203f8eae918"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/fix_loop_worker.py",
+      "size": 37091,
+      "sha256": "17e629b8789590f3798dbe2a7273194ce3aee852e74ef50a6510079295a76aad"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/generate_relational_world.py",
+      "size": 2864,
+      "sha256": "aa9d5b10a7a198018ebb620aa0cc2a958feec20a049862092a085b34074f3567"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_campaign.py",
+      "size": 25684,
+      "sha256": "09267bc065587ff9f937c47ec3dd56763bfb0213847116c4a856d7c4f0809d3f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_protocol.py",
+      "size": 10421,
+      "sha256": "a9ea159093631bf41a0b3ce985a1622cba38857e654bb52c561c3805265e21ff"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_recover_trial.py",
+      "size": 5660,
+      "sha256": "6b1b27d6fba755fee42dcdbc26bfa53081b884472c5755ffaf834af7764344e3"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_toolchain_probe.py",
+      "size": 2046,
+      "sha256": "c0d1dd6b1b807104c1c3898e47907eeb61b0660d62f161fbfae8ea77bd6f62e2"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_campaign.py",
+      "size": 46314,
+      "sha256": "ff9fe54f4323571f3f9c223c485f23b04d78295365a542322c42611f3f099324"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_fixloop_state.py",
+      "size": 38507,
+      "sha256": "692cf5dcd5e29ddea35184006876c0e1551b2e125b68c23904a355c0e4fedfda"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_heldout.py",
+      "size": 10412,
+      "sha256": "1e81ea7c28754b9c70acfa4f5515d84b6ab3a2b33cb24f089b42b732d342a344"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_protocol.py",
+      "size": 45647,
+      "sha256": "8a15beedb07038d788149d81ff0b4c984a57d2a43e63387e8a80142a60ca4e0d"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/paired_bowl_supervisor.py",
+      "size": 18554,
+      "sha256": "2b2f5b4cb9c409a7befe05f677a459cf08e625d2accfae33004d737a0e2cc556"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/probe_scene_world_control.py",
+      "size": 7017,
+      "sha256": "49af245f6128a7bb7bc482159ae674f50e772cac9e761476c612ab166b38d47f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/qwen_fix_loop_worker.py",
+      "size": 212,
+      "sha256": "1085acb867ac8f3e30c7e64eacd68c00771fca830c3f2760e6eedec07fdb3980"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/relational_scene_bowl_supervisor.py",
+      "size": 12176,
+      "sha256": "23050810c9e2f8781b1072e90e053431273e51fc6ec3e7e7a18fbd7a31e208ac"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/render_scene_bowl.py",
+      "size": 3626,
+      "sha256": "1f10e3a2d629164a532609743cc890c22bccaf6de6b211f96df37443f378e0d4"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/render_scene_world_diagnostic.py",
+      "size": 3878,
+      "sha256": "91d669387ddc840ee90d8dc0f30d0d77600bf514651c77d90a225e48353ec21a"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/render_scene_world_smoke.py",
+      "size": 4696,
+      "sha256": "8035081359bfd8bedced9aefa96985b7aa274039ea4f7f4946ce1c7a3dd2b761"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/scene_bowl_supervisor.py",
+      "size": 10684,
+      "sha256": "355253c211effbb8a55d5b87294f6c71c05dc40eeb26bc05de06de8e1505793f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/scene_world_smoke.py",
+      "size": 22712,
+      "sha256": "9378f90dd32c9e8e46920070cdcea58af12d1e387d1292e46c9072e6018e378b"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/simple_world_profile.py",
+      "size": 5354,
+      "sha256": "c89a76ea51867530bd903b88e8ffeb46026d9c480c91805d6c7eecc29ee1bb12"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/world_fix_loop.py",
+      "size": 31819,
+      "sha256": "477bfb1ae099f7244ca20f9554c9ad8faf528b3e39102352405a6e7d1f84d43e"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/world_fix_loop_model.py",
+      "size": 11288,
+      "sha256": "14128bbb5ed45de849f2144c53fbc8e984d27e2861992b5e05dc66f6464c3749"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/world_fix_loop_state.py",
+      "size": 30100,
+      "sha256": "a716c385a2c011e787494a2463b30a16e2303fb064842615a10adebcbce00cd0"
+    },
+    {
+      "path": "aspire/sim/tests/code_world_fake_api.py",
+      "size": 2943,
+      "sha256": "dbca3d3f017cbbdaa7d9ee0afea43fc6a4b11f8425e540138b1d485e65807311"
+    },
+    {
+      "path": "aspire/sim/tests/test_abc_conditions.py",
+      "size": 24428,
+      "sha256": "1672b8d2ddae23360c341935f6895c2efcf63b2c05a712eeb2961fe463aefed6"
+    },
+    {
+      "path": "aspire/sim/tests/test_code_world_cli.py",
+      "size": 7583,
+      "sha256": "ac0d585d50530d55ccf6e339d3ba1ba10c2120fb9d5c8596811b5127f7fd036e"
+    },
+    {
+      "path": "aspire/sim/tests/test_executable_world.py",
+      "size": 11319,
+      "sha256": "fee22c0c2c795d5ec6aa3b2fff39514bc6c2eb56bb2d908a003f3c8545f22352"
+    },
+    {
+      "path": "aspire/sim/tests/test_llm_client_deepseek_v4.py",
+      "size": 3426,
+      "sha256": "a94574618ec73f17a21b241e9d618e3a3f1080e0102d2db739f0132e062cc6f8"
+    },
+    {
+      "path": "aspire/sim/tests/test_llm_client_qwen3_8_flash_next.py",
+      "size": 4029,
+      "sha256": "62aff3d3e6f4ae99a61e95e77fa2567469e98566ab227f3fd442dcd5c68fb8eb"
+    },
+    {
+      "path": "aspire/sim/tests/test_model_fix_loop_worker.py",
+      "size": 17532,
+      "sha256": "2e72b11769c5f18e4a9c23c00319c10699b8f950b60c5c7d0f391b156c1525ef"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_permissions.py",
+      "size": 947,
+      "sha256": "56277b215a31d88aac1b9aeb01653f42f91c289c8de061e487879dabb0741711"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_protocol.py",
+      "size": 7485,
+      "sha256": "0571e96abccf29e77c433fe5ae852854663679104f7c39d3a741f5d9de43c2bb"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_recover_trial.py",
+      "size": 4271,
+      "sha256": "671768218e8e727a1a9124245a7a732d32d6678c01df6eedf9d41a6aaaea0dd8"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_runtime.py",
+      "size": 8797,
+      "sha256": "f0b1e4a7ce4faeab47f6fff0cb76bd5f0d1dd2a6efe3f5896981db40f6efe752"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_runtime_repair.py",
+      "size": 8714,
+      "sha256": "16dddb7b4839769ff61e89bdc54a14bcb0292d0384b03d3fadf9ebd52fe7458f"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_stream.py",
+      "size": 3513,
+      "sha256": "86da313bc9998929ea6ba6f51c50c106ed3c87a04fbf4f441a10fb9daaf0c81c"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_world_broker.py",
+      "size": 20933,
+      "sha256": "e10c135cae599756ce909943594d2161bf28b3fdc2a56e6551d23b576ed0f9fe"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_world_fixloop.py",
+      "size": 53007,
+      "sha256": "3fc04b737a199f2dc4fbd778b362296ea9ff1033df36e700df3050fa38a992a7"
+    },
+    {
+      "path": "aspire/sim/tests/test_openrouter_server.py",
+      "size": 659,
+      "sha256": "fa44fbef17917a60d6cedab0d2e3e02d84fd079625801498238f9f6131952665"
+    },
+    {
+      "path": "aspire/sim/tests/test_ordinary_fix_loop.py",
+      "size": 31801,
+      "sha256": "c79ff81e390f7f4946f3fddde51c11b2017da222e4aa74795004f1b7150e4c6a"
+    },
+    {
+      "path": "aspire/sim/tests/test_qwen_full_repair.py",
+      "size": 17917,
+      "sha256": "e851cdb66ad1cc876768ffa5828c0652a5c28ad84c0f97baec183a12913e3d3e"
+    },
+    {
+      "path": "aspire/sim/tests/test_reference_relational_world.py",
+      "size": 38989,
+      "sha256": "0146a44fcfe7a519b8729258589c205572bd14cbb78ee4578a321725ebda8378"
+    },
+    {
+      "path": "aspire/sim/tests/test_submit_dlc_once.py",
+      "size": 2373,
+      "sha256": "075f1c7267754c24c603cc1640ff6464cb8d996032af43c34172753241567370"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_fix_loop.py",
+      "size": 31981,
+      "sha256": "542fcb4bc4a9f0db46bd4b545e25b907004a15c5cb4300cf10148af6dee62d45"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_foundation.py",
+      "size": 7897,
+      "sha256": "3976b0d6ce9c2f1a6dca2eafda99299ce7798ed80de655eec2c5d2a754208630"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_model_opt_in.py",
+      "size": 22716,
+      "sha256": "0d9e6cac0870133f7f71a2d4a875386d9b7ad0e9125d6831f1aad7f5a87e2dd6"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_model_runtime.py",
+      "size": 14798,
+      "sha256": "716e21818a64ab6429dc5eb94f41abaffd9a49a787984e4f3f7045fa0ac536c4"
+    },
+    {
+      "path": ".gitmodules",
+      "size": 1082,
+      "sha256": "7f484ca7add9d27a79c396df294cc230f35ce40b6e4ecc58fcefacc8c949d270"
+    },
+    {
+      "path": "AGENTS.md",
+      "size": 10158,
+      "sha256": "dd8a4d2d469b18f2fdf856bdaa0cfcfe58dac1a8a4731eadd2a0b9925eb32d70"
+    },
+    {
+      "path": "CLAUDE.md",
+      "size": 1729,
+      "sha256": "0db70000ef3b55d011348002d23d4f38c8d70cdd72d5fbbe1c000b69b109afd7"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "size": 2275,
+      "sha256": "39c8a53be5981744335dbeba80fc9c665734ab4bca75a2dc4203f506d4dd7e93"
+    },
+    {
+      "path": "LICENSE",
+      "size": 42205,
+      "sha256": "a9799a6c213cbebca0085806599844990b535ea5963f6ddee85568eb0c82017c"
+    },
+    {
+      "path": "LICENSES/BSD-3-Clause-ALOHA.txt",
+      "size": 1502,
+      "sha256": "21868447315ac2b10e592d08958c1035b19a32cf39e9165b23033f68390098cb"
+    },
+    {
+      "path": "LICENSES/MIT-CaP-X.txt",
+      "size": 1063,
+      "sha256": "42bdf4172179e229e97d1ae568db9d6103cbcfae038a315b8462ac65c07731ec"
+    },
+    {
+      "path": "LICENSES/MIT-Hydra.txt",
+      "size": 1086,
+      "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+    },
+    {
+      "path": "LICENSES/MIT-PyRoKi.txt",
+      "size": 1070,
+      "sha256": "34e977226cf6a0ee7b35c61dcbe8bff0b5d84c5aeb3fecd0f3b41b2416601eb3"
+    },
+    {
+      "path": "LICENSES/MIT-RoboCasa.txt",
+      "size": 1416,
+      "sha256": "976ddca526ad9916b9242f79cd4d7405cc62691850778e64f1c3542e897ba575"
+    },
+    {
+      "path": "LICENSES/MIT-Robosuite.txt",
+      "size": 1472,
+      "sha256": "81b17330326a315c2a87be8ed5ff7fcff76c56283db5577bd2c7df474fcdb8d8"
+    },
+    {
+      "path": "LICENSES/MIT-i2rt-YAM.txt",
+      "size": 1070,
+      "sha256": "dc46c3a7dc48221aa783e634d15db0f816ba83ba5cdb77bbaa91525c61c7552f"
+    },
+    {
+      "path": "LICENSES/MIT-i2rt.txt",
+      "size": 1073,
+      "sha256": "7cd0a0224a287ebd6c45703eb6623d264c7810f8958d65de8f99e87ccd9f4891"
+    },
+    {
+      "path": "LICENSES/NVIDIA-cuRobo-v0.7.8.txt",
+      "size": 4357,
+      "sha256": "7827264a78d9bc8252fef2537c58f3e4a9de9254526486d51cd04f931abae2a6"
+    },
+    {
+      "path": "LICENSES/README.md",
+      "size": 2294,
+      "sha256": "83d936c5300963f04042a0f7c5032ddd145ca0f3db0842963f0f00ea0d8fbb22"
+    },
+    {
+      "path": "LICENSES/THIRD_PARTY_LICENSES.md",
+      "size": 11450,
+      "sha256": "cc48fc269c4b5fda503b02731c61de1862cce7bd46a9f39ec2b37e719e9579a1"
+    },
+    {
+      "path": "LICENSES/THIRD_PARTY_NOTICES.md",
+      "size": 6208,
+      "sha256": "599a11250ddaa3f46440c92bd52f6a6b9732772e491701a3b1e96e7867cb6844"
+    },
+    {
+      "path": "LICENSES/evidence/OSRB_COMPLIANCE_REPORT.md",
+      "size": 10723,
+      "sha256": "bd12bfe17b2ea29f1bae8fdae932307398c2ed8a36a4a388072a0062868f1e38"
+    },
+    {
+      "path": "LICENSES/evidence/SOURCE_MODIFICATION_EVIDENCE.tsv",
+      "size": 137032,
+      "sha256": "db01b56526310aae25fc5cfea84878590f8098f5a7d649294b845823e2a0dfd3"
+    },
+    {
+      "path": "LICENSES/evidence/SOURCE_PROVENANCE.md",
+      "size": 10108,
+      "sha256": "dee62a7730aa9afcf8e41486144d3c73da5905e207b6929a2477f2172c562220"
+    },
+    {
+      "path": "LICENSES/evidence/SOURCE_PROVENANCE.tsv",
+      "size": 64208,
+      "sha256": "fc3af680330ea72b6d731bee73b5a3b80b2e6dd11b27cc9c69ab56aa5c97fc52"
+    },
+    {
+      "path": "LICENSES/evidence/SUBMODULE_AUDIT.md",
+      "size": 9579,
+      "sha256": "2836c8e33b3fe1c741c9ee9dc697ac8de4d7c15156bf232c5dd7b2faeb38bea8"
+    },
+    {
+      "path": "LICENSES/evidence/SUBMODULE_AUDIT.tsv",
+      "size": 5446,
+      "sha256": "f32dc782f5a9fc12612c90217ba1ffdb0a12de03ba7264a9afd54981f86d066f"
+    },
+    {
+      "path": "NOTICE",
+      "size": 1030,
+      "sha256": "3ebd2a0f14baa041d74f98c477e863c4cb06927a73c8befa04e7ecb586e16ea6"
+    },
+    {
+      "path": "README.md",
+      "size": 13847,
+      "sha256": "72478a6c949e3ef53b289ab8e7b1c1adfbdc06bcd8c4a6c07f33ec1d8c493acb"
+    },
+    {
+      "path": "SECURITY.md",
+      "size": 1917,
+      "sha256": "eadb71ef3237a9f9b04aa71b1f74f86a58116678d39ea46309bd988c4fcc62e8"
+    },
+    {
+      "path": "aspire/__init__.py",
+      "size": 193,
+      "sha256": "1a4c6e252299300fe274be89c3eb894fd7b1338a1e9fd440625e5ee16b497250"
+    },
+    {
+      "path": "aspire/sim/.claude/README.md",
+      "size": 3173,
+      "sha256": "7f1ace1c13ef406606cbf84f6aa116e806f9e45965112171e0aabd3a63c9447f"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/CLAUDE.md",
+      "size": 5294,
+      "sha256": "a55037d9246710d467b3e6e1f1e1e4a7f910b9152ed0a55f73b42cc6feca7d80"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/api-reference.md",
+      "size": 3317,
+      "sha256": "03fb34c16b3dcea39098d50225044d0fe957feabcf2c5993d477e4dab7148f3b"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/fix-loop/INSTRUCTIONS.md",
+      "size": 5838,
+      "sha256": "21a3cef07939ca34cfd5e12262774815196b6e7d14d2229ec77f35ffde3d2a1f"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/fix-loop/SKILL.md",
+      "size": 1280,
+      "sha256": "0fca2a91fecb2656d2605bb0670b361a7e8281a2084a2557d31b55d6159ef392"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/fix-loop/campaign-state-template.md",
+      "size": 1145,
+      "sha256": "12d01493e9b460c79dfedf6d94866dd19b19bf369b771ca057c2d83d2a529929"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/fix-loop/clean-task-slate.md",
+      "size": 1094,
+      "sha256": "1732291c04b3e35b4f18fa36c3837fe5e82971d2d7e2368f03ff9a0dc2847c46"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/fix-loop/main-agent-prompt.md",
+      "size": 1349,
+      "sha256": "6d3d28c618cbc00f6386227bb448eebf94e78234494b729fef79f1d0ca19e867"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/fix-loop/stage1-skill-acquisition-prompt.md",
+      "size": 1162,
+      "sha256": "02a9f2dc828aa178d8e5345c9c13e475cab4503a6e2ecf20ab8ee315fe688442"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/fix-loop/stage2-evaluation-seed-prompt.md",
+      "size": 1203,
+      "sha256": "e3838e9444da898a74b32091033404eea5e00ab2b89cd36ea26517700f4dc4cd"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/run-baseline.md",
+      "size": 3552,
+      "sha256": "80eb5fcb0246dfe38f6bf80682219c49217e963e1b8264938245ce8443b7fa2c"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/README.md",
+      "size": 1515,
+      "sha256": "70902b35a21181a97e1d1fa2d29dda11c5ba36fb18f1a15b00a0431ce9f0cbb4"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/grasping.md",
+      "size": 404,
+      "sha256": "2fe88e7f44d869ba161edf05a13ece00cc248d338d20ccd20ae4da3cc52930d2"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/interactive-policy.md",
+      "size": 388,
+      "sha256": "fb8fe85b0b820760d98c29c3a512f7aee97750f45ae21f00e7cd7db97109da90"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/navigation.md",
+      "size": 375,
+      "sha256": "eff027c61c8a7d47940bb26addda64f2b00afad329a57e8ea391ceab18d2295e"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/perception-and-search.md",
+      "size": 378,
+      "sha256": "75e9381b977be7e5fadb127e2567f52d154b566d02c85ba14a556766ad71df3c"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/r1pro-api.md",
+      "size": 3632,
+      "sha256": "dac9eac5c21aba490e576e42d56033f1e9ee120e48760146ecdbba8b8873872c"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/radio-table-tasks.md",
+      "size": 397,
+      "sha256": "756cc4dbeb0aed604d32820eb26be884f31fd4d96f28822838b257d2d5a56a75"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/search.md",
+      "size": 363,
+      "sha256": "4c1becfeeb2a1baf8bf1c82a98fa56211a7b345570167141891feb31078e4dd6"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/system-pipeline.md",
+      "size": 14076,
+      "sha256": "9af91f7fe4f4635d77aef750697b6db2f35f1a69ec0f373db94219cc6ea547c3"
+    },
+    {
+      "path": "aspire/sim/.claude/behavior/skills/time-budget.md",
+      "size": 357,
+      "sha256": "7bf658beeb570e443d9e6672fd07ccfe75125b9e8005a2a3442a95075a86de8c"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/CLAUDE.md",
+      "size": 4441,
+      "sha256": "8654e68f6e9956553ac5aac3c35492197ae7cbbfc8a419e0c2d9670ea3292590"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/analysis/README.md",
+      "size": 300,
+      "sha256": "cacd775d98e45c98e03020cfe88eaf2e39486d9ca45da7dfd41939a4c37090a4"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/analysis/token-calculate.md",
+      "size": 2710,
+      "sha256": "66e0a575605c27448a1010eca9af68c7f8ab5ed5e304991ff636d3281b5d37c1"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/api-reference.md",
+      "size": 5318,
+      "sha256": "81b962f9db2ab7dd3e6cb357a3b8b9b25a8825a60b8ff81fe679ba2a03439218"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/INSTRUCTIONS.md",
+      "size": 972,
+      "sha256": "c1985662a88ef22b07d5890335f610b7e32c2a0a70a82752dbc93e5ffd54920f"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/SKILL.md",
+      "size": 1553,
+      "sha256": "5357f33e771ef58671ae97ff4a0cb66fceeafaace733fb2e2a4cc9183df2ce23"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/clean-task-slate.md",
+      "size": 667,
+      "sha256": "b7d8e3e382748ffff6205b86be91fe38ba1ec005b05873e01b64ac8a87e1bb74"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/main-agent-prompt.md",
+      "size": 4798,
+      "sha256": "c83f12146c4a2f3af9317198b46f12e66481ed0037f10238c7f72adb39b3285a"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/skills/README.md",
+      "size": 527,
+      "sha256": "fef8c40f444a610f9e1d0c23ef4247ffaf7c0df2ca03e0668726e8db82defbc3"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/skills/evosearch-iteration.md",
+      "size": 29834,
+      "sha256": "d7438867262ec9daeba93094c0f732d80dc1f4b4b99a3908e11a901cbade4bb4"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/skills/motion-efficiency.md",
+      "size": 2062,
+      "sha256": "a9abf1acd3527c957d6a1959dceceabd33dc33f66829ca452aa9c4e034c1c09e"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/skills/push-contact-tasks.md",
+      "size": 4719,
+      "sha256": "ae47e0595fa52fa82876dadd353ae1309237404f97d76ffec2ba7d546adaf108"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/skills/wrist-rotation-blocking.md",
+      "size": 2923,
+      "sha256": "d275ff7ddfa3d7576ca55e777c0aca810fe902767f84c92c06ffffcb2d7a7f64"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/evosearch/subagent-prompt.md",
+      "size": 16200,
+      "sha256": "47e0df98f2be7da98055c6d4d684b7fbaa247c389f9b69424cf5617a792ccb83"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/fix-loop/INSTRUCTIONS.md",
+      "size": 1664,
+      "sha256": "43b51d5d3e5e2b31a98faa1cf8be6824e7e8693311a17f50cd25072219711f7d"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/fix-loop/QUICKSTART.md",
+      "size": 5147,
+      "sha256": "1cb8b48a43dac9ea5880bb293ee872701de5320d7be0f19b0e46c266781581b3"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/fix-loop/SKILL.md",
+      "size": 1038,
+      "sha256": "d1f07bc584fb8c105a32f1305cdd416e11e7f1c2320e2f54290b58ed3fd33644"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/fix-loop/clean-task-slate.md",
+      "size": 546,
+      "sha256": "4f49ee5c9227ad20e52c4b4ab9a22f4e9a174d8b1126668a7a066dae0b09f5b4"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/fix-loop/main-agent-prompt.md",
+      "size": 11253,
+      "sha256": "c0885fbf935119b3f53fcc2cb9477ea36a5c0afba6d0fa43fe626aa2a94559a8"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/fix-loop/skills/task-exploration.md",
+      "size": 1558,
+      "sha256": "039170a2cfd1a09bffafd4e2dd96d58c60eb6f106b8d66e829b3c52272f376ad"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/fix-loop/subagent-prompt.md",
+      "size": 11179,
+      "sha256": "ec2e0ad672b4b2ca04109a5f979e89a298e099710c3093ba5aad5e90acb64361"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/inference-time-scaling/INSTRUCTIONS.md",
+      "size": 781,
+      "sha256": "70a88918f45457d725b960c2e2eef5efccd386e4947b70b1307d7996551bdea9"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/inference-time-scaling/SKILL.md",
+      "size": 1459,
+      "sha256": "909c4394eb9c34487a5071dc242b7a83dfd5f9773d2622aa0f1c5596b3136181"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/inference-time-scaling/clean-task-slate.md",
+      "size": 624,
+      "sha256": "8d3a58512965e5361e437f34c3e736d2ca90f21ea2bb2a77dd58716040f8df0d"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/inference-time-scaling/main-agent-prompt.md",
+      "size": 14965,
+      "sha256": "a359608420c86fcb1bc443f70e78e2c4c947fcfc85ba2b18d542d3e50ad4d30c"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/inference-time-scaling/skills/README.md",
+      "size": 194,
+      "sha256": "14e4933a8bcaa1acf05448ebb6d5f8a8262a4250ef94fa7ded0fb02c747dbb77"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/inference-time-scaling/subagent-prompt.md",
+      "size": 27433,
+      "sha256": "36149b4a482f6411d30a3f8732b4443741a29a927fc51eedce7cb423bf2ac38b"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/inference-time-scaling/token-scaling-coordinator.md",
+      "size": 11446,
+      "sha256": "1f56035fd4434390120b6e9cc160f7a2d3fa591d5ed42f0a505ee6837df47e53"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/legacy/libero-90-pro-pipeline.md",
+      "size": 7489,
+      "sha256": "16500102c3c3f44773bb4bbbc2c3df44f250f326362376a3e9257bd633cef628"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/legacy/libero-90-pro-subagent-prompt.md",
+      "size": 14809,
+      "sha256": "ac9bf163abf60850397a985de3686d55a97d32d791a78b84bec8dbdcbdf61c6f"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/legacy/libero-long-pro-pipeline.md",
+      "size": 9458,
+      "sha256": "6d0e8f8cd70d0da01297d4eea52f76b275e6a93d1e3087211c4f7641ac027aa5"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/legacy/libero-long-pro-subagent-prompt.md",
+      "size": 18223,
+      "sha256": "f787349eb5fb47836a58b3da602a9062d82b1965c37f1525ab3559c8811c88e9"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/legacy/zeroshot-capx-coordinator.md",
+      "size": 5588,
+      "sha256": "ca3e3960ded0d9c2c681acfc3100f18403c5f1555c22613aebff24db26999ca4"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/legacy/zeroshot-capx-subagent-prompt.md",
+      "size": 2326,
+      "sha256": "a2eecb55185aed5c16b8ed5b65e42154190b938688ffb297d0f8a2e1ee922720"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/library-size-scaling/INSTRUCTIONS.md",
+      "size": 885,
+      "sha256": "b56e2e5e2d086913ed02cda54804e340ed363b799df98ad0e672d4e17c10e31e"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/library-size-scaling/SKILL.md",
+      "size": 1492,
+      "sha256": "82fa528064c94b8753d364dcace93f06ef208918cbbc974ff3292c71c01b7f86"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/library-size-scaling/clean-task-slate.md",
+      "size": 633,
+      "sha256": "3f80e7d4c595776a00f939032fff90f3b6054bafc901ca7dad685e24e6a9dce9"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/library-size-scaling/legacy-seed-running-subagent-prompt.md",
+      "size": 18915,
+      "sha256": "37d7e0c18c41dbf51a42856330bdb480b8aaa85997ed91121560e10b0a47a0b1"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/library-size-scaling/main-agent-prompt.md",
+      "size": 11529,
+      "sha256": "15bc9b58679b652cc11a9572cd6e7abe229ba70d16d484e2b4dd52bf8dbab15e"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/library-size-scaling/skills/README.md",
+      "size": 210,
+      "sha256": "ac8d587db81b6810af32382f22ca16dbe6b3a697120a380a4ee9e0e1f2d78a2e"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/library-size-scaling/subagent-prompt.md",
+      "size": 16172,
+      "sha256": "7d0e70ec010e7318207f489bbbb646d0aa70d5aa649a54113d8a5b1e8ec2564a"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/run-baseline.md",
+      "size": 6285,
+      "sha256": "9fb29142d863b6cf32946472ef46c6c2d6756a07591967a97d148239eefca8ac"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/skills/README.md",
+      "size": 867,
+      "sha256": "f385fa3fd558b61e96e06928c6a318a710318ce2b80abc0f102f4a430817357f"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/skills/grasp.md",
+      "size": 5438,
+      "sha256": "e496883b7b6c99cb91a8925cffe2bd1e5611176b3e1e2cb3e2dba5bc57c9851a"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/skills/localize.md",
+      "size": 6732,
+      "sha256": "f4c60b7c01171153d4fa3b5499c87193ac6c6f89dcbc5406d9e2b98f7ccac996"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/skills/manipulation.md",
+      "size": 956,
+      "sha256": "af80f4937b1999d2d2b95af6ff14838e93721008057334f883227f5bfcc68e70"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/skills/transport.md",
+      "size": 2783,
+      "sha256": "fccf00783eb11b9c4fbbfd99d51f2575d7798df07c5654038b26287ff6434e72"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/INSTRUCTIONS.md",
+      "size": 736,
+      "sha256": "a7db8dd9527df8d7545217b8da63227c126dc5f2bd896f8dbb8c6e3e298d7dfb"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/SKILL.md",
+      "size": 1564,
+      "sha256": "e70e6129cd8daef1adde1b14e07f4a944248aa96d64a7f6f1bc2c4b740085e5a"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/clean-task-slate.md",
+      "size": 677,
+      "sha256": "f86f0e6fec3c03f679edfe18f9f085107a72eb9a75d054e46bf0f11398a7e173"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/commit-convention.md",
+      "size": 3465,
+      "sha256": "9d90a4436e9fb79a11d2247957ccffeed4f32a6a7b9df338234757e647a4bf35"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/libero-90-heldout-eval.md",
+      "size": 4645,
+      "sha256": "597b00de8192ae19e32007edba23196a4b2877c38a2e5b74ecc7a903393f20ad"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/main-agent-prompt.md",
+      "size": 13062,
+      "sha256": "616e3b23b43ae218873e3e07bcbd6b61bba210ff58c0b05ff1f9fe1669696b51"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/skills/README.md",
+      "size": 224,
+      "sha256": "08d10b07a1aaf42d230ad27d1558b1eb232e8a5d3b55b28930c7d28c6226a65b"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/zeroshot-transfer/subagent-prompt.md",
+      "size": 14936,
+      "sha256": "de98aa124f5fd6286894c33879d4bd8f00fcaa618aad3bc40f34db4eeed78e95"
+    },
+    {
+      "path": "aspire/sim/.claude/memory/MEMORY.md",
+      "size": 2921,
+      "sha256": "e48b132c93accaffaef7d438999b591d89bac0f9d28c481f48e9b499a61a52d6"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/CLAUDE.md",
+      "size": 8362,
+      "sha256": "0d9a9037c1f2a68294d2e6fba5464ffb955b5e179dfd37451af28b3ea8507326"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/api-reference.md",
+      "size": 8465,
+      "sha256": "972ea1d7820b852bc84316a1fc7426cc3b84bd1b5023cb4aa7f47ed5caead532"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/evosearch/INSTRUCTIONS.md",
+      "size": 1699,
+      "sha256": "d95bb620a5a3923dd8798338cb21c06bf4faca7c9ed1ef4f46c0f98e5a77eaec"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/evosearch/SKILL.md",
+      "size": 1566,
+      "sha256": "51edc1347086d537ce731abf56e8268384c337ac0f1d5acababc2070281dcf60"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/evosearch/main-agent-prompt.md",
+      "size": 5496,
+      "sha256": "72d6b540eb05a6cafdef9c03648d8eb555d35447366c2ffcabdee80fbda2f1c3"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/evosearch/subagent-prompt.md",
+      "size": 14247,
+      "sha256": "57b92bce38aa5a9a60a73f79e84ee64b202461c4b0816aa11fd32139c2452355"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/INSTRUCTIONS.md",
+      "size": 1680,
+      "sha256": "58cd9bc4e66de6349497d7684f1938a9bb6e241f182ea2462fbcbc39c0db6aea"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/SKILL.md",
+      "size": 6264,
+      "sha256": "86b1b66319d7bb40d5e1f9310bd2cf576bd57e4bbfd13d74b359ceb5693d69f1"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/clean-task-slate.md",
+      "size": 3677,
+      "sha256": "024c79bedfc57aee9c1aa4df7f97d93ea194f9b1257159c653246a6c5b6667c7"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/main-agent-prompt.md",
+      "size": 7775,
+      "sha256": "e7d19afc934a11a35cb5d2f1b30d6a172a8e004bee56b4a1aafcd6bad5a01709"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/skills/grasp.md",
+      "size": 2599,
+      "sha256": "8794dba5affed6a1f90055078a6a0ea4078c6987f483bcfbc9a30dd012668b79"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/skills/localize.md",
+      "size": 4597,
+      "sha256": "a1039986b8897c3054c52be4890a27d36d2d593d0c5b551e775d4ab2a15fa651"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/skills/manipulation.md",
+      "size": 644,
+      "sha256": "5124135522543fdd4fa091e49ca155955e0322bba45841883d8f2120edac3410"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/skills/transport.md",
+      "size": 2698,
+      "sha256": "0bb74168f6652c4270af3cfe040d858988ae2158f0ebfd6790fa4270fc986140"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/fix-loop/subagent-prompt.md",
+      "size": 18870,
+      "sha256": "926c3be19e569ae3fe3d72831940ced8c2273cb1073ba1e9c31720b28ebbcf60"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/run-baseline.md",
+      "size": 4795,
+      "sha256": "0b00f5e7e1a397d32d7ba3b5f4032d41b27f55c809891872ec786c11918ea32f"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/INSTRUCTIONS.md",
+      "size": 5628,
+      "sha256": "e09691657e2d66d75f845e8902073ef8fd2cd475f72ad80bf0c3cf5035d684cc"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/SKILL.md",
+      "size": 6296,
+      "sha256": "dd34fe0e22e69d97381fbec5155b4695072834618c335830c8f3dbc81322c5be"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/clean-task-slate.md",
+      "size": 3780,
+      "sha256": "3a7d20bd1706c82df9d513aa540859e5e19ab6dad96bc930dd71f332f4ad9863"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/main-agent-prompt.md",
+      "size": 7180,
+      "sha256": "430c25a56eb9a4bb44c7b53122b6a1aaecc6385d0420b75a025c96a784336676"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/skills/grasp.md",
+      "size": 1805,
+      "sha256": "a5c26726c3b3b7a10b51a8eff38c6b402f16586ccc8f90e8e5961b37851a410c"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/skills/localize.md",
+      "size": 2478,
+      "sha256": "24115716307f2788bde20f1845ed9186ffcfe3377aa7e48848ea8188d4c9f6bd"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/skills/manipulation.md",
+      "size": 652,
+      "sha256": "de9ea79435fee70c9b6164f0409cf3d95f89508cf8778ab952df2a1ecc79b25e"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/skills/transport.md",
+      "size": 674,
+      "sha256": "059d3ddb15554bb4c73f7541ad1b496443e914d73b7f2a7e2f12c0d3ee04e480"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/subagent-prompt.md",
+      "size": 17991,
+      "sha256": "b2fb35a64ad13b0d81c77e261ec20ffa584a7450d977fd9d2a51961bd51c459f"
+    },
+    {
+      "path": "aspire/sim/.claude/robosuite/training-law/token-calculate.md",
+      "size": 3825,
+      "sha256": "a142fa86f6dc311894cccdd0dbfacd262c01983bf38d02ddfd35121974fdf830"
+    },
+    {
+      "path": "aspire/sim/CLAUDE.md",
+      "size": 8033,
+      "sha256": "b08d11ef5e519e604ad179f6218584635d3a440ed117e0064dd71d210cd344f5"
+    },
+    {
+      "path": "aspire/sim/README.md",
+      "size": 21005,
+      "sha256": "aa9c1e5925ae0f32b58c9ee77d3ad111d019c0ac8ad3c7ab1871b8988e64edeb"
+    },
+    {
+      "path": "aspire/sim/__init__.py",
+      "size": 181,
+      "sha256": "883094b044aff77374193d72bb1d257bf8677e1f2dc15e6561de38cc8ba6334c"
+    },
+    {
+      "path": "aspire/sim/cap/__init__.py",
+      "size": 403,
+      "sha256": "907412dd3b727b3d417ad18e966b186e337f89a488f7d038d90cc48e109d270e"
+    },
+    {
+      "path": "aspire/sim/cap/envs/__init__.py",
+      "size": 429,
+      "sha256": "b570e69f43065c9eec4edf4e318bcd7d23829d015e89a9ec1b763fe8f99f158d"
+    },
+    {
+      "path": "aspire/sim/cap/envs/adapters/__init__.py",
+      "size": 259,
+      "sha256": "5628398110f1ed6681ed077ad82eaa5cb64fab7063c68a1c5c74b7ccf0d35493"
+    },
+    {
+      "path": "aspire/sim/cap/envs/adapters/libero_wrapper.py",
+      "size": 1373,
+      "sha256": "cf91b4dda74c283b82c284fb63114420c4ca27421e3fe117f189a881f6f632f5"
+    },
+    {
+      "path": "aspire/sim/cap/envs/adapters/robosuite_wrapper.py",
+      "size": 993,
+      "sha256": "ac2998126c5e1e3b929f42299e970ea2d3a62378aff0bfba7d79d5ea1ab15e24"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/README.md",
+      "size": 892,
+      "sha256": "025e9934201d30340730b5622eda5d60fe3cdf153dbcba02ae77dbd54aee0da8"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/finger_0.obj",
+      "size": 87872,
+      "sha256": "215098c0fcdf7192f6c503a37cf49e3efecf8a9e1320f02b17c5584d89cc5b2c"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/finger_1.obj",
+      "size": 64651,
+      "sha256": "cf239e9aca26bba09dbbf1c544c47d87cfc9a2f0637c8bb786af750b6d4eca44"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand.stl",
+      "size": 10084,
+      "sha256": "94493e94f30fe940f2c8ca2f155c3bbe67bbff406d3edf5e261670d2f0f6e2ed"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_0.obj",
+      "size": 9091,
+      "sha256": "b94aab901086f85df04c019b30f43bf9aa23a7ad0443ec80a8c14662a41cabd2"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_1.obj",
+      "size": 121863,
+      "sha256": "cd76f7494bb314406a1819c46eb826ee254894f87235714f604a470653d9badb"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_2.obj",
+      "size": 596001,
+      "sha256": "e0f44a71712afa5b98eb20355eff17763d3e2e19f459b2bef19abed3727e64b3"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_3.obj",
+      "size": 902145,
+      "sha256": "a431a06d99e88a1b322b3122a01424ee7704daeaad0bc343b90b9604f014ad0c"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_4.obj",
+      "size": 151988,
+      "sha256": "21f96ef6a8de082e41b1ea9834f1043de359e5d60305541bcb63539581f53bff"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0.stl",
+      "size": 10084,
+      "sha256": "dfc6d94330de8ddb005b311bfdba9f3b8e1aa7c256b71592ee7ff32cb9a9a5aa"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_0.obj",
+      "size": 296497,
+      "sha256": "6b9f41a4c203540daaeb7a33cc3d0d6c6a32dc8bba187074eeaf97b3e36b3f9c"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_1.obj",
+      "size": 103978,
+      "sha256": "57673d2ee2a9db2e10c8986ae57c56a7c39c012b60fd26d7d8549553b664a5ed"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_10.obj",
+      "size": 343308,
+      "sha256": "c9198b9d8534d628d097b0f2b239bb30343353182df098ce0d9db6bc13326848"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_11.obj",
+      "size": 22295,
+      "sha256": "f0adec78d6677b7799d25121981270e8bfe119b5c18d08a91ee37a54ad75f65c"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_2.obj",
+      "size": 590892,
+      "sha256": "1ca435a2a87a9608a146a47955724d43dd7ce10fc3dd3018800aa98f8ba86e05"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_3.obj",
+      "size": 47588,
+      "sha256": "3e9c6334d2b3b47944af3458ee5f20519abc20fe7ee23063bb53405ccab28046"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_4.obj",
+      "size": 211200,
+      "sha256": "215d25789704936120f119c0bc1cc7f68516dd3f8f1df61457b71acac3873f26"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_5.obj",
+      "size": 17023,
+      "sha256": "9361b104e93743045107aa5b15fb1a0835ba9c1f355aae71f56403cf6a9c33f6"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_7.obj",
+      "size": 30699,
+      "sha256": "2dc0b8ebbbc80e4c065d71e195adbc384f673438641fac82b07b801b4d2837cb"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_8.obj",
+      "size": 3263194,
+      "sha256": "3b8c436999db5586b8eb47bed2b0aa7de6993868b2681b4c04246eeac42fdb7a"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_9.obj",
+      "size": 105629,
+      "sha256": "45178f97d2b5da6bce11f610212c4ef7d08c73db33a4fc38e1b7f66b93d023f5"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link1.obj",
+      "size": 3274995,
+      "sha256": "51091e776b16babdbe2f3849b5c041f921d1f11dd94ac19a0f1c81abf496fbae"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link1.stl",
+      "size": 15084,
+      "sha256": "e41a39a94108fcf56aacff603fc91ec80541f4c1af17b51a0de5617f5566e6d2"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link2.obj",
+      "size": 3295608,
+      "sha256": "5c9f8e715de52c3eb71b475de35993b3b96081e02abea9f28c414768877fc59b"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link2.stl",
+      "size": 15084,
+      "sha256": "370f7605a0fae3529db169ded50f52f171024aa792d4d773bc84197301f6a039"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3.stl",
+      "size": 15084,
+      "sha256": "0a8d638b9349c6c0eefc4e888636ac4838c4b27170f18a51699321118af709c1"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_0.obj",
+      "size": 3046804,
+      "sha256": "ce2da87f51708e11b189249d41401065dabe89a06e251185a06cef4d5ff27178"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_1.obj",
+      "size": 65260,
+      "sha256": "2880b7753a7173f38fa87ee21da4dfc7fa7be46fbe07bac5aef9e128513cb118"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_2.obj",
+      "size": 83591,
+      "sha256": "670cff81ae84693769ca4ae658c154cf909d81167e7c8d22b70ea977f2504efa"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_3.obj",
+      "size": 457684,
+      "sha256": "30ede0c812efd0e0b767d134a4eae0b84e0fa407bb6325a5a555e0569b3a3ffd"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4.stl",
+      "size": 15084,
+      "sha256": "0180ebb5772ec9840cb049750cffb29a9ddc90311752a16ea34757782ef9e48d"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_0.obj",
+      "size": 83486,
+      "sha256": "443bf6d178177cf347951ecf107ccd10ca444e605e375b67304579e5f948806f"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_1.obj",
+      "size": 3148001,
+      "sha256": "ca935ec7cc8b3f0e86aa079c76b0b3bf593b1e9830bab0fa7131ac51577c74f0"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_2.obj",
+      "size": 455522,
+      "sha256": "c89caf26d379c35bb9e191ee2d91d09ab29ecc792b48d8bc10b39e5b38222175"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_3.obj",
+      "size": 67497,
+      "sha256": "1495d17f45bdb230cf58b0beef9da4e8c9cfe76a3d2d38da89017efe5e093136"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_0.obj",
+      "size": 824158,
+      "sha256": "a3238b8f2af0f2eb66d9fe63dc5d41ac52d5d38507241b5ed10e3cb019ab3e71"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_1.obj",
+      "size": 63174,
+      "sha256": "9d994bbf83ec241e301b5197a6846da13f2a4a0582edb2c0f76962c5549649d6"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_2.obj",
+      "size": 3856621,
+      "sha256": "83b4ffe9f772cd7fe182e98640650eebc899aaf01842656574b0416c90dd40a4"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_collision_0.obj",
+      "size": 3861,
+      "sha256": "3e5aa75fb13f193555c3dfb999df91d81df25006a5c3af5338297d78137c129b"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_collision_1.obj",
+      "size": 2412,
+      "sha256": "87cd8f621071df010f774cbde789282b8463840dfe704f8bdfa2e29be0142e15"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_collision_2.obj",
+      "size": 3786,
+      "sha256": "823ab6c8f7b1d79e0844fa071d82a03499ff68e34fddb1ba3451032c22736040"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6.stl",
+      "size": 10084,
+      "sha256": "20b768e99a0e0440b5754dcca108016434e57937cc356acd9c352ccd3cb27f77"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_0.obj",
+      "size": 157563,
+      "sha256": "0504c70ebf1b284ee8faae7dcb896b8830bc672a6552015dd5dbd121fa031fb9"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_1.obj",
+      "size": 27106,
+      "sha256": "45f7ca77695198b6d86ec2417ad4e42e6275044f0f96266699ee8e1057757ac1"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_10.obj",
+      "size": 368502,
+      "sha256": "365f26c21d10332cab8d8704645cb46930c30b3085956f2d097498c793f24db4"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_11.obj",
+      "size": 32653,
+      "sha256": "8ae61e08b3ad064f25bbf03b22e59cc15d65883b5a7ce92711aff29df2493901"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_12.obj",
+      "size": 3894,
+      "sha256": "f28d1bfd62b0244ffd19fb35fe9edefdf583d3c9167db944e87185d919e1d021"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_13.obj",
+      "size": 3798,
+      "sha256": "0a55fa92dccb261d07200e6565fca4c850fd17f0c1ecf38821c0b97d51796c7d"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_14.obj",
+      "size": 444469,
+      "sha256": "750ae3ee4781e62e3a045c662195247b03f6642b05aa93104f08258e5f6eba26"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_15.obj",
+      "size": 668552,
+      "sha256": "5999c1c2497a004a7c4bbe034cdf13744f839d85ae7a11b1bc386c48a3e642e6"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_16.obj",
+      "size": 3675358,
+      "sha256": "551d7a8b37c53e7a152d008b4e36992e5b5abe74a4be18b57ee6319c27def09f"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_2.obj",
+      "size": 9916,
+      "sha256": "e54eee4d8232947ee8af65afd5a067e09dac2da6e7e585cb1dccb65496457da0"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_3.obj",
+      "size": 11943,
+      "sha256": "d4f6a25ef32fa1fa4734146981994ee760232cb077c80fea6487d78a077c7f27"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_4.obj",
+      "size": 13846,
+      "sha256": "be353480fe71d46f7a96f0a3cbb7e112caaf8d88368826f321a36a253c8749b2"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_5.obj",
+      "size": 11841,
+      "sha256": "7c87664623c3e1a6cb330db273227a69626dc5e53b4caff1d4ee7911eb3340c6"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_6.obj",
+      "size": 12597,
+      "sha256": "8fbc031e0d07b795ebf99115c75223141caaba317cab569159f3d477a7821681"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_7.obj",
+      "size": 4382,
+      "sha256": "7dc5ebb799fe281aab27d6e84e7a4efa0a8e42da2369ec83de3ea3f206f62d73"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_8.obj",
+      "size": 9131,
+      "sha256": "e3f77381817a341030f9dcc4c4aa7c559f80411b453fd87eb0fefecca82151bf"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_9.obj",
+      "size": 17616,
+      "sha256": "25a56ea9b02a03b6cb5a81f31c54f54d0185e1a0b3937c37e4289d896e50215a"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7.stl",
+      "size": 10084,
+      "sha256": "92ac6afcf7574c034d3170d8a68e95ac9048ab9d0dd5bbd8311b86e551b9ab1c"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_0.obj",
+      "size": 1362355,
+      "sha256": "04586b0bde011715cfc22072ac72fe0717eb4d4817bcf665987ce6cd88eb2b93"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_1.obj",
+      "size": 121358,
+      "sha256": "c3f72289f394c9d6749a4a327fb11f05b203c37c95032c92f28019b40ebe7e00"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_2.obj",
+      "size": 208907,
+      "sha256": "d2faecedb304d0989040d082410378dc949dbbda23bd18c05134f08aae984db5"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_3.obj",
+      "size": 123684,
+      "sha256": "b62d87c4d4bdb7b281ed341d347c39dad0e50bf36aed8ac11d050073701d5f70"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_4.obj",
+      "size": 85732,
+      "sha256": "cb78ccb61fd4ad6c7bff4c4d2e6cb41e1964a5a3e1a28e67c0c6202371cfc018"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_5.obj",
+      "size": 226402,
+      "sha256": "099071d3090b51471ba52f4f90814fd3089f4975d196e4d488117073d0bfe491"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_6.obj",
+      "size": 99900,
+      "sha256": "99469e2d95ab74ce0292f2f16954c87a8a7dc16652e62e970fe37c94330a81bb"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_7.obj",
+      "size": 792162,
+      "sha256": "426c3db8a19373f3dc73d4bec672e948121b2914c10e2e7b9c7ea80643a19e54"
+    },
+    {
+      "path": "aspire/sim/cap/envs/assets/franka_pick_place/panda_scene.xml",
+      "size": 16508,
+      "sha256": "b23feeeba6fce809641610e20356cbc3358a27040f87b84c868b749da2e3322e"
+    },
+    {
+      "path": "aspire/sim/cap/envs/base.py",
+      "size": 3141,
+      "sha256": "fac0a92e1f37b161af569eb54193b2681ac64e76c10afc878d9b68ff6081b3e5"
+    },
+    {
+      "path": "aspire/sim/cap/envs/configs/instantiate.py",
+      "size": 7757,
+      "sha256": "d881e1cc6c1c5949b3d81a683e8f124836973eb74378b1bc16cad900baff7fcc"
+    },
+    {
+      "path": "aspire/sim/cap/envs/configs/loader.py",
+      "size": 7923,
+      "sha256": "a566d94f765b0d1ae9d1d6e91f80d0bc99bd76462f21a04b1e1ce062ea250616"
+    },
+    {
+      "path": "aspire/sim/cap/envs/launch.py",
+      "size": 5018,
+      "sha256": "88b2a7a40811dad29111de9ca01f806c3bc0c940bd3c0c2def589df420c8a8f3"
+    },
+    {
+      "path": "aspire/sim/cap/envs/launch_b1k.py",
+      "size": 15440,
+      "sha256": "5928b6c1b99cc00c32b1c9b4cdc9fcd9d40430de4b53ec963027cbb676e3c31f"
+    },
+    {
+      "path": "aspire/sim/cap/envs/runner.py",
+      "size": 14693,
+      "sha256": "6656c932a63da71adb1234d0669f520031d30460cae6c914a292dcb3687444fb"
+    },
+    {
+      "path": "aspire/sim/cap/envs/scripts/__init__.py",
+      "size": 83,
+      "sha256": "7dc6e7e2821d4f7cff2cdab332564b29b811667de26d86aa566f71b801408b70"
+    },
+    {
+      "path": "aspire/sim/cap/envs/scripts/run_libero_batch.py",
+      "size": 9681,
+      "sha256": "9053ce986af2ee4127c80a5d712f5239eabf9abe20090c1bea243a3f15d502e4"
+    },
+    {
+      "path": "aspire/sim/cap/envs/scripts/run_robosuite_batch.py",
+      "size": 7255,
+      "sha256": "143cb69d8514d8f2edeeeebaa5ece86f19c7e18a39b704d840eed0da173e1641"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/__init__.py",
+      "size": 3174,
+      "sha256": "ef38a6b4b0b7f2f2befa76901108d9cfa4728550ab9ec6b204f71530117c0394"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/libero.py",
+      "size": 32764,
+      "sha256": "690c31e355d0d287262d0c316f73e8391f6e468299a790ef4a84206089d508ac"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/r1pro_b1k.py",
+      "size": 49707,
+      "sha256": "a9faf245393c98ed5987c7e18da26ffd68cc8de23a7dc6b0f730ff0fb4b3d9bc"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_base.py",
+      "size": 21384,
+      "sha256": "7a0df7b3436180875540065518f3002cc03b336caa77ba99d57a40222646f177"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_cube_lift.py",
+      "size": 10494,
+      "sha256": "1aa6cea738721f7c83db0ef4f4766c7f713c4e64d2dd004a5d83c37afd932c58"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_cubes.py",
+      "size": 8505,
+      "sha256": "939e8a22f88d96ec5c6f918fd3e724973a39bf36b0790f52ae39901426725515"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_cubes_restack.py",
+      "size": 19967,
+      "sha256": "64735a706d95db285014d33a00e45810b60a75ed750639ff8049d3e33c937b15"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_handover.py",
+      "size": 37890,
+      "sha256": "241875ba1286322334c956790e56f2376090918fc52840e6639ea363bcb711c9"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_nut_assembly.py",
+      "size": 21978,
+      "sha256": "63cf859b5a0eb9aa357c948c49f4342232e2faf1c51112b385fa934a49204e8f"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_spill_wipe.py",
+      "size": 10973,
+      "sha256": "eea1b9ac7f802e533d58191a03219775cb5b36d20c35f2f3115a63c326709194"
+    },
+    {
+      "path": "aspire/sim/cap/envs/simulators/robosuite_two_arm_lift.py",
+      "size": 34207,
+      "sha256": "c85d8fa6fad49acb502eb218b060a93e5f2c472ac6b63fd64aa79d8e5ec00aba"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/__init__.py",
+      "size": 6084,
+      "sha256": "7b66f68f7ed886e0c09d49feea990566c98baeff59880e289f2a4b9a3b849d1c"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/base.py",
+      "size": 15824,
+      "sha256": "a27f9378d0d954bcee3d86a14065cc54b8136ee328bf4c2bd9dd105c98a6aee5"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/__init__.py",
+      "size": 83,
+      "sha256": "7dc6e7e2821d4f7cff2cdab332564b29b811667de26d86aa566f71b801408b70"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/franka_cube_restack.py",
+      "size": 2533,
+      "sha256": "baaee0d5d662f9cdcdee70d32c681a9cb75fa324ac2949f30707dbddfc13fbc1"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/franka_libero_env.py",
+      "size": 20855,
+      "sha256": "54962791f50a2514a1acd00266c9c7c4b27f15a1c3a5226fa7e4de16b2347785"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/franka_lift.py",
+      "size": 1543,
+      "sha256": "abfbbf272eb28b1b00b08b9e7d058508ab7cb8fec88ab6818dc6e22462ab5a83"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/franka_nut_assembly.py",
+      "size": 5066,
+      "sha256": "b37c41af930c6c40574de0f10728276d9422485aff62dfc5c4914009b82f5df9"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/franka_pick_place.py",
+      "size": 2566,
+      "sha256": "1f93fc3f1b6c1b3f6a035719e8e610006cfe2f501286ea4588d41011ca11e30a"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/franka_spill_wipe.py",
+      "size": 3416,
+      "sha256": "7cb07114f46f57a3df6e3f18e230cc7356e218702e489fbddd865d8012d060c7"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/two_arm_handover.py",
+      "size": 5506,
+      "sha256": "0549fd0374836eac5fbb1e53d4d0359f617965028a0359bcceee8db67be61c32"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/franka/two_arm_lift.py",
+      "size": 5258,
+      "sha256": "faeec3b2a5fa5f60cbeefe43e4c6be3707ed541741900a4192077ba8c927efb9"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/r1pro/__init__.py",
+      "size": 83,
+      "sha256": "7dc6e7e2821d4f7cff2cdab332564b29b811667de26d86aa566f71b801408b70"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/r1pro/r1pro_behavior.py",
+      "size": 1325,
+      "sha256": "10c9329af3eaa1b79b541f551a471eb5c40954864ec0980329c5a2e430c29709"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/r1pro/r1pro_pickup_radio.py",
+      "size": 2829,
+      "sha256": "fe5b71620e5b047362e3863334c1cbdec823cfc8a1a2d437501b0a1656cea82a"
+    },
+    {
+      "path": "aspire/sim/cap/envs/tasks/r1pro/r1pro_pickup_trash.py",
+      "size": 5535,
+      "sha256": "0b1b4cb1df5a8d4ecc5898a8f4d17e32afc916b810c32c6adbaa26dea56cf1ec"
+    },
+    {
+      "path": "aspire/sim/cap/envs/trial.py",
+      "size": 39582,
+      "sha256": "9285dbec3000557079fc19093269f3acebe49f8f4fde8257d86c517b1eb092e9"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/__init__.py",
+      "size": 7751,
+      "sha256": "43b964ae96d72e801097da18821cc4f2d1c8698c38d4a660ff83803c7ab64036"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/base_api.py",
+      "size": 4737,
+      "sha256": "e3d5ff9537941d160cccf5bfd45f773d3c9d8558610f4af3f6eb2ec4be2b25e4"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/__init__.py",
+      "size": 83,
+      "sha256": "7dc6e7e2821d4f7cff2cdab332564b29b811667de26d86aa566f71b801408b70"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/common.py",
+      "size": 14110,
+      "sha256": "0e0254a487b819611ab611c29eb8142e23c9d516bd59905b75bdc0b9fa0805ad"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/control.py",
+      "size": 24708,
+      "sha256": "3c3c1082912dc834f2374695b36045be8cb79d0c9484f9a943e2860547aed27a"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/control_privileged.py",
+      "size": 7811,
+      "sha256": "d74bebb032fc7e8082b3425539bc78cf9dbbf9ac1a1dbc9fb7f78eb5e988f2da"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/control_reduced.py",
+      "size": 27849,
+      "sha256": "d06743736c04f3e2df7fe1d077f86e1302703b615a74d7dd3603e8cae57ad1e4"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/control_reduced_exampleless.py",
+      "size": 3342,
+      "sha256": "5ddd27813d0274f8c4606866695071e5c1dbc7c471a706988e5982763045a402"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/control_reduced_skill_library.py",
+      "size": 13384,
+      "sha256": "054bc020ea2d56a62eced8fe66276f8694712f78860d59f849cf45fffb25138f"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/handover.py",
+      "size": 19797,
+      "sha256": "60c260756894a807d2393577a7508b8b1a665d34b3e763b363337c9233c03b42"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/handover_privileged.py",
+      "size": 12145,
+      "sha256": "66a0d0d42e8a04b99458b0e98d83f01f2dba591d065b396d10e28796b8cb723f"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/handover_reduced.py",
+      "size": 12897,
+      "sha256": "1439bddb27680e5dfdd3b03fececc11c64e3ba89a7ce4fe21358275aae0734b2"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/handover_reduced_exampleless.py",
+      "size": 2401,
+      "sha256": "988f0dda122b8b23d285ec6a9eba091b6d3646a6fd843c3a9382b42aa8f43a56"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/libero.py",
+      "size": 48799,
+      "sha256": "e5bf3867a84a6efb3c4f9b0b46c64688dcd01bdfe0f16c70d21092c906329c5c"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/libero_privileged.py",
+      "size": 16420,
+      "sha256": "1bd8b143256c9c2ca843b2861fe31e150ad077b357f4786b1727ad56591d134e"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/libero_reduced.py",
+      "size": 39698,
+      "sha256": "fee6d84b7d5dbb0a7cf36b9d58d6dd52db606256302f539ab9105bd1912ef17b"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/libero_reduced_skill_library.py",
+      "size": 13299,
+      "sha256": "7c4f1ca76b30d2a18d3a52fb4ecbc68f6b277f8f62ce167bc5e1606c3cd72c45"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/nut_assembly_privileged.py",
+      "size": 10977,
+      "sha256": "70738c7cb3c39f8304585140767041b4c24fc2becb7de2d8983bb7627e4a9af9"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/nut_assembly_visual.py",
+      "size": 17381,
+      "sha256": "e378ad67a4e3702e4fd8dc6f4488c9816fba7bb0811c3434dda036783f138491"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/spill_wipe.py",
+      "size": 12317,
+      "sha256": "9a9c63046214da2550c29bccb330a5b869cfaada8202812a15e065a4804e56bf"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/spill_wipe_privileged.py",
+      "size": 6195,
+      "sha256": "de29b882f20d4e93c021d372bb0a4160e7c8ad1eca1977416281859fab493ed7"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/two_arm_lift.py",
+      "size": 35113,
+      "sha256": "f56b3e7bf089803897f6a4e8f0ea3d4932a189b3831ba3e08dfb380c151943bd"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/franka/two_arm_lift_privileged.py",
+      "size": 19000,
+      "sha256": "4108cffb243d68b1d50a497721eae6452bab3e146693b5f61bd2700bc7370838"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/libero/__init__.py",
+      "size": 6114,
+      "sha256": "a6bf52cbb0dced62f5109559d362fc2cabecb0ac3dba38ee5b700e617b4a70a9"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/libero_trace_logger.py",
+      "size": 948,
+      "sha256": "001d4f6385828cc06d28a519a975d2c23d853f98d9b4cbb1281a437dddcde5bf"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/__init__.py",
+      "size": 83,
+      "sha256": "7dc6e7e2821d4f7cff2cdab332564b29b811667de26d86aa566f71b801408b70"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/curobo.py",
+      "size": 2366,
+      "sha256": "920819800f8c6ef250066a899142ca524b84e2d60264d35416f80c4079a8fe26"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/curobo_api.py",
+      "size": 62594,
+      "sha256": "306a13a838baed035c560efbc52797f81dd3d3015b9ba77871d49d8329cd19d5"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki.py",
+      "size": 3955,
+      "sha256": "fb8baeb204a015a66927f723fcf0d97cfe68c426fb73b919dca507b4ec81b86c"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_context.py",
+      "size": 2531,
+      "sha256": "509a4ddbf243ee242e6a7702c45af3bcf99632f53ea6d00ab3053bb9adfcb93b"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/__init__.py",
+      "size": 878,
+      "sha256": "1511eec6a39466f578bd7d7668ddb084ee4251b8e646e6826358b19d85351a02"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_online_planning.py",
+      "size": 7227,
+      "sha256": "2a6a65d7b0a97151682955bcdfe32c7f5e9d79b296574f85c46529abc4a233af"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik.py",
+      "size": 2165,
+      "sha256": "086ad161fed0b541cb05287ae6be090e965d05d7d0c6d21f3bfd9b9fe79208f8"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_vel_cost.py",
+      "size": 3184,
+      "sha256": "77371e5fef8e86bd2c4e2d11f956a4bd7bce6e556dfec8da84ff846dcbc3750d"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_base.py",
+      "size": 4205,
+      "sha256": "05ecd7162bcd76002879f7565719ed16b99e403c62023ca57a0d851984947ceb"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_collision.py",
+      "size": 3031,
+      "sha256": "8b1337b6340553b6e58ceba7904f23e41abe51fc357297c1010dc1f21a54e204"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_manipulability.py",
+      "size": 2561,
+      "sha256": "80b8787ebc4809a1a2c2476fb00c22d945efab8f849946f75b0ba517015330e3"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_multiple_targets.py",
+      "size": 2834,
+      "sha256": "4f9655d4805b8cb4bb960e81567245317847d053a3855db18af8645b6f83e655"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_multiple_targets_vel_cost.py",
+      "size": 3566,
+      "sha256": "5b81f909c10e3f20c3c22b689ab8fbf8c39a55919647cf61ec80dfad31d7ea4f"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_rest_cost.py",
+      "size": 2619,
+      "sha256": "cddd223f77a62fb2289e89ac4a3503623d215825ad4f9e529c7069045e443fd3"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/motion/pyroki_snippets/_trajopt.py",
+      "size": 8590,
+      "sha256": "36f9f27d90925f456ac53eafffc90e75530e5754a7758acd3bfc9fb04fee0560"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/r1pro/__init__.py",
+      "size": 83,
+      "sha256": "7dc6e7e2821d4f7cff2cdab332564b29b811667de26d86aa566f71b801408b70"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/r1pro/control.py",
+      "size": 65061,
+      "sha256": "82e5b0f3c96db73bbd9f116f53cd0d260a92043c1a0952700533600c5d4c91bc"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/r1pro/utils.py",
+      "size": 11193,
+      "sha256": "9ef1c087c554a3b9ec9027f42e64598363a61ecee037be5156a43f2967a049b9"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/robosuite/controllers/config/robots/panda_joint_ctrl.json",
+      "size": 619,
+      "sha256": "2059d1fd62d6b528f32f830b04511da3eb447ae98cfcc3115d6f2e8779352972"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/robosuite/controllers/config/robots/panda_joint_ctrl2.json",
+      "size": 658,
+      "sha256": "c945ce4800aa840cb7786cf1f415874e1e0380932712cb598074132c4a433d71"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/robosuite_trace_logger.py",
+      "size": 834,
+      "sha256": "ab268e9bbdd67a144b5842f44284a31b6b538057ab5e9795663bd3f7703d228a"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/trace_logger.py",
+      "size": 21593,
+      "sha256": "39126c6120ab1f58ea5ca51ed607485f335485cdc4452b8129503d0e6aec4242"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/vision/__init__.py",
+      "size": 83,
+      "sha256": "7dc6e7e2821d4f7cff2cdab332564b29b811667de26d86aa566f71b801408b70"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/vision/graspnet.py",
+      "size": 8164,
+      "sha256": "3a75dc6edb40cf1531cfa9a20f91bb83ebaf7796de59ca08ca73ba88aa3b7763"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/vision/molmo.py",
+      "size": 9517,
+      "sha256": "3707af941e09f3f1eef9b19891d3ec3a32568e1076415c85c2a79c9b4247e4a2"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/vision/owlvit.py",
+      "size": 3039,
+      "sha256": "6a0806d8b6cd3006f8c9b3ae52fd9dbd0692d5ef33f376b0491d9d1c47ab8efb"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/vision/sam2.py",
+      "size": 11583,
+      "sha256": "cec5c34b755f42f84448c930c0987abe3d90b0b76299e95f57731a973cb4feda"
+    },
+    {
+      "path": "aspire/sim/cap/integrations/vision/sam3.py",
+      "size": 7303,
+      "sha256": "285b14dbe559017c31c352ef54d7afe5898a135b1f6c93ae22d4b25f79dffaae"
+    },
+    {
+      "path": "aspire/sim/cap/llm/__init__.py",
+      "size": 1543,
+      "sha256": "12d3d1e79e80fb0dd599c1df900b8defba60e00da267d70080e36df1e0a052f2"
+    },
+    {
+      "path": "aspire/sim/cap/llm/client.py",
+      "size": 33046,
+      "sha256": "1650d2abd9cdfbc3708cf804df00042aa7e212c66d4ecfb18d213797f4346660"
+    },
+    {
+      "path": "aspire/sim/cap/serving/__init__.py",
+      "size": 133,
+      "sha256": "2ddd0c8fa0f66b74f2df80e4002af5459542222af066a21d43e45752a286c949"
+    },
+    {
+      "path": "aspire/sim/cap/serving/assets/panda_spheres.json",
+      "size": 6760,
+      "sha256": "fffe904825c1a4c3b5e46b05fd91276605af435aff7dbfe4ea279b7d0c605d81"
+    },
+    {
+      "path": "aspire/sim/cap/serving/launch_contact_graspnet_server.py",
+      "size": 20424,
+      "sha256": "64b301e5d100c5f6a5b48229f06f1cc1fce89f8c1650964f11f66bd85ba9770c"
+    },
+    {
+      "path": "aspire/sim/cap/serving/launch_curobo_server.py",
+      "size": 13909,
+      "sha256": "d129816d404ec85236536eb0f7cef810c90c7392dde7abc73ecbd15194b0aca8"
+    },
+    {
+      "path": "aspire/sim/cap/serving/launch_owlvit_server.py",
+      "size": 4500,
+      "sha256": "0af0171c463448545af73fd946cb6cbc67652b69128487ce0abd82cffa9999bc"
+    },
+    {
+      "path": "aspire/sim/cap/serving/launch_pyroki_server.py",
+      "size": 12857,
+      "sha256": "1f8de94143a1d743af257f0c0c0013faf96dff6f21be3c824496d9c97a7e2741"
+    },
+    {
+      "path": "aspire/sim/cap/serving/launch_sam2_server.py",
+      "size": 13640,
+      "sha256": "07da5fd0bbe1127826463e702c7ad74654a37a839e9ec388626efacccf9c640f"
+    },
+    {
+      "path": "aspire/sim/cap/serving/launch_sam3_server.py",
+      "size": 9332,
+      "sha256": "f01f1b49b803eebcb1c3af0c90b0c4f2310435f005e5c4a548482b8883525bba"
+    },
+    {
+      "path": "aspire/sim/cap/serving/launch_servers.py",
+      "size": 24595,
+      "sha256": "460fc84db3e4576fe5f4bb50229e89b0b0fd5e9321d46e87a508470da103a7ec"
+    },
+    {
+      "path": "aspire/sim/cap/serving/openrouter_server.py",
+      "size": 9254,
+      "sha256": "67ba624cccae9fd2d412e184d93e2f1afc52e2f03c5ded29c70a6e635fdbfffb"
+    },
+    {
+      "path": "aspire/sim/cap/serving/vllm_server.py",
+      "size": 2371,
+      "sha256": "e8fcfddffd2bde07886931f8f323f1c7948f41c3148241846f6f93fcf07dec56"
+    },
+    {
+      "path": "aspire/sim/cap/skills/__init__.py",
+      "size": 522,
+      "sha256": "bdb2d7d8e86aed1921179885b44507130728a7e23067282938385959dbf822e0"
+    },
+    {
+      "path": "aspire/sim/cap/skills/claude_integration.py",
+      "size": 2169,
+      "sha256": "1bad07e8e6d4a48d845221fab78a672f89bcc75011199618e132bcfac7090542"
+    },
+    {
+      "path": "aspire/sim/cap/skills/extractor.py",
+      "size": 2921,
+      "sha256": "527b8b2f5c0e025bb63f7e34aac94a8716742211fcf39b912455ea82374fa792"
+    },
+    {
+      "path": "aspire/sim/cap/skills/library.py",
+      "size": 7962,
+      "sha256": "f6c1721e167ccd0c28c8b301c03ff561730fd5a8c17531662f5d80ba76be0cd2"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/__init__.py",
+      "size": 175,
+      "sha256": "3465b81bbec94cbddbeaa1550bcc3c7de2d18410e35d2540e0ea4ae27341f16d"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/__init__.py",
+      "size": 745,
+      "sha256": "ecc4d234d3959c0211d73855b23e656235cf799eafa4949a5d36c1e3900c671d"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_online_planning.py",
+      "size": 7253,
+      "sha256": "d282d176ee6c4fa3f9211677861dc5ce3a4cd3a9fae1cf4fef904f06cffd669c"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik.py",
+      "size": 2148,
+      "sha256": "fadb9b30c306e408b901840048cfad4652f99d3c9d2fbfc43382282318eaab60"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_base.py",
+      "size": 4227,
+      "sha256": "7a33a5532c84ad4be6f72e40b31c86e0fcbd80f1ee6778677fe62ba07a2f5863"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_collision.py",
+      "size": 3061,
+      "sha256": "424ac42827ecd54847abd1e0702415b05e82e4a7f0d8888a1025412d7f4f0f72"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_manipulability.py",
+      "size": 2633,
+      "sha256": "00e392ea99d250db5eb75aac17990b48de9383c57752cbb9acf34574f2595fa0"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_multiple_targets.py",
+      "size": 2848,
+      "sha256": "8b1eba31514ce2962204a96c2aa189f846916474771642370e00685aeb77b677"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_trajopt.py",
+      "size": 8694,
+      "sha256": "75af8195105ef6c14b531d10e53e8bfec96fac7bf9a8e1e11930f7118ce480c7"
+    },
+    {
+      "path": "aspire/sim/cap/utils/__init__.py",
+      "size": 292,
+      "sha256": "0d55ae1b40ad13bc9f7758ef4660e81acf19598cae1a5131c64575d869fa69bc"
+    },
+    {
+      "path": "aspire/sim/cap/utils/camera_utils.py",
+      "size": 1026,
+      "sha256": "9fbc7bc3f360b35d97a6a269d55d3200d67fb89fa9b3807dd5eacaef0756151c"
+    },
+    {
+      "path": "aspire/sim/cap/utils/depth_utils.py",
+      "size": 8943,
+      "sha256": "d6c4b4572b2286fb5661718e0e2491405d7c25d66eca57d718d45b2609c61e8e"
+    },
+    {
+      "path": "aspire/sim/cap/utils/eval_utils.py",
+      "size": 6770,
+      "sha256": "075f315e026cad0688d8018089c303a2e5da6ae974ec00d6088a86457728ef88"
+    },
+    {
+      "path": "aspire/sim/cap/utils/execution_logger.py",
+      "size": 14946,
+      "sha256": "85f87973b4e0c67dcc5b6ab8826fcab711ba963ade7b8e0a0745485d00bf0bf1"
+    },
+    {
+      "path": "aspire/sim/cap/utils/graspnet_utils.py",
+      "size": 11925,
+      "sha256": "a40cd9837f009146b972bc6c525992c3ca9ec1e9687c598e8c699366f52d4011"
+    },
+    {
+      "path": "aspire/sim/cap/utils/launch_utils.py",
+      "size": 23510,
+      "sha256": "f7788d1814a8e0fa0fce6225f8dce63ad5067ff8eb629e806a92b69cbb394989"
+    },
+    {
+      "path": "aspire/sim/cap/utils/msgpack_server_client_utils.py",
+      "size": 2883,
+      "sha256": "0639e66444784d0f8e3ce62a1b16acf9f873c353da16086a926cd8ceb5786264"
+    },
+    {
+      "path": "aspire/sim/cap/utils/parallel_eval.py",
+      "size": 12009,
+      "sha256": "81bc209aa41edac610291458e22e73ee14c7145a04d795d81117364019f0fbe1"
+    },
+    {
+      "path": "aspire/sim/cap/utils/serve_utils.py",
+      "size": 3467,
+      "sha256": "9df3039fbd93ab02776fda09ae23256ac71f49ccaef4c93026e79a06931cd9ea"
+    },
+    {
+      "path": "aspire/sim/cap/utils/video_utils.py",
+      "size": 6610,
+      "sha256": "6350abd0ff6c3ea6ba0959586987759b4162706bdb703a01990ac402ac19f7f8"
+    },
+    {
+      "path": "aspire/sim/cap/utils/visualization_utils.py",
+      "size": 9011,
+      "sha256": "840cd13a322a025919857e8caf93ed9964853d2d809100d0364f0d13c9420828"
+    },
+    {
+      "path": "aspire/sim/docs/adding-environments.md",
+      "size": 4629,
+      "sha256": "c845b2bed304508d1b040710948167c64a141432aa6dc9ab00c4d70a5d765d49"
+    },
+    {
+      "path": "aspire/sim/docs/behavior-tasks.md",
+      "size": 15548,
+      "sha256": "81af0e3b9efb3a36fb28df2577ebf2222c3baec21c3120606a6bd1fd97280455"
+    },
+    {
+      "path": "aspire/sim/docs/configuration.md",
+      "size": 4083,
+      "sha256": "8b4e34f8ffd4203f6cd1ccd68c35d892f2452ded277335a8f0189f6af9a0304d"
+    },
+    {
+      "path": "aspire/sim/env_configs/libero/franka_libero_baseline_debug.yaml",
+      "size": 2862,
+      "sha256": "48cb06c5c56d644c9e489c1010eafdad01abbdc56f33956e1a76bcabd47c2d61"
+    },
+    {
+      "path": "aspire/sim/env_configs/libero/franka_libero_baseline_image_diff_debug.yaml",
+      "size": 2690,
+      "sha256": "4479b2b143148d32f07726447772d6a589cb2fc83e3e317590046c572e8f5534"
+    },
+    {
+      "path": "aspire/sim/env_configs/libero/franka_libero_libero10_traced.yaml",
+      "size": 2910,
+      "sha256": "fca5139b54ae4f2f885b397f8afab2f4b6a305d20e4820392649d0493591b8ef"
+    },
+    {
+      "path": "aspire/sim/env_configs/libero/franka_libero_traced.yaml",
+      "size": 2791,
+      "sha256": "759e6d80a3a3631cdfdd9cf995cbd130b071a2a4363edf9d8fb07a47fc9edcad"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio.yaml",
+      "size": 950,
+      "sha256": "e13dec51f36a993be832e7a5b1451f55186174486e636a140159a2b437373d38"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio_aspire.yaml",
+      "size": 2295,
+      "sha256": "e69d6680db5143063c7a4e6b922fef0db89b553dba3c347f0e60f864190a03e9"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio_aspire_traced.yaml",
+      "size": 2306,
+      "sha256": "009777f9ecec8d722ab53ae7bd7129df48373ea97ec993cd800b3ad3d094d1ae"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio_oracle.yaml",
+      "size": 956,
+      "sha256": "9b45a74bc084e2f76c6a36affd8f034f8b45bf9570848e047d3aee5e12bbf7df"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash.yaml",
+      "size": 819,
+      "sha256": "f92533c917b94b45758a9e2aa3cf76546cb4f6851608a5cdcb2c05d8007ed019"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash_aspire.yaml",
+      "size": 3152,
+      "sha256": "88ea68f2f99b1cce5b5adce57710dc150f6523ffa6c3ae40d3bb3787168b9b8e"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash_aspire_traced.yaml",
+      "size": 3233,
+      "sha256": "b0220a0ff942e58db61b105536a0a91b41b585b38629db992e10e2c69fce83f9"
+    },
+    {
+      "path": "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash_oracle.yaml",
+      "size": 831,
+      "sha256": "6a19e077bdb5dd80a12fb539be8565ae0b861c16a9f707378e6c215ba3420e5c"
+    },
+    {
+      "path": "aspire/sim/env_configs/robosuite/cube_lifting_multimodel_aspire_traced.yaml",
+      "size": 2513,
+      "sha256": "56bd63751781240630ee9c255d0cc0b74e7820feaaec88e39347506dd0d20d60"
+    },
+    {
+      "path": "aspire/sim/env_configs/robosuite/cube_restack_multimodel_aspire_traced.yaml",
+      "size": 2555,
+      "sha256": "36709d3e28583809b457b78a631ca821f8b7bae483db11aee9ec555d37c62818"
+    },
+    {
+      "path": "aspire/sim/env_configs/robosuite/cube_stack_multimodel_aspire_traced.yaml",
+      "size": 2545,
+      "sha256": "093f3fa708808b592ef9e98a8ae59c1d2a757463b46e4662a77d216cb0d968a9"
+    },
+    {
+      "path": "aspire/sim/env_configs/robosuite/nut_assembly_multimodel_aspire_traced.yaml",
+      "size": 3421,
+      "sha256": "3f0ca522dbace4c11fd4b5b3dd20514e48604f3dbf38880235de41e225f458e8"
+    },
+    {
+      "path": "aspire/sim/env_configs/robosuite/spill_wipe_multimodel_aspire_traced.yaml",
+      "size": 3637,
+      "sha256": "c6cecc90fac1085cd006e28458f87c8206534676b21acde46fbbe0407d510d1f"
+    },
+    {
+      "path": "aspire/sim/env_configs/robosuite/two_arm_handover_multimodel_aspire_traced.yaml",
+      "size": 4687,
+      "sha256": "7148b615bdbba7c6d48a1d40c1edea7893546dd25eec4085e80675d67ae7c977"
+    },
+    {
+      "path": "aspire/sim/env_configs/robosuite/two_arm_lift_multimodel_aspire_traced.yaml",
+      "size": 3301,
+      "sha256": "b52ad72eff6088f2cc6c1eadb6b1ca817cc6e29571284c086323c59fe2302564"
+    },
+    {
+      "path": "aspire/sim/patches/b1k/README.md",
+      "size": 1834,
+      "sha256": "dcd377911c859b95809247044a9703f80baae516b7997c30c240e223917fb660"
+    },
+    {
+      "path": "aspire/sim/patches/contact_graspnet_pytorch-compat.patch",
+      "size": 1321,
+      "sha256": "134a2938c6a6cab41d677c945fa21ffe9225d9ccbf31bad414a9af02ab5f97fd"
+    },
+    {
+      "path": "aspire/sim/pyproject.toml",
+      "size": 4437,
+      "sha256": "94128e031171c274f98b5a04a35cd8714db1dbdb181a733c9572cdc25006fc19"
+    },
+    {
+      "path": "aspire/sim/scripts/README.md",
+      "size": 708,
+      "sha256": "aa632289f63cc8e4f20332939dbb1b151ce8c36d209f24df4c691781bed48300"
+    },
+    {
+      "path": "aspire/sim/scripts/behavior/replay_trial_b1k.py",
+      "size": 2226,
+      "sha256": "c85020b41c8e13721b1667c9cc2eb54e7d1ef844fe844e19944c48e4a55392f0"
+    },
+    {
+      "path": "aspire/sim/scripts/behavior/setup_behavior.sh",
+      "size": 14440,
+      "sha256": "37054987ac195323c04547c74ef62c0f83ea326b699c396c33e3ff8318fb206e"
+    },
+    {
+      "path": "aspire/sim/scripts/behavior/verify_behavior.py",
+      "size": 17915,
+      "sha256": "97afd38e8d4bea74440ee184b7a8601944a9c187e5332cd2bc37ba6411494b6f"
+    },
+    {
+      "path": "aspire/sim/scripts/common/analyze_trial.py",
+      "size": 28584,
+      "sha256": "84a369f7bfb6d75cfc71fbf3fe4880eeeeb0c4db5b46c1859100e05cd93158ad"
+    },
+    {
+      "path": "aspire/sim/scripts/common/apply_contact_graspnet_patch.sh",
+      "size": 2749,
+      "sha256": "a0cdfadf56838563c8d239931a7be827170a7df3fb1ac20fb4bc4b8c1234e544"
+    },
+    {
+      "path": "aspire/sim/scripts/common/chunk_tokens.py",
+      "size": 5393,
+      "sha256": "6d5f07dd350d5109dc4b6ebf7a4337a2463498060bd109ac8fc7788d81c0e48f"
+    },
+    {
+      "path": "aspire/sim/scripts/common/plot_subagent_token_trace.py",
+      "size": 7571,
+      "sha256": "cb414a68e2c63d0cdda42d27a77765a2ad6171e30ea93125c1d85738671e1f1b"
+    },
+    {
+      "path": "aspire/sim/scripts/common/plot_token_usage.py",
+      "size": 9266,
+      "sha256": "a9405e771db7d52f989f3bbf75483e1cd06a0462364b3fcea38a08e9a275b062"
+    },
+    {
+      "path": "aspire/sim/scripts/common/scan_progress.py",
+      "size": 6921,
+      "sha256": "69d718776b19b6fbed1de199515b70992b7666422f52d15869bdbbfbf2f9e222"
+    },
+    {
+      "path": "aspire/sim/scripts/common/skill_library_compilation/README.md",
+      "size": 1497,
+      "sha256": "16448e916fb30fed400de6076d48e0f369f3191aadaf0ccfd0d7292777169d97"
+    },
+    {
+      "path": "aspire/sim/scripts/common/skill_library_compilation/compile_skill_library.py",
+      "size": 13343,
+      "sha256": "0d03e12fad441cc71731b16d95084afb7848764d0c1961de9283b029e0020534"
+    },
+    {
+      "path": "aspire/sim/scripts/common/skill_library_compilation/eval_dir_to_code.py",
+      "size": 3318,
+      "sha256": "2e145ed42dcb37eae467bbeb8611f4715f265e46aae2a6f2762ff88f5dadc6d3"
+    },
+    {
+      "path": "aspire/sim/scripts/common/skill_library_compilation/parse_outputs.py",
+      "size": 15348,
+      "sha256": "2818cdb3e46966492f363700a94f8954ef9e7765a11c25501649e0d128e7e226"
+    },
+    {
+      "path": "aspire/sim/scripts/common/skill_library_compilation/summarize_analysis.py",
+      "size": 12284,
+      "sha256": "3b6e36a9d2132e3a117bd4db85672996ab3894dda37fe39e25864031ac8332cf"
+    },
+    {
+      "path": "aspire/sim/scripts/common/skill_library_compilation/trial_folder_rename.py",
+      "size": 2602,
+      "sha256": "f4383480df0c9bd5a9fd530ed0c5dd751dda6b70c3ddf95289f8146aacb01b45"
+    },
+    {
+      "path": "aspire/sim/scripts/common/start_perception_servers.sh",
+      "size": 5731,
+      "sha256": "ea288935fb34cb9db2645dc3dc45369a2a0f73c718aee6d34bc2f76deff65367"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/analyze_evosearch_traces.py",
+      "size": 10546,
+      "sha256": "2b52abbd2ef8c3501af6ab19d89bf9725b0cc54319a34c41ef1b58ed1c33d726"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/analyze_stage1_tokens.py",
+      "size": 7430,
+      "sha256": "7ff9592181f18c84daff157a9cc0892d8f515b1bd0b625caacbb4fcb360cfce2"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/annotate_snapshot_tokens.py",
+      "size": 7843,
+      "sha256": "1e594ea826688797788a5e1a2a7139caa5db8842028f18378314b0f87dd81688"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/eval_checkpoint_n5.sh",
+      "size": 6901,
+      "sha256": "80b73cc5ce3b160f3d6da0e1384f3477c5c1b801bdf258109241fb246cd2ef04"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/eval_checkpoint_n50.sh",
+      "size": 6967,
+      "sha256": "aa2196d691700157a8abcdf602e90a1ae3a3cdedbde101268f403303873fdfc4"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/eval_libero90_held_out.sh",
+      "size": 4027,
+      "sha256": "63acaf204a695fea4e15fb5b33273bcb6b33cf59480e3a2be186f61520ed9b49"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/eval_run_seeds.py",
+      "size": 6749,
+      "sha256": "bdd5a1e610e26b8a54c8b25e9ab386e21e85f8b2ef2492fbf2cf3300318716c1"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/eval_setup_worktree.sh",
+      "size": 1722,
+      "sha256": "ea3c4a24aa05234fa58666a4713eb52298c5e2db38255e13cc199e8d03558961"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/eval_snapshot.sh",
+      "size": 4339,
+      "sha256": "ec10e74ea45f1e4e0a3ac33ab9f61b6b0901b796dd7ab0f5333e8762c2aab448"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/evosearch_eval.py",
+      "size": 26426,
+      "sha256": "fb650cc7b105e6408a5af22b1a6059d87e8bf9ac9f404e602761c8a4a5c6ccb3"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/gen_progress.py",
+      "size": 11951,
+      "sha256": "c26bdc6dca5e8cbcd05fec5249f7ca706074e4e964f72236fb4863af4202d015"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/gen_progress_90.py",
+      "size": 6046,
+      "sha256": "69d30b26844841a3a913b1f63471b0e436a161d54b039fe0e2b1d32a3c1aa04c"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/gen_progress_long.py",
+      "size": 6621,
+      "sha256": "481c1021c13be71619caa180b5106993ce03070efea24b6a767bbeaafce5521b"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/gen_progress_scaling.py",
+      "size": 7413,
+      "sha256": "f623a7b37c4ce806511e36e948f5178ec1dec65e47fdbc077673c7c92cac2555"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/generate_ordering.py",
+      "size": 2917,
+      "sha256": "fc79f02d8d0efd103fc6b48e047e7d7a2c5327b77a982ecb6e5e96db8f2c409c"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/make_libero_pro_master_table.py",
+      "size": 20373,
+      "sha256": "db01faff1754021e8d58ec6c743ac198bc4912ecd46546298a59c0f17b6d7fc9"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/make_snapshot_table.py",
+      "size": 10541,
+      "sha256": "cd01253f7ad44804934fe4c45fe3637b65025ee607278f30c85aaea0df05d9aa"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_baseline_vs_fix.py",
+      "size": 10541,
+      "sha256": "225b363be7c6d73862a0dc8bb710537e58574616a9ba621b49246932651f29ac"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_baseline_vs_fix_v3_evosearch.py",
+      "size": 13320,
+      "sha256": "714947cbbf8fc59c0a36ec189151f87970ab3703a25d83db4febde6c71746075"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_checkpoint_sr_pareto.py",
+      "size": 10114,
+      "sha256": "faa0ecff11359c7edcfab0c6a222014fc9b7a2917a789c5186757f3b964e3928"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_evosearch_progress.py",
+      "size": 4363,
+      "sha256": "13411237cb83bbc1ccfb1894a94a02d18964b64d37972e6b5050a7c62cb99220"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_libero90_all_task_sr.py",
+      "size": 8219,
+      "sha256": "3b77750fd1dde313f2b56b221112cb0472c4094347b195b691005019d6d85d8f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_libero90_seen_task_sr.py",
+      "size": 8597,
+      "sha256": "7de96fff769e88eddb7b168a99177aec151de2f1d3108e6f92e8a350e790fe55"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_libero90_solved_fraction.py",
+      "size": 9122,
+      "sha256": "090b70739b48e1dbb1418e39842f19a81af6d4ba55a4ac2eef5ae599752686a1"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_method_comparison_v5.py",
+      "size": 8519,
+      "sha256": "ec035d1d4eba1a49c1fcff0872ecafc64dcb28e972a1cc50ae52f2e023c4a93c"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/plot_suite_summary.py",
+      "size": 4139,
+      "sha256": "c7cb151645ccbba5e9dc347d1091b5c461dd0361238eae9923746e486db8bba0"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/record_skill_promotion.py",
+      "size": 13166,
+      "sha256": "82171aaf7c3bb6d465bfeb5db38dcb1c66b7b536a779fde6e70bdd945c659128"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/replay_trial.py",
+      "size": 29280,
+      "sha256": "0dbf88675ab9f6bc343aa75a9d2a21b11a33d25f984f2cfb0c426c2b1a2b73d6"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/resume_eval_gpu.sh",
+      "size": 2383,
+      "sha256": "0d83c86a6df67eb92459836a4eab3711fd29a7d01495cc32998601b38fffc084"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/run_fix_loop_validation.py",
+      "size": 12957,
+      "sha256": "3ddd1e1d78e65e1e847f1c6c113577114504e6f28e9517a34d11c5f09ca48969"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/run_stage2_batch.sh",
+      "size": 2606,
+      "sha256": "e0e824a8a004b3013d33e07f2a8cd2a5e62ea23955e14d4a18ce04783f9117bb"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/run_stage2_token_scaling.py",
+      "size": 7211,
+      "sha256": "99c3c4247bbf6d5d6c79bc5579bdec14fffc289ae5c02a865a90819a32c6a37c"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/run_validation_comparison.py",
+      "size": 11912,
+      "sha256": "db64e5ec5777c14a210fc531f4f991d05b6754fe7770245f28d26728a828e6d3"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/scene_snapshot.py",
+      "size": 1915,
+      "sha256": "6c07958405fe48e65d4169b64a648cd90ba1152dd4fda7ab4e3a51f0d49384b1"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/gen_progress_robosuite.py",
+      "size": 3334,
+      "sha256": "66f858f5f1a5f76efab172d1fdccfe3b0df6531b36d92a9dfa55878e82e4765b"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/plot_tokens_vs_debug_sr.py",
+      "size": 11560,
+      "sha256": "58bf982270b5f5e475d8f9d7760ee51e5c8c99ea2e002e7933cd6e37ecf9101e"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/plot_tokens_vs_eval_sr.py",
+      "size": 11024,
+      "sha256": "8ceb8da75aea5a7e77e154b2989d26d5b29e5fb206bbb0baa95193c99696f18e"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/plot_tokens_vs_sr_v2.py",
+      "size": 17450,
+      "sha256": "c380238b612068a522024f467e9ed121ee03aa4651d0fcd642aad48f7de0c905"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/replay_trial_robosuite.py",
+      "size": 19544,
+      "sha256": "54552400f0d6b816eb18bfd3c3ce9dcb57aabe91763be4b29c686340931390d6"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/run_baseline_robosuite.sh",
+      "size": 4726,
+      "sha256": "0a11e8c7a7db46608f18ea7b65599239fa35f43404f8192ea2334239ee037f3d"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/run_debug_fix_code.sh",
+      "size": 3881,
+      "sha256": "38b01a744267fd374bd5fed4fb24987a95fde525002d573b36bfcfd2b3bc5f35"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/run_eval_fix_code.sh",
+      "size": 3892,
+      "sha256": "77cf9221b0b1e269db05e3eb19e511919a91780a69a8f502a3a325d2b87c55e6"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/run_eval_training_law.sh",
+      "size": 6498,
+      "sha256": "3e2d1da9090c7f74a0110b6ab8b552d27ec357904aa7e06d7f7b48c45d22929c"
+    },
+    {
+      "path": "aspire/sim/scripts/robosuite/run_iteration.sh",
+      "size": 11610,
+      "sha256": "7a7ff506d4ff797be6471fed9a2f95ae198f2ef94aea973facdba1b116c08cb1"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_grasp_graspnet.py",
+      "size": 1855,
+      "sha256": "be687b23758989cdf82ff52ff0f8820e23d24bf62a9e7700e7fe126da3df3e16"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_libero_integration.py",
+      "size": 2798,
+      "sha256": "04fd32ec0a55832bdb0c451c045aa1121f40a2dbe0b66c1d51775c0f1e6fe153"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_molmo_integration.py",
+      "size": 968,
+      "sha256": "8741850587e13c589d216fe876f89e349264cfbc8bf9f565be0b8714d11423d3"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_owlvit_integration.py",
+      "size": 1966,
+      "sha256": "7bfd791f4099ae5bd7d7ebd3987002afa09c71b8c1da574f72bb5d290118a806"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_owlvit_visualization.py",
+      "size": 6639,
+      "sha256": "83d8a22178d2063219ca93200b4e22dcab4b1ce801421f929bfa863947ad621b"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_pyroki_integration.py",
+      "size": 2176,
+      "sha256": "eb5ed133af1beaba4b69b7929aaf51c12066c6f4deca93160b19e678b970ba81"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_ransac_visualization.py",
+      "size": 6234,
+      "sha256": "66831ffd5a60d0ea87872eb45f155283e4311f245573d57151bd8f0356fc97ce"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_sam2_integration.py",
+      "size": 2054,
+      "sha256": "524f8b6a6b96dc05838d55783239671dc736ec81366ce83f31b35c69a7be8b7d"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_sam2_visualization.py",
+      "size": 4394,
+      "sha256": "6f8fd1eea9ad8c2e39fcc25802b33e0231029bf0888059bee9bd54561573998c"
+    },
+    {
+      "path": "aspire/sim/tests/integrations/test_sam3_visualization.py",
+      "size": 5717,
+      "sha256": "2feb02fc1a12bae670b8f1bfeb15289bcdbc4f8ecbce1852eb1ad4099906c4e9"
+    },
+    {
+      "path": "aspire/sim/tests/test_dep_compat.py",
+      "size": 2480,
+      "sha256": "3a38d29529fac0da2b553202bf6e421066f5f984abb08d7b5961e65f93529b75"
+    },
+    {
+      "path": "aspire/sim/tests/test_environments.py",
+      "size": 4019,
+      "sha256": "1b288d48f17f0c7ff46930aa37ac27361fe25f6ffc6cac0d6b4e663aa7f07d20"
+    },
+    {
+      "path": "aspire/sim/tests/test_gen_progress.py",
+      "size": 3737,
+      "sha256": "5b90edf78d60bbf16c5611fcbb51a528863d1db100166fc2005b3b9a619de63d"
+    },
+    {
+      "path": "aspire/sim/tests/test_libero.py",
+      "size": 1411,
+      "sha256": "cc2d1ced6c782d0bdd499c0e8af1a5e7692e478cc487b50ecbb9a73df43a6810"
+    },
+    {
+      "path": "aspire/sim/tests/test_libero_fix_loop_pipeline.py",
+      "size": 3878,
+      "sha256": "64da6a406b26f5d92d723816a80f1183349c7366d1f0bb793c27f09b34aa0eb0"
+    },
+    {
+      "path": "aspire/sim/tests/test_record_skill_promotion.py",
+      "size": 5450,
+      "sha256": "7a090961ff8399d947302733880c809f2d67c21d90ba58a7dd165c74d387edf3"
+    },
+    {
+      "path": "aspire/sim/tests/test_robosuite_setup.py",
+      "size": 907,
+      "sha256": "67630fa6294e56e6b2c7d2c30b80f57faa8a3027f4e45c64eabc1ca0eb2e59fd"
+    },
+    {
+      "path": "aspire/sim/uv.lock",
+      "size": 1529751,
+      "sha256": "25f59b0c20c647af981ca3c11df58fbd2e6f3760d986f2e5c726cbc94f1439ef"
+    }
+  ],
+  "submodules": [
+    {
+      "path": "aspire/sim/cap/third_party/LIBERO-PRO",
+      "commit": "47aaa8038930bcdc84ab9ea2867e2ffc8039ab4a"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/b1k",
+      "commit": "272ec5ca9936453c4a8fd335c4dfba61245e33ca"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/contact_graspnet_pytorch",
+      "commit": "2d71da4e50a04aa353352d1cae99f20f7022145b"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/curobo",
+      "commit": "d64c4b005459db10c5dd867d8b30a87d5bda9bdb"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/libero_dependencies/robosuite",
+      "commit": "a498b087d4bc5a3981e3d27030d09bc537a537f3"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/robosuite",
+      "commit": "97292732ed909ac3ae116579fb768607034a4dbd"
+    },
+    {
+      "path": "aspire/sim/cap/third_party/sam3",
+      "commit": "6fe87d64a5beb9084923d7a9e002741178635b09"
+    }
+  ],
+  "note": "SHA256 values describe copied source inputs. README renamed; AGENTS and CLAUDE replaced by personal-repository guidance. Newly authored export docs/configuration are not source inputs."
+}
