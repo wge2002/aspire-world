@@ -157,7 +157,7 @@ class ExecutableSession(WorldSession):
             self.emit("world_loaded", source_sha256=self.sha256, arm=self.arm,
                       binding=self.binding, features=self.features, snapshot=self.snapshot())
             return self
-        except Exception as exc:
+        except (Exception, SystemExit) as exc:
             self.fault("load", exc)
             self.close("program_error")
             raise WorldProgramError(str(exc)) from exc
@@ -414,6 +414,16 @@ def run_offline(policy, world, output, *, arm="full", mode="rehearsal", tape=Non
                 report.update(status="complete", api_calls=session.api_calls)
                 if session.features["self_eval"]:
                     report["goal"] = session.done()
+            except SystemExit as exc:
+                # Policy-level early termination must still leave a report.
+                # A zero exit does not establish a modeled goal or a live task
+                # outcome; keep it unknown and admissible for real evaluation.
+                clean = exc.code is None or exc.code == 0
+                report.update(status="unsupported" if clean else "program_error",
+                              reason=f"policy raised SystemExit({exc.code!r}); no completion verdict",
+                              termination="policy_exit", api_calls=session.api_calls)
+                if not clean:
+                    session.fault("offline_policy", exc)
             except Unsupported as exc:
                 report.update(status="unsupported", reason=str(exc), api_calls=session.api_calls)
             except Exception as exc:

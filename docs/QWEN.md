@@ -7,6 +7,7 @@
 - [ASPIRE 客户端](../aspire/sim/cap/llm/client.py)
 - [native CC 连接器](../aspire/sim/scripts/common/claude_with_local_model.sh)与[接口说明](../aspire/sim/docs/experiments/claude-code-local-models.md)
 - [实验服务配置原件](../aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/model-server.json)、[路径占位符示例](../deploy/qwen/model-server.example.json)、[客户端环境示例](../deploy/qwen/client.env.example)
+- [R2 报告交接兼容探测](../aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/qwen-native-compat-r2.py)
 - [实验兼容探测](../aspire/sim/docs/experiments/code-world-qwen-debug-20260922/qwen-native-compat.py)
 
 ## 接口

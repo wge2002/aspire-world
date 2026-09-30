@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-09-30",
+  "snapshot_date": "2026-10-01",
   "source_upstream": "https://github.com/NVlabs/ASPIRE",
   "source_base_commit": "7ba73d3bcac8f6b6d4a7d67ed4040988f768d282",
   "includes_uncommitted_working_tree_changes": true,
@@ -41,8 +41,8 @@
     },
     {
       "path": "aspire/sim/cap/world_model/executable_world.py",
-      "size": 22492,
-      "sha256": "812953860ad3f4be57c182fadf4d638bbe327c9896d24c1fa6475992b00015ea"
+      "size": 23194,
+      "sha256": "ca6c151beac2944ce652efbe152bd6c6fd0ff21ed3c6476a7e1976c846ef670d"
     },
     {
       "path": "aspire/sim/cap/world_model/fix_loop_scene_broker.py",
@@ -3313,6 +3313,146 @@
       "path": "aspire/sim/uv.lock",
       "size": 1529751,
       "sha256": "25f59b0c20c647af981ca3c11df58fbd2e6f3760d986f2e5c726cbc94f1439ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/IMPLEMENTATION.md",
+      "size": 2447,
+      "sha256": "4084e895a248495682bc2df9f842ede201a76b147685ae95006664e0d2fdc1f0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/NATIVE_WORLD_INTERFACE.md",
+      "size": 11611,
+      "sha256": "20836585286b5245d640241f10d42a92461f2c9e04863204b9777598979d495f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/PLAN.md",
+      "size": 2128,
+      "sha256": "22abd2b58064aae2ca4c4929a49e4724366f52d927bb52e15c3735fd89b83e8b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/prepare-foundation.py",
+      "size": 32228,
+      "sha256": "2cbd3ac7f2c6fb41ab237440891242f8beea34bb0fde073617c37e3c8d464822"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowl-c.py",
+      "size": 17527,
+      "sha256": "1c84ce8620258877950af3950de74a4d22ca306f107434e900f3ce2177924ea4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowldrawer-c.py",
+      "size": 17665,
+      "sha256": "47cd2670153a4303b4058c9179a997585f11abdcc4c826ec7bec1752f12579ca"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-drawer-c.py",
+      "size": 17597,
+      "sha256": "a22885488aca7399b3ce72bfef82e53b387be9e9bda88a1829ccdb36dce8d0e5"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-preflights.sh",
+      "size": 316,
+      "sha256": "5b281563c4a7d7b04fb94dc6a5966baed7513f195575d5f2a1aa39e645ae76c3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/submit-foundation.py",
+      "size": 2991,
+      "sha256": "40248cda4a81e50d8b6885bc6571f36841ea5b3fdc1e0a6cefbd116395f20a1d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/dlc-supervisor.py",
+      "size": 23946,
+      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/qwen-native-compat-r2.py",
+      "size": 9372,
+      "sha256": "48de7d88473a9e8c97d926f8298ce70eb1a7e4102be0e6c9402deaaeb37a6230"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/run_two_task_cell.py",
+      "size": 30424,
+      "sha256": "68baf4460a5aee8b2a693d4e3298381e1ac3bfebad51df2b870a541f12749733"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_scope.py",
+      "size": 11557,
+      "sha256": "2d28e86dfc71a38467bfbc070c95748e93804f4a450337fee7f07e37798b1a2b"
+    },
+    {
+      "path": "aspire/sim/tests/test_foundation_r2_repairs.py",
+      "size": 7229,
+      "sha256": "808d3b8827ec96463ae89f500511eff24d6272fe1a67ed3a887b18d0a5d991d2"
     }
   ],
   "submodules": [
@@ -3345,5 +3485,45 @@
       "commit": "6fe87d64a5beb9084923d7a9e002741178635b09"
     }
   ],
-  "note": "SHA256 values describe copied source inputs. README renamed; AGENTS and CLAUDE replaced by personal-repository guidance. Newly authored export docs/configuration are not source inputs."
+  "note": "SHA256 values describe copied source inputs. README renamed; AGENTS and CLAUDE replaced by personal-repository guidance. Newly authored export docs/configuration are not source inputs.",
+  "updates": [
+    {
+      "date": "2026-10-01",
+      "previous_personal_commit": "97d4e5cf57509554e9873f18d6aba77f60b1fd82",
+      "changed_source_files": [
+        "aspire/sim/cap/world_model/executable_world.py"
+      ],
+      "new_source_files": [
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/IMPLEMENTATION.md",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/NATIVE_WORLD_INTERFACE.md",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/PLAN.md",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/foundation_import.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/prepare-foundation.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowl-c.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowldrawer-c.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-drawer-c.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-preflights.sh",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/submit-foundation.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/cell_read_guard.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/dlc-supervisor.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/foundation_import.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/full_deadlines.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/heldout_stop_on_infra.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/infra_guard.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/legacy_stager.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/lineage.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_cc_stream.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_lineage_r2.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/output_ownership.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pilot_assignment_guard.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pristine_a_render.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/qwen-native-compat-r2.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/run_two_task_cell.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_render.py",
+        "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_scope.py",
+        "aspire/sim/tests/test_foundation_r2_repairs.py"
+      ],
+      "scope": "Foundation R2 source, tests, and core protocols only; no runtime artifacts."
+    }
+  ]
 }

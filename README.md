@@ -1,6 +1,6 @@
 # ASPIRE World
 
-个人维护的 ASPIRE 仿真、Code World 与 Qwen 实验代码仓库：[wge2002/aspire-world](https://github.com/wge2002/aspire-world)。基于 [NVlabs/ASPIRE](https://github.com/NVlabs/ASPIRE)，保留上游归属、许可证及第三方声明。当前整理日期：2026-09-30。
+个人维护的 ASPIRE 仿真、Code World 与 Qwen 实验代码仓库：[wge2002/aspire-world](https://github.com/wge2002/aspire-world)。基于 [NVlabs/ASPIRE](https://github.com/NVlabs/ASPIRE)，保留上游归属、许可证及第三方声明。当前整理日期：2026-10-01。
 
 此仓库保存源码、协议、配置和必要测试；实验日志、原始结果、轨迹、视频、模型权重、环境及缓存保存在仓库外。原始工作目录及已有实验数据不受此副本影响。
 
@@ -9,7 +9,7 @@
 | 内容 | 入口 |
 | --- | --- |
 | 仿真环境与依赖安装 | [Simulation README](aspire/sim/README.md) |
-| 最新实验：Qwen foundation 1/2/3/8 | [最新实验索引](docs/LATEST_EXPERIMENTS.md) |
+| 最新实验：Qwen foundation R2 | [最新实验索引](docs/LATEST_EXPERIMENTS.md) |
 | Qwen 部署、1M 配置与模型接口 | [Qwen 接口](docs/QWEN.md) |
 | Code World 执行实现 | [cap/world_model](aspire/sim/cap/world_model/) |
 | 仓库收录范围与运行限制 | [内容边界](docs/REPOSITORY_SCOPE.md) |
