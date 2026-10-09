@@ -124,13 +124,13 @@ def test_calibration_final_identity_and_development_boundary(tmp_path):
 def test_diagnostic_import_idempotent_and_never_candidate(tmp_path):
     sim = Path(__file__).resolve().parents[1]
     sys.path.insert(0, str(sim / "scripts/libero"))
-    sys.path.insert(0, str(sim / "docs/experiments/code-world-qwen-foundation-20260930/support"))
+    sys.path.insert(0, str(sim / "docs/experiments/code-world-gate-ablation-20261005/support"))
     from native_world_fixloop_state import NativeWorldState
     from foundation_import import import_diagnostic
     root = tmp_path / "coordination/preflight"
     root.mkdir(parents=True)
     data = {"summary.json": {"state": "passed", "cell": "toy_C", "task": "toy", "seed": 51,
-                            "charged": True, "task_policy_executed": False, "exit_code": 0},
+                            "spends_retry": True, "task_policy_executed": False, "exit_code": 0},
             "resolved-environment.json": {"privileged": False, "constructed_apis": {"FrankaLiberoApiReducedSkillLibraryTraced": "actual"}},
             "bundle/code.py": "pass", "bundle/world_program.py": "diagnostic"}
     for name, value in data.items():
@@ -147,7 +147,7 @@ def test_diagnostic_import_idempotent_and_never_candidate(tmp_path):
     second = import_diagnostic(case, task)
     assert first == second and first["remaining_real_budget"]["51"] == 2
     state = NativeWorldState(task, identity, resume=True)
-    assert state.attempts_used(51) == 1 and not state.candidates()
+    assert state.retries_used(51) == 1 and not state.candidates()
     (root / "bundle/code.py").write_text("tampered")
     with pytest.raises(ValueError, match="evidence changed"):
         import_diagnostic(case, task)

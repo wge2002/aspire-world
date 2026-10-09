@@ -37,11 +37,29 @@ class EvidenceState:
     predicates still require a fresh current observation in addition to references.
     """
 
-    def __init__(self, evidence_valid, binding="shadow"):
+    def __init__(self, evidence_valid, binding="shadow", strict=False):
         self._valid = evidence_valid
         self.binding = binding
+        # strict=True (closed-loop revision only): a current fact needs EVERY
+        # evidence ID to postdate the last motion, so one fresh ID cannot
+        # launder stale ones. False keeps the original any-fresh semantics.
+        self.strict = bool(strict)
         self._layers = {"observed": {}, "predicted": {}, "rehearsal": {}}
         self.revision = 0
+
+    @property
+    def measured_layer(self):
+        """Where this binding stores measurements: real or rehearsal observations."""
+        return "rehearsal" if self.binding == "rehearsal" else "observed"
+
+    def current(self, ids):
+        """Every ID is a real observation taken after the most recent motion."""
+        ids = list(ids)
+        return (self._valid(ids) and bool(ids)
+                and all(self._valid([i], fresh=True) for i in ids))
+
+    def _fresh(self, ids):
+        return self.current(ids) if self.strict else self._valid(ids, fresh=True)
 
     def set(self, name, value, *, evidence_ids=(), valid=True, reason="",
             identity=None, layer="observed", reference_evidence_ids=()):
@@ -78,10 +96,102 @@ class EvidenceState:
         reason = None
         if identity is not None and identity != fact["identity"]:
             reason = "object identity mismatch"
-        elif fresh and layer != "predicted" and not self._valid(fact["evidence_ids"], fresh=True):
+        elif fresh and layer != "predicted" and not self._fresh(fact["evidence_ids"]):
             reason = "no post-action observation for this fact"
         if reason:
             fact.update(status="unknown", value=None, reason=reason)
+        return fact
+
+    def invalidate(self, name, reason, *, identity=None):
+        """Replace a measured fact with `unknown`, without needing evidence.
+
+        Missing or unusable perception must remove the observed fact rather than
+        leave the previous value (or a prediction) standing in for it. An unknown
+        fact claims nothing, so it needs no observation ID. Stored in this
+        binding's measured layer; the predicted layer is never touched.
+        """
+        self.revision += 1
+        fact = {"status": "unknown", "value": None, "evidence_ids": [],
+                "reference_evidence_ids": [], "identity": clone(identity),
+                "layer": self.measured_layer, "revision": self.revision, "reason": reason}
+        self._layers[self.measured_layer][name] = fact
+        return clone(fact)
+
+    def confirm_identity(self, name, candidates, *, match, assumed=None, evidence_ids=()):
+        """Adjudicate a target's identity against one current candidate set.
+
+        Task-neutral contract. The caller supplies the candidates, a `match` test
+        and, once a target has been acquired, the `assumed` identity to keep. The
+        result is a known fact only when ALL of these hold:
+          - every evidence ID is a real observation taken after the last motion;
+          - exactly one candidate satisfies `match`;
+          - that candidate declares a stable identity (see `identity_of`);
+          - if `assumed` is given, that identity equals it.
+        Otherwise the measured fact `name` is invalidated to `unknown`, its
+        identity kept as `assumed`, and the reason says which condition failed.
+        It never raises for missing evidence, never selects by position in an
+        incomplete detection set, and never silently switches to a different
+        target that happens to match uniquely. `assumed=None` is first
+        acquisition and establishes the identity.
+        """
+        ids = list(evidence_ids) if isinstance(evidence_ids, (list, tuple)) else []
+        if not self.current(ids):
+            return self.invalidate(name, "identity needs a current observation after the last motion",
+                                   identity=assumed)
+        try:
+            matches = [c for c in candidates if match(c)]
+        except Exception as exc:
+            return self.invalidate(name, f"identity match failed: {type(exc).__name__}: {exc}",
+                                   identity=assumed)
+        if len(matches) != 1:
+            return self.invalidate(name, "no candidate matched the target" if not matches
+                                   else f"ambiguous association: {len(matches)} candidates matched",
+                                   identity=assumed)
+        chosen = matches[0]
+        found = self.identity_of(chosen)
+        if found is None:
+            return self.invalidate(name, "the matched candidate declares no stable identity",
+                                   identity=assumed)
+        if assumed is not None and found != assumed:
+            return self.invalidate(name, f"identity changed: matched {found!r}, target is {assumed!r}",
+                                   identity=assumed)
+        return self.set(name, chosen, evidence_ids=ids, valid=True,
+                        reason="identity confirmed by a unique current public match",
+                        identity=found, layer="observed")
+
+    @staticmethod
+    def identity_of(candidate):
+        """The stable identity a candidate declares, or None.
+
+        Identity is what the public relation calls it: the first present, non-null
+        `identity`, `name`, `label` or `id`. There is no fallback to position,
+        because position is exactly the association this contract refuses.
+        """
+        if isinstance(candidate, dict):
+            for key in ("identity", "name", "label", "id"):
+                if candidate.get(key) is not None:
+                    return clone(candidate[key])
+        return None
+
+    def observed_only(self, name, *, identity=None):
+        """The control accessor: a value only if it is currently MEASURED.
+
+        Always fresh and always strict: every evidence ID must postdate the last
+        motion, so one fresh ID cannot launder stale ones. Reads this binding's
+        measured layer (real observations, or rehearsal observations under the
+        rehearsal binding); never the predicted layer. A prediction may still be
+        read directly as a search hint, but it cannot arrive through here, so no
+        grasp target, progress or goal claim is built on a guess.
+        """
+        fact = self.query(name, fresh=False, identity=identity, layer="observed")
+        fact["binding"] = self.binding
+        if fact["status"] == "known":
+            if fact.get("layer") != self.measured_layer:
+                fact.update(status="unknown", value=None, reason="not a measurement in this binding")
+            elif not self.current(fact["evidence_ids"]) or (
+                    fact.get("reference_evidence_ids") and not self._valid(fact["reference_evidence_ids"])):
+                fact.update(status="unknown", value=None,
+                            reason="every evidence ID must be a current observation")
         return fact
 
     def predicate(self, name, test, keys, *, references=(), identity=None):
@@ -102,7 +212,20 @@ class EvidenceState:
             return clause
         result = test(*[f["value"] for f in facts + refs])
         if type(result) is not bool:
-            raise TypeError("predicate must return a bool; missing evidence is handled before test")
+            # numpy.bool_ is a valid predicate scalar; coerce it rather than
+            # rejecting.  int, float, str, arrays, and arbitrary truthy objects
+            # are authored errors and are refused unconditionally.
+            _coerced = False
+            try:
+                import numpy as _np
+                if isinstance(result, _np.bool_):
+                    result = bool(result)
+                    _coerced = True
+            except ImportError:
+                pass
+            if not _coerced:
+                raise TypeError(
+                    "predicate must return a bool; missing evidence is handled before test")
         clause.update(verdict="true" if result else "false", reason="authored predicate on measured facts")
         return clause
 

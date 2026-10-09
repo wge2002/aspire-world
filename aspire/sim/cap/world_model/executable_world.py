@@ -23,6 +23,7 @@ import numpy as np
 from .simple_world import WorldSession, WorldProgramError, summarize, module_errors as simple_errors
 from .evidence_state import EvidenceState, conjunction
 from .judgment_world import caller_site
+from . import prediction_contract as predictions
 
 MODE = "opus46-executable-world-c-r1"
 REVISION = "r1"
@@ -127,10 +128,23 @@ class TapeStore:
 
 
 class ExecutableSession(WorldSession):
-    def __init__(self, source, expected_sha256, output, arm="full", binding="shadow"):
+    def __init__(self, source, expected_sha256, output, arm="full", binding="shadow",
+                 closed_loop=False, prediction_contract=None):
+        # Refuse an unknown contract before anything is created on disk.
+        contract = predictions.contract(prediction_contract)
         super().__init__(source, expected_sha256, output)
         self.arm, self.binding = arm, binding
         self.features = flags(arm)
+        # Opt-in only. With this False the session is byte-for-byte the r1
+        # behaviour every previously staged study renders.
+        self.closed_loop = bool(closed_loop)
+        # Prediction contract p1, also opt-in: None (absent or "off") constructs
+        # no ledger, so no event, manifest key or query interception exists.
+        self.prediction_contract = contract
+        self.predictions = (predictions.PredictionLedger(self.emit, lambda: self.last_observation)
+                            if contract else None)
+        self.prediction_checks = self.predictions.checks if contract else []
+        self.final_judgment_active = False
         self.observations = set()
         self.last_motion = -1
         self.last_observation = None
@@ -143,7 +157,14 @@ class ExecutableSession(WorldSession):
         self.had_previous, self.previous = "world" in sys.modules, sys.modules.get("world")
         sys.modules["world"] = self.module
         self.module.Unsupported = Unsupported
-        self.module.WorldState = lambda: EvidenceState(self.evidence_valid, self.binding)
+        if self.predictions is not None:
+            # Same EvidenceState API; it additionally reports measured writes.
+            self.module.WorldState = lambda: self.predictions.state(
+                self.evidence_valid, self.binding, strict=self.closed_loop)
+        elif self.closed_loop:
+            self.module.WorldState = lambda: EvidenceState(self.evidence_valid, self.binding, strict=True)
+        else:
+            self.module.WorldState = lambda: EvidenceState(self.evidence_valid, self.binding)
         try:
             exec(compile(self.raw, str(self.source), "exec"), self.module.__dict__)
             if not all(callable(getattr(self.module, n, None)) for n in REQUIRED):
@@ -167,6 +188,17 @@ class ExecutableSession(WorldSession):
                 and all(type(i) is int and i in self.observations for i in ids)
                 and (not fresh or any(i > self.last_motion for i in ids)))
 
+    def evidence_current(self, ids):
+        """Closed-loop strictness: EVERY id is an observation after the last motion.
+
+        The legacy any-fresh rule lets one new observation carry stale IDs along
+        with it; an online stop or recovery must not rest on that.
+        """
+        return self.evidence_valid(ids) and all(i > self.last_motion for i in ids)
+
+    def fresh_evidence(self, ids):
+        return self.evidence_current(ids) if self.closed_loop else self.evidence_valid(ids, fresh=True)
+
     def wrap_update(self, fn):
         def update(obs, last_action=None):
             if not isinstance(obs, dict) or not self.evidence_valid(obs.get("evidence_ids")):
@@ -179,7 +211,11 @@ class ExecutableSession(WorldSession):
 
     def wrap_query(self, fn):
         def query(name, **kwargs):
-            value = finite_json(fn(name, **copy.deepcopy(kwargs)))
+            if self.predictions is not None and name in predictions.RESERVED:
+                # Reserved under p1 only; the author's query never sees these names.
+                value = finite_json(self.predictions.answer(name, copy.deepcopy(kwargs)))
+            else:
+                value = finite_json(fn(name, **copy.deepcopy(kwargs)))
             self.queries += 1
             self.emit("world_query", name=name, kwargs=summarize(kwargs), result=value,
                       caller=caller_site(), api_calls_before=self.api_calls,
@@ -190,11 +226,16 @@ class ExecutableSession(WorldSession):
     def done(self):
         if not self.features["self_eval"]:
             raise SelfEvaluationDisabled("this arm has no online self-evaluation; do not call done()")
+        # Origin is fixed when the call starts, not inferred later from position:
+        # complete() sets it for the framework's own final shadow judgment only.
+        origin = "framework_final" if self.final_judgment_active else "policy"
         raw = finite_json(self.original_done())
         if not isinstance(raw, dict) or raw.get("verdict") not in {"true", "false", "unknown"}:
             raise WorldProgramError("done() must return verdict true/false/unknown, evidence_ids and reason")
         checked = dict(raw)
-        if getattr(self.module, "FOUNDATION_REVISION", None) == "r1":
+        # The closed-loop revision requires the foundation clause contract even if
+        # a world forgot its declaration; collect_bundle also refuses that world.
+        if self.closed_loop or getattr(self.module, "FOUNDATION_REVISION", None) == "r1":
             clauses = raw.get("clauses")
             if not isinstance(clauses, list) or not clauses:
                 checked.update(verdict="unknown", reason="foundation goal requires explicit evidence-bearing clauses")
@@ -208,30 +249,51 @@ class ExecutableSession(WorldSession):
                     refs = clause.get("reference_evidence_ids", [])
                     if clause["verdict"] != "unknown" and (
                             clause.get("layer") != expected_layer
-                            or not self.evidence_valid(clause.get("evidence_ids"), fresh=True)
+                            or not self.fresh_evidence(clause.get("evidence_ids"))
                             or (refs and not self.evidence_valid(refs))):
                         clause.update(verdict="unknown", reason="missing, stale, or non-observed clause evidence")
                     validated.append(clause)
                 checked = conjunction(validated)
                 if checked["verdict"] != raw["verdict"]:
                     checked["authored_verdict"] = raw["verdict"]
-        if checked["verdict"] != "unknown" and not self.evidence_valid(checked.get("evidence_ids"), fresh=True):
+        if checked["verdict"] != "unknown" and not self.fresh_evidence(checked.get("evidence_ids")):
             checked.update(verdict="unknown", reason="missing or stale post-action observation evidence", authored_verdict=raw["verdict"])
+        if self.closed_loop:
+            checked["origin"] = origin
+            if origin == "policy":
+                # The world names the branch; the framework only refuses one the
+                # evidence cannot support. The final shadow judgment is not a
+                # decision and is recorded with its verdict unadjudicated.
+                from .decision_revision import adjudicate
+                checked = adjudicate(checked, raw, self.evidence_current)
         checked.update(binding=self.binding, api_calls_before=self.api_calls, caller=caller_site())
         self.self_evaluations.append(checked)
         self.emit("model_goal" if self.binding == "rehearsal" else "self_evaluation", result=checked)
         return checked
+
+    def final_judgment(self):
+        """The framework's own post-program judgment, tagged as such."""
+        self.final_judgment_active = True
+        try:
+            return self.done()
+        finally:
+            self.final_judgment_active = False
 
     def invoke(self, name, fn, args, kwargs):
         index = self.api_calls
         call = {"id": index, "function": name, "args": copy.deepcopy(args), "kwargs": copy.deepcopy(kwargs)}
         # Commands and predictions precede the response, and cannot be promoted
         # to measurement IDs. Prediction is never supplied the future response.
+        declined = None
         try:
             prediction = self.module.predict(copy.deepcopy(call))
         except Unsupported as exc:
             prediction = {"supported": False, "reason": str(exc)}
+            declined = str(exc)
         self.emit("prediction", api_call=index, function=name, prediction=summarize(prediction))
+        if self.predictions is not None:
+            # Committed before the call runs, so it can only be resolved by a later observation.
+            self.predictions.record(index, prediction, declined)
         encoded_call = self.store.encode(call, save=True)
         result, error, unsupported = None, None, False
         try:
@@ -294,11 +356,18 @@ class ExecutableSession(WorldSession):
 
     def complete(self, **result):
         # Score AFTER the program and before storing evaluator-only labels.
+        # This is the framework's own shadow judgment, not a policy decision, so
+        # it goes through final_judgment(): its recorded evaluation carries
+        # origin="framework_final" and the closed-loop adjudication of an online
+        # branch is skipped for it. Legacy arms have no origin key, so their
+        # manifest is unchanged.
         if self.features["self_eval"]:
             try:
-                self.done()
+                self.final_judgment()
             except Exception as exc:
                 self.fault("final_self_evaluation", exc)
+        if self.predictions is not None:
+            self.predictions.finalize()
         self.result = result
         self.emit("complete", result=result, snapshot=self.snapshot())
 
@@ -313,7 +382,11 @@ class ExecutableSession(WorldSession):
                     "world_sha256": self.sha256, "api_calls": self.api_calls,
                     "updates": self.updates, "queries": self.queries,
                     "features": self.features, "self_evaluations": self.self_evaluations,
-                    "errors": self.errors, "result": self.result}
+                    "closed_loop": self.closed_loop, "errors": self.errors, "result": self.result}
+        if self.predictions is not None:
+            # Idempotent; covers an interrupted episode that never reached complete().
+            self.predictions.finalize()
+            manifest["prediction_checks"] = self.predictions.manifest()
         (self.output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
         self.tape.close()
         self.stream.close()
@@ -370,12 +443,17 @@ def write_offline_report(report, output, started):
 
 
 def run_offline(policy, world, output, *, arm="full", mode="rehearsal", tape=None,
-                task_language="", pure_source=None):
+                task_language="", pure_source=None, closed_loop=False, prediction_contract=None):
     started = time.monotonic()
     if mode not in {"rehearsal", "replay"}:
         raise ValueError("offline binding must be rehearsal or replay")
+    contract = predictions.contract(prediction_contract)
     if not flags(arm)["rehearsal"]:
         raise ValueError("offline candidate screening is disabled in this ablation")
+    if closed_loop:
+        from .decision_revision import ARMS as _CL_ARMS
+        if arm not in _CL_ARMS:
+            raise ValueError("closed-loop screening is unsupported with this ablation arm")
     policy, world, output = Path(policy), Path(world), Path(output)
     report = {"mode": mode, "arm": arm, "policy_sha256": hashlib.sha256(policy.read_bytes()).hexdigest(),
               "world_sha256": hashlib.sha256(world.read_bytes()).hexdigest(),
@@ -389,7 +467,8 @@ def run_offline(policy, world, output, *, arm="full", mode="rehearsal", tape=Non
         raise ValueError("replay requires a public development tape")
     loaded = False
     try:
-        with ExecutableSession(world, report["world_sha256"], output, arm, mode) as session:
+        with ExecutableSession(world, report["world_sha256"], output, arm, mode,
+                               closed_loop=closed_loop, prediction_contract=contract) as session:
             loaded = True
             pure = pure_bindings(pure_source) if pure_source else {}
             def bound(name):
@@ -413,7 +492,9 @@ def run_offline(policy, world, output, *, arm="full", mode="rehearsal", tape=Non
                         exec(compile(block, str(policy), "exec"), namespace)
                 report.update(status="complete", api_calls=session.api_calls)
                 if session.features["self_eval"]:
-                    report["goal"] = session.done()
+                    # The framework's post-program judgment, tagged as such; a
+                    # policy decision would be a separate origin="policy" row.
+                    report["goal"] = session.final_judgment()
             except SystemExit as exc:
                 # Policy-level early termination must still leave a report.
                 # A zero exit does not establish a modeled goal or a live task
@@ -432,6 +513,12 @@ def run_offline(policy, world, output, *, arm="full", mode="rehearsal", tape=Non
             if replay is not None:
                 report.update(matched_calls=replay.index, tape_calls=len(replay.rows),
                               scope="same recorded public call prefix only; no live-success claim")
+            if session.predictions is not None:
+                # Generated simulate() effects are what the predictions met here:
+                # a rehearsal match is consistency between the world's two models,
+                # not evidence about the real scene.
+                session.predictions.finalize()
+                report["prediction_checks"] = session.predictions.manifest()
     except WorldProgramError as exc:
         if loaded:
             raise
@@ -457,8 +544,20 @@ def run_executable_world(args):
     if hashlib.sha256(Path(args.replay_code).read_bytes()).hexdigest() != config["policy_sha256"]:
         raise ValueError("policy differs from frozen bundle")
     source = config_path.parent / config["world_program"]
+    # The closed-loop revision is a property of the frozen trial config, so a
+    # resumed replay reproduces the same online semantics it was recorded under.
+    # An absent key keeps the r1 observational behaviour.
+    closed_loop = bool(config.get("closed_loop"))
+    if closed_loop:
+        from .decision_revision import ARMS as _CL_ARMS
+        if config.get("c_arm") not in _CL_ARMS:
+            raise ValueError("closed-loop config carries an unsupported ablation arm")
+    # Likewise frozen: an absent key is the contract-off behaviour.
+    prediction_contract = predictions.contract(config.get("prediction_contract"))
     # Preserve the protocol's in-process artifact location for fault accounting.
-    with ExecutableSession(source, config["world_program_sha256"], config_path.parent / "judgment_world", config["c_arm"]) as session:
+    with ExecutableSession(source, config["world_program_sha256"], config_path.parent / "judgment_world",
+                           config["c_arm"], closed_loop=closed_loop,
+                           prediction_contract=prediction_contract) as session:
         _run_replay(args, _world_capture=session)
         if session.errors:
             raise WorldProgramError("executable world recorded errors")

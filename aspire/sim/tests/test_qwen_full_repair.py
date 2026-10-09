@@ -36,7 +36,7 @@ def ledger(tmp_path) -> fixloop.NativeWorldState:
 
 
 def admit(state, phase, seed, *, status="complete", completed=0):
-    """One admitted, charged attempt with a settled outcome."""
+    """One admitted attempt that spent a retry, with a settled outcome."""
     record = state.begin_trial(phase, seed, {"policy": "a" * 64}, {"policy": "p"})
     record.update(status=status, sandbox_rc=0 if status == "complete" else 1,
                   reward=0.0, task_completed=completed, trial_dir=record["directory"])
@@ -54,7 +54,7 @@ def crashing_smoke(state, seed):
 
 
 def lost_attempt(state, phase, seed):
-    """An admitted attempt the infrastructure lost: charged, resolved nothing."""
+    """An admitted attempt the infrastructure lost: retry spent, resolved nothing."""
     record = state.begin_trial(phase, seed, {"policy": "a" * 64}, {"policy": "p"})
     state.finish_trial(record, result=None, exit_code=1, error="the worker died")
     return record
@@ -64,7 +64,7 @@ def blocker_note(state, seed):
     (state.task_dir / "attempts").mkdir(parents=True, exist_ok=True)
     (state.task_dir / "attempts" / f"seed_{seed}_BLOCKED.md").write_text(
         "## Root Cause\nEvery smoke crashed in the same grasp.\n\n"
-        "## Details\nThree charged smokes, sandbox_rc=1 each.\n\n"
+        "## Details\nThree retry-spending smokes, sandbox_rc=1 each.\n\n"
         "## What Was Tried\nTwo approach heights and a wider segmentation prompt.\n")
 
 
@@ -77,13 +77,33 @@ def test_snapshot_then_initial_is_the_only_path_to_repair(tmp_path):
 
 
 def test_spent_diagnostics_do_not_unlock_repair(tmp_path):
-    """The exact exploit: burn a seed's budget on inspection, call it triaged."""
+    """The exact exploit: burn a seed's budget on inspection, call it triaged.
+
+    The last-diagnostic reservation means the third diagnostic on a seed with
+    no graded evidence is now refused before it can be admitted, so this test
+    builds the exhausted ledger by injecting the rows directly rather than
+    going through begin_trial.
+    """
     state = ledger(tmp_path)
     admit(state, "snapshot", 51)
     admit(state, "initial", 51)
-    for _ in range(fixloop.ATTEMPT_LIMIT):
-        admit(state, "diagnostic", 52, status="diagnostic_program_error")
-    assert state.budget_remaining(52) == 0
+    # Simulate a historical ledger where 3 diagnostics were admitted before the
+    # reservation rule existed.  Inject the rows directly into state.data so
+    # the test exercises the repair-gate and completion-errors logic, not
+    # begin_trial admission.
+    for i in range(fixloop.RETRY_LIMIT):
+        row = {"phase": "diagnostic", "seed": 52, "attempt": i + 1,
+               "status": "diagnostic_program_error",
+               "directory": f"development/diagnostic/seed_52/attempt_{i + 1}",
+               "spends_retry": True, "executed": True,
+               "bundle_sha256": "a" * 64, "bundle": {"policy": "a" * 64},
+               "sources": {"policy": "p"},
+               "sandbox_rc": 0, "reward": 0.0, "task_completed": 0,
+               "trial_dir": f"development/diagnostic/seed_52/attempt_{i + 1}",
+               "process_exit_code": 0, "error": ""}
+        state.data["trials"].append(row)
+    state.save()
+    assert state.retries_remaining(52) == 0
     assert not state.has_initial_evidence(52)
     with pytest.raises(fixloop.ProtocolError, match="no initial evidence and no attempts left"):
         state.begin_trial("repair", 51, {"policy": "a" * 64}, {"policy": "p"})
@@ -93,8 +113,20 @@ def test_missing_initial_evidence_fails_completion(tmp_path):
     state = ledger(tmp_path)
     admit(state, "snapshot", 51)
     admit(state, "initial", 51, completed=1)
-    for _ in range(fixloop.ATTEMPT_LIMIT):
-        admit(state, "diagnostic", 52, status="diagnostic_program_error")
+    # Inject a historical ledger with 3 diagnostics on seed 52 directly,
+    # bypassing begin_trial admission (reservation now blocks the 3rd call).
+    for i in range(fixloop.RETRY_LIMIT):
+        row = {"phase": "diagnostic", "seed": 52, "attempt": i + 1,
+               "status": "diagnostic_program_error",
+               "directory": f"development/diagnostic/seed_52/attempt_{i + 1}",
+               "spends_retry": True, "executed": True,
+               "bundle_sha256": "a" * 64, "bundle": {"policy": "a" * 64},
+               "sources": {"policy": "p"},
+               "sandbox_rc": 0, "reward": 0.0, "task_completed": 0,
+               "trial_dir": f"development/diagnostic/seed_52/attempt_{i + 1}",
+               "process_exit_code": 0, "error": ""}
+        state.data["trials"].append(row)
+    state.save()
     progress = state.progress()
     assert progress["seeds_exhausted_without_initial"] == [52]
     assert progress["seeds_exhausted_without_graded_evidence"] == [52]
@@ -111,7 +143,7 @@ def exhausted_by_smokes(tmp_path, *, initial_completed=1):
     """Seed 51 spends all three attempts on real, crashing smokes."""
     state = ledger(tmp_path)
     admit(state, "snapshot", 51)
-    for _ in range(fixloop.ATTEMPT_LIMIT):
+    for _ in range(fixloop.RETRY_LIMIT):
         crashing_smoke(state, 51)
     admit(state, "initial", 52, completed=initial_completed)
     return state
@@ -119,10 +151,10 @@ def exhausted_by_smokes(tmp_path, *, initial_completed=1):
 
 def test_graded_smoke_exhaustion_still_lets_other_seeds_be_repaired(tmp_path):
     state = exhausted_by_smokes(tmp_path, initial_completed=0)
-    assert state.budget_remaining(51) == 0
+    assert state.retries_remaining(51) == 0
     assert not state.has_initial_evidence(51) and state.has_graded_evidence(51)
     record = state.begin_trial("repair", 52, {"policy": "a" * 64}, {"policy": "p"})
-    assert record["phase"] == "repair" and record["charged"] is True
+    assert record["phase"] == "repair" and record["spends_retry"] is True
     progress = state.progress()
     # Missing initial coverage is still reported; it is simply not the same fact
     # as "this seed was never graded".
@@ -150,9 +182,9 @@ def test_infrastructure_only_exhaustion_unlocks_nothing(tmp_path):
     state = ledger(tmp_path)
     admit(state, "snapshot", 51)
     admit(state, "initial", 51, completed=1)
-    for _ in range(fixloop.ATTEMPT_LIMIT):
+    for _ in range(fixloop.RETRY_LIMIT):
         lost_attempt(state, "initial", 52)
-    assert state.budget_remaining(52) == 0 and not state.has_graded_evidence(52)
+    assert state.retries_remaining(52) == 0 and not state.has_graded_evidence(52)
     with pytest.raises(fixloop.ProtocolError, match="no initial evidence and no attempts left"):
         state.begin_trial("repair", 51, {"policy": "a" * 64}, {"policy": "p"})
     progress = state.progress()
@@ -236,7 +268,7 @@ def test_diagnostics_alone_are_not_graded_evidence(tmp_path):
     assert any("no graded development execution" in e for e in errors)
 
 
-def test_authored_repl_failure_is_charged_but_not_infrastructure(tmp_path):
+def test_authored_repl_failure_spends_retry_but_not_infrastructure(tmp_path):
     state = ledger(tmp_path)
     admit(state, "snapshot", 51)
     record = state.begin_trial("diagnostic", 51, {"policy": "a" * 64}, {"policy": "p"})
@@ -244,7 +276,7 @@ def test_authored_repl_failure_is_charged_but_not_infrastructure(tmp_path):
         "error_count": 1,
         "errors": [{"type": "AttributeError", "message": "no attribute 'handle'"}]})
     assert record["status"] == "diagnostic_program_error"
-    assert record["charged"] is True and record["task_completed"] == 0
+    assert record["spends_retry"] is True and record["task_completed"] == 0
     progress = state.progress()
     assert progress["infrastructure_errors"] == []
     assert progress["diagnostic_program_errors"] == [record["directory"]]
@@ -261,22 +293,22 @@ def test_missing_repl_artifact_stays_infrastructure(tmp_path):
     assert state.progress()["infrastructure_errors"] == [record["directory"]]
 
 
-def test_blocker_is_attributable_and_charges_nothing(tmp_path):
+def test_blocker_is_attributable_and_spends_nothing(tmp_path):
     state = ledger(tmp_path)
-    before = state.attempts_used(51)
+    before = state.retries_used(51)
     blocker = state.record_blocker("initial", 51, "screening could not run",
                                    {"policy": "p"}, {"status": "blocked"})
-    assert blocker["charged"] is False and blocker["retryable"] is True
-    assert state.attempts_used(51) == before
-    assert state.budget_remaining(51) == fixloop.ATTEMPT_LIMIT
+    assert blocker["spends_retry"] is False and blocker["retryable"] is True
+    assert state.retries_used(51) == before
+    assert state.retries_remaining(51) == fixloop.RETRY_LIMIT
     reloaded = json.loads(state.path.read_text())
     assert reloaded["blockers"][0]["reason"] == "screening could not run"
     assert state.progress()["screening_blockers"] == [blocker]
 
 
-def test_attempt_limit_and_charged_phases_are_unchanged():
-    assert fixloop.ATTEMPT_LIMIT == 3
-    assert fixloop.CHARGED_PHASES == ("smoke", "initial", "repair", "diagnostic")
+def test_retry_limit_and_retry_phases_are_unchanged():
+    assert fixloop.RETRY_LIMIT == 3
+    assert fixloop.RETRY_PHASES == ("smoke", "initial", "repair", "diagnostic")
 
 
 # ---- tape integrity and replay -------------------------------------------
@@ -339,7 +371,7 @@ def test_exhausted_history_is_unsupported_not_invented(tmp_path):
 
 
 CASE = {"executable_world_revision": "r1", "condition": "C", "profile": "judgment",
-        "c_arm": "full", "task": "put_the_bowl_on_the_stove"}
+        "c_arm": "full", "c_lineage": "fresh", "task": "put_the_bowl_on_the_stove"}
 
 
 def screen(tmp_path, monkeypatch, reports):

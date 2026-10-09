@@ -54,8 +54,8 @@ Record:
 
 - Repository commit, local changes, isolated checkout, and frozen policy source.
 - Host, driver/runtime, currently free GPUs, explicit worker/device ownership,
-  and required ports. If using DLC, request only 4, 8, 16, or 24 total GPUs and
-  follow `rbs-debug:/mnt/home/gewang/DSW_DLC_WORKFLOW.md` for mapping.
+  and required ports. If using DLC, request only 4, 8, or a multiple of 8 total
+  GPUs (N workers x 8) and follow `rbs-debug:/mnt/home/gewang/DSW_DLC_WORKFLOW.md` for mapping.
 - Existing environments, allowed perception tools, available weights, and
   credential readiness without printing secrets. Generated code must not
   receive provider keys or physical-robot access.

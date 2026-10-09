@@ -285,12 +285,51 @@ def _diagnostic_console(code_module):
             super().__init__(namespace, filename)
             self.errors: list[dict] = []
             self.statements = 0
+            # "interactive" (line-by-line push) or "script" (run_script).
+            self.execution = "interactive"
+            self.current_line: int | None = None
 
         def push(self, line, *args, **kwargs):
             more = super().push(line, *args, **kwargs)
             if not more:  # The statement is complete; anything it raised is recorded.
                 self.statements += 1
             return more
+
+        def run_script(self, source: str) -> None:
+            """Run a whole authored program, one top-level statement at a time.
+
+            Batch stdin used to be pushed line by line, which is how a person
+            types, not how a file is written: a blank line inside a function or
+            a dedented line straight after a loop became a SyntaxError the file
+            never contained, and every following line of that block an
+            IndentationError (seed 54 of bowldrawer_C: a valid 18-statement file
+            reported 14 errors). The whole file is compiled first, so a genuine
+            syntax error is reported once with its line and nothing runs. Then
+            each top-level statement runs with REPL semantics: expression values
+            echo, and a statement that raises is recorded and the next one runs.
+            """
+            import ast
+            import linecache
+
+            self.execution = "script"
+            # Tracebacks then quote the authored line instead of nothing.
+            linecache.cache[self.filename] = (
+                len(source), None, source.splitlines(True), self.filename)
+            try:
+                compile(source, self.filename, "exec", dont_inherit=True)
+                tree = ast.parse(source, self.filename)
+            except (SyntaxError, ValueError):  # ValueError: source has null bytes.
+                self.current_line = getattr(sys.exc_info()[1], "lineno", None)
+                self.showsyntaxerror(self.filename)
+                return
+            for node in tree.body:
+                self.current_line = node.lineno
+                # The console's own compiler carries `from __future__` flags from
+                # one statement to the next, as a whole-file compile would.
+                code = self.compile.compiler(ast.Interactive(body=[node]), self.filename,
+                                             "single", incomplete_input=False)
+                self.runcode(code)
+                self.statements += 1
 
         def _record(self, kind: str) -> None:
             import traceback
@@ -306,6 +345,7 @@ def _diagnostic_console(code_module):
                 "type": getattr(exc_type, "__name__", str(exc_type)),
                 "message": str(exc_value),
                 "statement_index": self.statements + 1,
+                **({"line": self.current_line} if self.execution == "script" else {}),
                 "traceback": "".join(frames)[-4000:],
             })
 
@@ -330,6 +370,7 @@ def _write_diagnostic_session(args: ReplayTrialArgs, console) -> None:
         "schema_version": 1, "session": "diagnostic",
         "suite": args.suite, "task": args.task, "seed": args.trial,
         "statements": getattr(console, "statements", 0),
+        "execution": getattr(console, "execution", "interactive"),
         "errors": getattr(console, "errors", []),
         "error_count": len(getattr(console, "errors", [])),
     }
@@ -339,15 +380,51 @@ def _write_diagnostic_session(args: ReplayTrialArgs, console) -> None:
         json.dumps(payload, indent=2) + "\n")
 
 
+class _SealedEnvView:
+    """The public surface generated code may read from `env` in a sealed trial.
+
+    It is the same surface the offline rehearsal binding exposes: the task
+    language and nothing else. No reward, no task label, no simulator handle.
+    """
+
+    def __init__(self, low_level: Any) -> None:
+        self._low_level = low_level
+
+    @property
+    def handle(self) -> Any:
+        import types
+        language = getattr(getattr(self._low_level, "handle", None), "task_language", None)
+        return types.SimpleNamespace(task_language=language)
+
+
+#: Must equal cap.world_model.development_gate.SEALED_ENV (a test pins the two).
+#: Spelled locally so the default replay imports no opt-in world module.
+SEALED_OUTCOME_ENV = "ASPIRE_SEALED_OUTCOME"
+
+
+def _sealed_outcome_path() -> str | None:
+    """Set only by a sealed development trial; absent in legacy and held-out runs."""
+    return os.environ.get(SEALED_OUTCOME_ENV) or None
+
+
+def _seal_sandbox(env: Any) -> None:
+    env.sandbox_env_proxy = _SealedEnvView(getattr(env, "low_level_env", None))
+    env.sandbox_hidden_names = ("APIS",)
+    if hasattr(env, "_init_exec_globals"):
+        env._init_exec_globals()
+
+
 def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
     """Drop into an interactive Python REPL with all API functions in scope."""
     import code as code_module
 
     apis = _find_apis(env)
+    sealed = _sealed_outcome_path() is not None
 
-    # Collect all API functions into a flat namespace
+    # Collect all API functions into a flat namespace. A sealed trial exposes
+    # the same read-only env view as the policy sandbox and no step() helper.
     repl_ns: dict[str, Any] = {
-        "env": env,
+        "env": _SealedEnvView(getattr(env, "low_level_env", None)) if sealed else env,
         "obs": obs,
         "np": np,
         "args": args,
@@ -363,11 +440,13 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
             trace_logger = api.get_trace_logger()
             repl_ns["trace_logger"] = trace_logger
 
-    # Helper: run a code string through env.step()
+    # Helper: run a code string through env.step(). Not offered in a sealed
+    # trial: its return value carries the reward and the task label.
     def step(code_str: str):
         """Execute a code string through env.step() and return (obs, reward, terminated, truncated, info)."""
         return env.step(code_str)
-    repl_ns["step"] = step
+    if not sealed:
+        repl_ns["step"] = step
 
     # Print banner
     print("\n" + "=" * 70)
@@ -387,12 +466,14 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
         print(f"    {fn}()" + (f"  — {first_line}" if first_line else ""))
     print()
     print("  Other objects in scope:")
-    print("    env            — the gym environment")
+    print("    env            — " + ("read-only view: env.handle.task_language only (sealed trial)"
+                                     if sealed else "the gym environment"))
     print("    obs            — last observation dict")
     print("    np             — numpy")
     if trace_logger:
         print("    trace_logger   — TraceLogger instance")
-    print("    step(code_str) — execute a code string via env.step()")
+    if not sealed:
+        print("    step(code_str) — execute a code string via env.step()")
     print()
     print("  Example:")
     print("    >>> obs = get_observation()")
@@ -405,7 +486,13 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
 
     console = _diagnostic_console(code_module)(repl_ns)
     try:
-        console.interact(banner="", exitmsg="REPL exited.")
+        if sys.stdin.isatty():
+            console.interact(banner="", exitmsg="REPL exited.")
+        else:
+            # A batch session (the protocol feeds the authored file on stdin)
+            # runs as the script it is; see DiagnosticConsole.run_script.
+            console.run_script(sys.stdin.read())
+            print("REPL exited.")
     finally:
         # Written even when the session ends by EOF, exit() or SystemExit, so a
         # zero exit code is never the only evidence about what the code did.
@@ -521,6 +608,9 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
     print("Instantiating environment...")
     env_factory = config["env"]
     env = instantiate(env_factory)
+    sealed_outcome = _sealed_outcome_path()
+    if sealed_outcome:
+        _seal_sandbox(env)
     if _world_capture is not None:
         _world_capture.attach(env)
 
@@ -575,10 +665,15 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
             print(f"\n--- Executing code block {i} ---")
             obs_next, reward, terminated, truncated, info_step = env.step(code)
             obs = obs_next
-            print(f"  reward={reward}, terminated={terminated}, task_completed={info_step.get('task_completed')}")
+            if sealed_outcome:
+                print(f"  sandbox_rc={info_step.get('sandbox_rc')} (task outcome sealed for the development gate)")
+            else:
+                print(f"  reward={reward}, terminated={terminated}, task_completed={info_step.get('task_completed')}")
             if info_step.get("stderr"):
                 print(f"  stderr: {info_step['stderr'][:200]}")
-            if terminated or truncated:
+            # A sealed trial runs every block: stopping early on success would
+            # tell the program's own log which block achieved the task.
+            if truncated or (terminated and not sealed_outcome):
                 break
 
     else:
@@ -608,7 +703,10 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
             obs_next, reward, terminated, truncated, info_step = env.step(code)
             obs = obs_next
 
-            print(f"  reward={reward}, terminated={terminated}, task_completed={info_step.get('task_completed')}")
+            if sealed_outcome:
+                print(f"  sandbox_rc={info_step.get('sandbox_rc')} (task outcome sealed for the development gate)")
+            else:
+                print(f"  reward={reward}, terminated={terminated}, task_completed={info_step.get('task_completed')}")
             if info_step.get("stderr"):
                 print(f"  stderr: {info_step['stderr'][:200]}")
 
@@ -665,6 +763,12 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
     # 8. Build log/summary
     sandbox_rc = info_step.get("sandbox_rc", 0)
     task_completed = info_step.get("task_completed", False)
+    if sealed_outcome:
+        outcome_lines = ["  Outcome: sealed (the recorded trial result carries the development gate verdict)",
+                         f"  Truncated: {truncated}"]
+    else:
+        outcome_lines = [f"  Reward: {reward}", f"  Task Completed: {task_completed}",
+                         f"  Terminated: {terminated}, Truncated: {truncated}"]
 
     log_lines = [
         "-" * 100,
@@ -678,9 +782,7 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
         f"  Sandbox failed: {sandbox_rc}",
         f"  Stdout: {info_step.get('stdout', '')}",
         f"  Stderr: {info_step.get('stderr', '')}",
-        f"  Reward: {reward}",
-        f"  Task Completed: {task_completed}",
-        f"  Terminated: {terminated}, Truncated: {truncated}",
+        *outcome_lines,
         f"  Num Regenerations: {num_regenerations}",
         f"  Num Finishes: {num_finishes}",
         f"  Num Code Blocks: {len(code_blocks)}",
@@ -688,7 +790,10 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
     ]
 
     # 9. Save artifacts
-    trial_dir = run_dir / f"trial_{args.trial:02d}_sandboxrc_{sandbox_rc}_reward_{reward:.3f}_taskcompleted_{int(task_completed or False)}"
+    if sealed_outcome:
+        trial_dir = run_dir / f"trial_{args.trial:02d}_sandboxrc_{sandbox_rc}_sealed"
+    else:
+        trial_dir = run_dir / f"trial_{args.trial:02d}_sandboxrc_{sandbox_rc}_reward_{reward:.3f}_taskcompleted_{int(task_completed or False)}"
     trial_dir.mkdir(parents=True, exist_ok=True)
 
     (trial_dir / "code.py").write_text(final_code)
@@ -713,7 +818,7 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
         frames = env.get_video_frames(clear=True)
         if frames:
             import imageio.v2 as imageio
-            video_path = trial_dir / f"video_{reward:.3f}.mp4"
+            video_path = trial_dir / ("video.mp4" if sealed_outcome else f"video_{reward:.3f}.mp4")
             with imageio.get_writer(str(video_path), fps=30, format="FFMPEG", codec="libx264") as writer:
                 for frame in frames:
                     writer.append_data(np.ascontiguousarray(frame))
@@ -733,15 +838,31 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
 
     print(f"\n{'=' * 80}")
     print(f"Trial {args.trial} complete!")
-    print(f"  Reward: {reward}")
-    print(f"  Task Completed: {task_completed}")
+    if sealed_outcome:
+        # The real outcome goes to the protocol's sealed file, outside the
+        # solver's read boundary; the public log and the world see neither the
+        # label nor the reward.
+        sealed_path = Path(sealed_outcome)
+        sealed_path.parent.mkdir(parents=True, exist_ok=True)
+        sealed_path.write_text(json.dumps({
+            "schema_version": 1, "suite": args.suite, "task": args.task, "seed": args.trial,
+            "sandbox_rc": int(sandbox_rc), "reward": float(reward),
+            "task_completed": bool(task_completed), "terminated": bool(terminated),
+            "truncated": bool(truncated), "trial_dir": str(trial_dir)}, indent=2) + "\n")
+        print("  Outcome: sealed")
+    else:
+        print(f"  Reward: {reward}")
+        print(f"  Task Completed: {task_completed}")
     print(f"  Output: {trial_dir}")
     print(f"{'=' * 80}")
     if _world_capture is not None:
-        _world_capture.complete(
-            trial_dir=str(trial_dir), sandbox_rc=sandbox_rc,
-            task_completed=bool(task_completed), reward=float(reward),
-        )
+        if sealed_outcome:
+            _world_capture.complete(trial_dir=str(trial_dir), sandbox_rc=sandbox_rc, outcome="sealed")
+        else:
+            _world_capture.complete(
+                trial_dir=str(trial_dir), sandbox_rc=sandbox_rc,
+                task_completed=bool(task_completed), reward=float(reward),
+            )
 
 
 if __name__ == "__main__":

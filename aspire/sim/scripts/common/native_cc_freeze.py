@@ -22,6 +22,13 @@ REQUIRED_FILES = (
     "scripts/common/native_cc_trial_process.py", "scripts/common/native_cc_skill_probe.py",
     "scripts/common/native_cc_stream.py", "scripts/common/native_cc_compat.py",
     "scripts/common/claude_with_local_model.sh",
+    # Native original fix loop (A1/B1/C1): runner, ledger, broker and the
+    # pristine prompt the worker prompt is rendered from.
+    "scripts/libero/native_world_campaign.py", "scripts/libero/native_world_protocol.py",
+    "scripts/libero/native_world_fixloop_state.py", "scripts/libero/native_world_heldout.py",
+    "cap/world_model/native_world_broker.py", "cap/world_model/live_broker.py",
+    "cap/world_model/relational_scene_broker.py",
+    ".claude/libero/fix-loop/subagent-prompt.md", ".claude/libero/api-reference.md",
 )
 
 

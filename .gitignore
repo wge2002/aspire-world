@@ -94,3 +94,12 @@ core.*
 /assets/media/
 /aspire/sim/docs/research/
 /aspire/sim/docs/logs/
+
+# Synthetic prediction-contract regression fixtures (no experiment runs)
+!/aspire/sim/tests/fixtures/prediction_contract/off_session_events.jsonl
+!/aspire/sim/tests/fixtures/prediction_contract/off_session_public_tape.jsonl
+!/aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_events.jsonl
+!/aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_public_tape.jsonl
+
+# macOS resource sidecars
+._*

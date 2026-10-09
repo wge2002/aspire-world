@@ -146,6 +146,10 @@ def main() -> int:
     if not args.case:
         parser.error("--case or ASPIRE_NATIVE_CASE is required")
     case, repo, task_dir = load_case(Path(args.case))
+    if case.get("closed_loop_revision") or case.get("prediction_contract"):
+        # Refuse an incompatible combination before a frozen bundle is copied.
+        from executable_world_profile import validate
+        validate(case)
     evaluation = Path(case["control"]) / "heldout"
     evaluation.mkdir(parents=True, exist_ok=True)
     ledger = evaluation / "heldout_state.json"
@@ -153,6 +157,13 @@ def main() -> int:
     identity = {"cell": case["id"], "condition": case["condition"], "suite": case["suite"],
                 "task": case["task"], "seeds": list(HELDOUT_SEEDS),
                 **({"profile": case["profile"]} if "profile" in case else {}),
+                # Only when set: legacy held-out ledgers keep their identity, and a
+                # closed-loop sweep cannot resume over an observational one.
+                **({"closed_loop_revision": case["closed_loop_revision"]}
+                   if case.get("closed_loop_revision") else {}),
+                # Same rule: a p1 sweep cannot resume over a contract-off one.
+                **({"prediction_contract": "p1"}
+                   if case.get("prediction_contract") == "p1" else {}),
                 "bundle": bundle, "bundle_sha256": bundle_identity(bundle),
                 "config_sha256": code_hash((repo / case["env_config"]).read_text()),
                 "max_steps": case["max_steps"], "trial_timeout": case["trial_timeout"]}

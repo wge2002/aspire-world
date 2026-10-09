@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: MIT
 """Per-seed evidence ledger for the native original Fix Loop.
 
-The original protocol budget is THREE TOTAL simulator task replay attempts per
-development seed. Smoke, initial, repair, and interactive diagnostic sessions are
-all charged to that one per-seed count; the single observation-only scene
-snapshot is separate and uncharged. There is no global code-edit count, no
+The original protocol budget is THREE TOTAL retries per development seed, one
+retry per simulator task replay. Smoke, initial, repair, and interactive
+diagnostic sessions all spend from that one per-seed count; the single
+observation-only scene snapshot is separate and spends no retry. There is no global code-edit count, no
 1+15 revision protocol, and no numerical action/query/recovery cap here.
 
 This is a protocol ledger, not a security sandbox. Only the runner writes
 records, so a model-authored report cannot turn an incomplete cell into a
-result. Infrastructure interruption is recorded as a consumed attempt with an
+result. Infrastructure interruption is recorded as a spent retry with an
 explicit blocker: it never resets a seed or grants a fresh budget.
 """
 
@@ -21,17 +21,17 @@ import json
 import re
 from pathlib import Path
 
-ATTEMPT_LIMIT = 3
-# Every phase that starts a simulator task replay is charged. `snapshot` is the
+RETRY_LIMIT = 3
+# Every phase that starts a simulator task replay spends a retry. `snapshot` is the
 # one documented exception: it observes the scene and runs no task program.
-CHARGED_PHASES = ("smoke", "initial", "repair", "diagnostic")
-PHASES = ("snapshot", *CHARGED_PHASES)
+RETRY_PHASES = ("smoke", "initial", "repair", "diagnostic")
+PHASES = ("snapshot", *RETRY_PHASES)
 BUNDLE_KEYS = {"policy", "world", "inventory"}
 # A record whose outcome is settled: the attempt reached its own end and said
 # what happened. Anything else is unresolved infrastructure evidence. These were
 # four separate inline literals; `diagnostic_program_error` is added here once so
 # an authored REPL failure cannot be read back as an infrastructure blocker.
-# It is resolved, and charged, but never graded evidence: `candidates()`,
+# It is resolved, and spends a retry, but is never graded evidence: `candidates()`,
 # `outcome()`'s graded set and `final_coverage()` all exclude the diagnostic
 # phase, so an inspection session can never stand in for a development trial.
 RESOLVED_STATUSES = frozenset({"complete", "world_program_error", "diagnostic_program_error"})
@@ -43,6 +43,28 @@ CODE_WORLD_PROFILES = frozenset({"simple", "judgment"})
 
 class ProtocolError(ValueError):
     pass
+
+
+class TerminalBlocker(ProtocolError):
+    """Irrecoverable stop: the batch cannot make forward progress without external action.
+
+    Raised (not just reported) so callers that only catch ProtocolError still stop.
+    Carries a structured payload so a machine-readable driver can report seeds and
+    reasons without parsing the message string.
+
+    ``recoverable`` is always False here; use plain ProtocolError for
+    missing-report issues that don't need this distinction.
+    """
+
+    def __init__(self, reason: str, *, seeds: list[int], details: list[str]):
+        super().__init__(reason)
+        self.seeds = seeds
+        self.details = details
+        self.recoverable = False
+
+    def as_dict(self) -> dict:
+        return {"terminal": True, "recoverable": False,
+                "reason": str(self), "seeds": self.seeds, "details": self.details}
 
 
 def code_hash(source: str) -> str:
@@ -133,12 +155,17 @@ def report_errors(path: Path, headings: tuple[str, ...]) -> list[str]:
 
 class NativeWorldState:
     VERSION = 1
-    ATTEMPT_LIMIT = ATTEMPT_LIMIT
+    RETRY_LIMIT = RETRY_LIMIT
 
     def __init__(self, task_dir: Path, identity: dict, *, resume: bool = False):
         self.task_dir = task_dir.resolve()
         self.path = self.task_dir / "development_state.json"
         self.seeds = identity["dev_seeds"]
+        # The development gate is part of the identity. The absent key is the
+        # legacy oracle gate: rows carry the simulator's `task_completed`. A
+        # sealed gate stores a `gate` verdict per row instead, and never the label.
+        self.gate = identity.get("development_gate") or "oracle"
+        self.sealed = self.gate != "oracle"
         if not self.seeds or len(set(self.seeds)) != len(self.seeds) or any(s <= 50 for s in self.seeds):
             raise ProtocolError("development seeds must be distinct and outside held-out seeds 1–50")
         if self.path.exists():
@@ -167,19 +194,38 @@ class NativeWorldState:
 
     # ---- accounting ---------------------------------------------------------
 
+    def passed(self, record: dict) -> bool:
+        """Did this graded execution pass its development gate?
+
+        Oracle cells read the simulator's label; sealed cells read the recorded
+        gate verdict (the world's final done() or the independent judge). Every
+        progress, triage and selection rule goes through here, so no rule can
+        reach the label in a sealed cell by accident.
+        """
+        if self.sealed:
+            return bool((record.get("gate") or {}).get("passed"))
+        return bool(record.get("task_completed"))
+
+    def failure_outcome(self, reason: str) -> dict:
+        """Outcome fields for a resolved row that graded no success."""
+        if self.sealed:
+            return {"outcome": "sealed", "gate": {"source": self.gate, "verdict": "not_evaluated",
+                                                  "passed": False, "reason": reason}}
+        return {"reward": 0.0, "task_completed": 0}
+
     def records(self, phase: str | None = None, seed: int | None = None) -> list[dict]:
         return [r for r in self.data["trials"]
                 if (phase is None or r["phase"] == phase) and (seed is None or r["seed"] == seed)]
 
-    def charged(self, seed: int) -> list[dict]:
-        """Every record that consumed one of this seed's three attempts."""
-        return [r for r in self.data["trials"] if r["seed"] == seed and r["charged"]]
+    def retries(self, seed: int) -> list[dict]:
+        """Every record that spent one of this seed's three retries."""
+        return [r for r in self.data["trials"] if r["seed"] == seed and r["spends_retry"]]
 
-    def attempts_used(self, seed: int) -> int:
-        return len(self.charged(seed))
+    def retries_used(self, seed: int) -> int:
+        return len(self.retries(seed))
 
-    def budget_remaining(self, seed: int) -> int:
-        return max(0, self.ATTEMPT_LIMIT - self.attempts_used(seed))
+    def retries_remaining(self, seed: int) -> int:
+        return max(0, self.RETRY_LIMIT - self.retries_used(seed))
 
     def initial_bundle(self) -> str | None:
         initial = self.records("initial")
@@ -210,7 +256,7 @@ class NativeWorldState:
                        detail: dict | None = None, bundle: dict | None = None) -> dict:
         """An infrastructure failure that stopped a trial BEFORE it was admitted.
 
-        Nothing executed and no attempt is consumed, so this is neither a charged
+        Nothing executed and no retry is spent, so this is neither a retry-spending
         row nor a rejected revision: blaming the candidate for the infrastructure
         would make a transient failure look like an authored one. The record is
         kept so the blocker is attributable and the same candidate can be retried
@@ -223,7 +269,7 @@ class NativeWorldState:
         say which historical blocker a later admitted attempt actually cleared.
         """
         record = {"phase": phase, "seed": seed, "reason": reason, "sources": sources,
-                  "status": "blocked", "charged": False, "executed": False,
+                  "status": "blocked", "spends_retry": False, "executed": False,
                   "retryable": True, "resolved": False,
                   **({"detail": detail} if detail else {})}
         if bundle:
@@ -256,7 +302,7 @@ class NativeWorldState:
         """Record a revision refused before any simulator process started.
 
         An invalid generated revision is preserved as an attempted snapshot, and
-        is explicitly NOT charged: nothing executed. Keeping it separate is what
+        explicitly spends NO retry: nothing executed. Keeping it separate is what
         makes "invalid source" distinguishable from "executed and failed".
 
         The refused content is preserved by digest and by a bounded excerpt, not
@@ -276,12 +322,19 @@ class NativeWorldState:
                               "bytes": len(text.encode()), "excerpt": text[:4000]}
         record = {"phase": phase, "seed": seed, "reason": reason,
                   "sources": sources, "submitted": snapshots,
-                  "charged": False, "executed": False}
+                  "spends_retry": False, "executed": False}
         self.data["rejected"].append(record)
         self.save()
         return record
 
-    def begin_trial(self, phase: str, seed: int, bundle: dict, sources: dict) -> dict:
+    def validate_admission(self, phase: str, seed: int, digest: str) -> None:
+        """Non-mutating pre-admission check shared by begin_trial and _run_trial.
+
+        Raises ProtocolError for recoverable stops and TerminalBlocker for
+        irrecoverable ones (seeds exhausted without any graded evidence). Callers
+        may invoke this before expensive offline screening so a candidate that
+        would be refused at begin_trial never wastes screening time.
+        """
         if self.data["stage1_complete"]:
             raise ProtocolError("this cell is frozen")
         if phase not in PHASES:
@@ -290,14 +343,13 @@ class NativeWorldState:
             raise ProtocolError(f"seed {seed} is outside the development partition")
         if any(r["status"] == "running" for r in self.data["trials"]):
             raise ProtocolError("a trial has unresolved infrastructure evidence; resolve it before continuing")
-        digest = bundle_identity(bundle)
         if phase == "snapshot":
             if seed != self.seeds[0] or self.records("snapshot"):
                 raise ProtocolError("the observation-only snapshot runs once, on the first development seed")
         else:
-            if self.budget_remaining(seed) <= 0:
+            if self.retries_remaining(seed) <= 0:
                 raise ProtocolError(
-                    f"seed {seed} used all {self.ATTEMPT_LIMIT} simulator attempts; "
+                    f"seed {seed} spent all {self.RETRY_LIMIT} retries; "
                     "record its blocker and continue with another seed")
         if phase == "smoke":
             if seed != self.seeds[0] or self.records("initial"):
@@ -316,11 +368,11 @@ class NativeWorldState:
         if phase == "repair":
             # The original workflow triages the whole initial batch before
             # repairing. The gate is missing INITIAL EVIDENCE, never remaining
-            # budget: the old `budget_remaining(s) > 0` term let the batch be
+            # budget: the old `retries_remaining(s) > 0` term let the batch be
             # "finished" by spending a seed's attempts on diagnostic sessions,
             # which grade nothing. Inspection is still never gated this way.
             pending = [s for s in self.seeds if not self.has_initial_evidence(s)]
-            runnable = [s for s in pending if self.budget_remaining(s) > 0]
+            runnable = [s for s in pending if self.retries_remaining(s) > 0]
             if runnable:
                 raise ProtocolError(f"run the initial program on seeds {runnable} before repairs")
             ungraded = [s for s in pending if not self.has_graded_evidence(s)]
@@ -329,23 +381,44 @@ class NativeWorldState:
                 # session or an infrastructure failure, so the batch has no graded
                 # observation of this seed at all. Burning more budget cannot
                 # create the missing evidence, so do not ask for it: record the
-                # blocker. Resumable — no state changed here — but
-                # `completion_errors` will refuse this cell either way.
-                raise ProtocolError(
+                # blocker. Irrecoverable — neither filing a note nor retrying a
+                # different candidate can produce the missing graded evidence —
+                # so this raises TerminalBlocker, not plain ProtocolError.
+                details = [
+                    f"seed {s}: {self.retries_used(s)} attempt(s), none graded"
+                    for s in ungraded]
+                raise TerminalBlocker(
                     f"seeds {ungraded} have no initial evidence and no attempts left; "
                     "their attempts produced no graded result. Record "
                     "attempts/seed_N_BLOCKED.md for each and report the blocker; "
-                    "do not spend further attempts trying to unlock repair")
+                    "do not spend further attempts trying to unlock repair",
+                    seeds=ungraded, details=details)
             # A seed whose budget went to real graded executions (three crashing
             # smokes) triaged nothing further to give. Repair of the OTHER seeds
             # proceeds, exactly as the original workflow allowed; the exhausted
             # seed keeps its missing-initial report and its blocker note.
-        attempt = self.attempts_used(seed) + 1 if phase != "snapshot" else 1
+        if phase == "diagnostic":
+            # Reserve the last attempt on a seed that has never produced graded
+            # evidence. An inspection session grades nothing; burning the final
+            # slot on it would leave the seed permanently ungraded — the exact
+            # failure mode that TerminalBlocker was added to surface. Crashing
+            # smokes and post-grade diagnostics are unaffected: they already
+            # have graded evidence and pass the has_graded_evidence check.
+            if self.retries_remaining(seed) == 1 and not self.has_graded_evidence(seed):
+                raise ProtocolError(
+                    f"seed {seed} has one attempt remaining and no graded evidence; "
+                    "reserve it for a real graded trial — an inspection session "
+                    "cannot substitute for execution")
+
+    def begin_trial(self, phase: str, seed: int, bundle: dict, sources: dict) -> dict:
+        digest = bundle_identity(bundle)
+        self.validate_admission(phase, seed, digest)
+        attempt = self.retries_used(seed) + 1 if phase != "snapshot" else 1
         relative = Path("development") / phase / f"seed_{seed}" / f"attempt_{attempt}"
         directory = self.task_dir / relative
         directory.mkdir(parents=True, exist_ok=False)
         record = {"phase": phase, "seed": seed, "attempt": attempt, "status": "running",
-                  "directory": str(relative), "charged": phase in CHARGED_PHASES,
+                  "directory": str(relative), "spends_retry": phase in RETRY_PHASES,
                   "executed": True, "bundle_sha256": digest, "bundle": bundle,
                   "sources": sources}
         self.data["trials"].append(record)
@@ -361,26 +434,26 @@ class NativeWorldState:
         if diagnostic_error and not error:
             # The REPL reached its own end and its authored code raised. The exit
             # code is 0 either way, so the artifact — not the exit status — says
-            # so. The attempt stays charged: a simulator process really ran. It
+            # so. The retry stays spent: a simulator process really ran. It
             # is never graded evidence; see RESOLVED_STATUSES.
             record.update(status="diagnostic_program_error",
                           diagnostic_error=diagnostic_error, sandbox_rc=1,
-                          reward=0.0, task_completed=0,
+                          **self.failure_outcome("diagnostic session raised; grades nothing"),
                           trial_dir=record["directory"], session="diagnostic")
         elif result is not None and exit_code == 0:
             record.update(result, status="complete")
         elif world_error:
             # The authored world program or inventory failed while the simulator
-            # itself worked. That is a charged model/program failure with usable
+            # itself worked. That is a retry-spending model/program failure with usable
             # feedback, not a permanent infrastructure blocker — and it is never a
             # silent B/C success, so the raw task outcome is kept separately.
             record.update(status="world_program_error", world_error=world_error,
-                          sandbox_rc=1, reward=0.0, task_completed=0,
+                          sandbox_rc=1, **self.failure_outcome("authored world program error"),
                           trial_dir=(raw_result or {}).get("trial_dir", record["directory"]))
             if raw_result is not None:
                 record["raw_result"] = raw_result
         else:
-            # The attempt stays charged: a simulator process really ran. This is a
+            # The retry stays spent: a simulator process really ran. This is a
             # blocker to report, never a score and never a reason to reset a seed.
             record["status"] = "infrastructure_error"
         self.save()
@@ -401,9 +474,10 @@ class NativeWorldState:
         if any(r["status"] == "complete" for r in self.records("initial", seed)):
             raise ProtocolError(f"seed {seed} already has completed initial evidence")
         alias = {k: smoke[k] for k in ("seed", "directory", "bundle_sha256", "bundle",
-                                       "sandbox_rc", "reward", "task_completed", "trial_dir")}
+                                       "sandbox_rc", "reward", "task_completed", "trial_dir",
+                                       "outcome", "gate") if k in smoke}
         alias.update(phase="initial", attempt=smoke["attempt"], status="complete",
-                     charged=False, executed=False, alias_of=smoke["directory"],
+                     spends_retry=False, executed=False, alias_of=smoke["directory"],
                      alias_reason="identical bundle already executed as smoke on this seed",
                      sources=smoke["sources"], process_exit_code=smoke["process_exit_code"],
                      error="")
@@ -422,20 +496,20 @@ class NativeWorldState:
         graded = [r for r in executed if r["phase"] != "diagnostic"]
         return {
             "seed": seed,
-            "attempts_used": self.attempts_used(seed),
-            "attempts_remaining": self.budget_remaining(seed),
-            "initial_task_completed": bool(initial and initial[0]["task_completed"]),
+            "retries_used": self.retries_used(seed),
+            "retries_remaining": self.retries_remaining(seed),
+            "initial_passed": bool(initial and self.passed(initial[0])),
             "has_initial_evidence": bool(initial),
             # Separate and truthful: a seed can be graded (a crashing smoke) while
             # still owing initial coverage, and a seed can be out of budget with
             # no graded observation at all.
             "has_graded_evidence": bool(graded),
-            "passed": any(r["task_completed"] for r in graded),
-            "passing_phases": sorted({r["phase"] for r in graded if r["task_completed"]}),
+            "passed": any(self.passed(r) for r in graded),
+            "passing_phases": sorted({r["phase"] for r in graded if self.passed(r)}),
             # A seed whose initial run failed and that has never been repaired,
             # while attempts remain, is unfinished fix-loop work — not a result.
-            "needs_repair": bool(initial and not any(r["task_completed"] for r in graded)
-                                 and self.budget_remaining(seed) > 0),
+            "needs_repair": bool(initial and not any(self.passed(r) for r in graded)
+                                 and self.retries_remaining(seed) > 0),
             "world_program_errors": [r["directory"] for r in self.records(seed=seed)
                                      if r["status"] == "world_program_error"],
             "infrastructure_errors": [r["directory"] for r in self.records(seed=seed)
@@ -457,11 +531,11 @@ class NativeWorldState:
                 continue  # A diagnostic session grades nothing; it is inspection.
             row = candidates.setdefault(record["bundle_sha256"], {
                 "bundle": record["bundle"], "passes": [], "crashes": 0, "trials": []})
-            if record["task_completed"] and record["seed"] not in row["passes"]:
+            if self.passed(record) and record["seed"] not in row["passes"]:
                 row["passes"].append(record["seed"])
             row["crashes"] += int(record["sandbox_rc"] != 0)
-            row["trials"].append({k: record[k] for k in
-                                  ("phase", "seed", "directory", "sandbox_rc", "task_completed")})
+            row["trials"].append({**{k: record[k] for k in ("phase", "seed", "directory", "sandbox_rc")},
+                                  "passed": self.passed(record)})
         for row in candidates.values():
             row["passes"].sort()
         return candidates
@@ -469,7 +543,7 @@ class NativeWorldState:
     def executed(self) -> list[dict]:
         """Completed records that really ran a simulator process, aliases excluded."""
         return [r for r in self.data["trials"]
-                if r["phase"] in CHARGED_PHASES and r["status"] in RESOLVED_STATUSES
+                if r["phase"] in RETRY_PHASES and r["status"] in RESOLVED_STATUSES
                 and r.get("executed", True) and not r.get("alias_of")]
 
     def graded(self) -> list[dict]:
@@ -483,24 +557,24 @@ class NativeWorldState:
         seeds = [self.outcome(s) for s in self.seeds]
         candidates = self.candidates()
         return {
-            "attempt_limit": self.ATTEMPT_LIMIT,
-            "charged_phases": list(CHARGED_PHASES),
+            "retry_limit": self.RETRY_LIMIT,
+            "retry_phases": list(RETRY_PHASES),
             "snapshot_complete": bool(self.records("snapshot")
                                       and self.records("snapshot")[0]["status"] == "complete"),
             "seeds": seeds,
-            "attempts_used_per_seed": {str(s["seed"]): s["attempts_used"] for s in seeds},
-            "attempts_remaining_per_seed": {str(s["seed"]): s["attempts_remaining"] for s in seeds},
+            "retries_used_per_seed": {str(s["seed"]): s["retries_used"] for s in seeds},
+            "retries_remaining_per_seed": {str(s["seed"]): s["retries_remaining"] for s in seeds},
             "seeds_needing_initial": [s["seed"] for s in seeds
-                                      if not s["has_initial_evidence"] and s["attempts_remaining"] > 0],
+                                      if not s["has_initial_evidence"] and s["retries_remaining"] > 0],
             "seeds_exhausted_without_initial": [s["seed"] for s in seeds
-                                                if not s["has_initial_evidence"] and not s["attempts_remaining"]],
+                                                if not s["has_initial_evidence"] and not s["retries_remaining"]],
             # The subset with no graded observation whatsoever: every attempt was
             # a diagnostic session or an infrastructure failure. Reported apart
             # from the line above because only this one means the development work
             # never happened.
             "seeds_exhausted_without_graded_evidence": [
                 s["seed"] for s in seeds
-                if not s["has_graded_evidence"] and not s["attempts_remaining"]],
+                if not s["has_graded_evidence"] and not s["retries_remaining"]],
             "seeds_passing": [s["seed"] for s in seeds if s["passed"]],
             # A failed development seed is finished only by a successful later
             # attempt or by an exhausted budget plus its recorded blocker.
@@ -515,7 +589,7 @@ class NativeWorldState:
             # Graded development executions: what any completeness claim rests on.
             # Diagnostic sessions are excluded by construction.
             "graded_executions": len(self.graded()),
-            # Pre-admission infrastructure blockers. Uncharged and retryable, kept
+            # Pre-admission infrastructure blockers. They spent no retry and are retryable, kept
             # attributable so a blocked screening is visible without being blamed
             # on the candidate. The full list is audit history and keeps every row
             # forever; only the unresolved subset is still standing in the way, so
@@ -536,7 +610,7 @@ class NativeWorldState:
         }
 
     def _needs_note(self, outcome: dict) -> bool:
-        if outcome["passed"] or outcome["attempts_remaining"]:
+        if outcome["passed"] or outcome["retries_remaining"]:
             return False
         path = self.task_dir / "attempts" / f"seed_{outcome['seed']}_BLOCKED.md"
         return bool(report_errors(path, ("Root Cause", "Details", "What Was Tried")))
@@ -547,16 +621,16 @@ class NativeWorldState:
                             error: str, recovery: dict) -> None:
         """Close out an interrupted attempt without refunding or re-freezing it.
 
-        The attempt keeps the charged slot it already consumed, keeps its frozen
+        The attempt keeps the retry it already spent, keeps its frozen
         inputs, and keeps its partial evidence. Recovery only records what the
         infrastructure observed afterwards. A recovery that had to run the
         simulator again must pass its own admitted record through begin_trial, so
-        that second execution is visible and charged like any other.
+        that second execution is visible and spends a retry like any other.
         """
         if record["status"] not in {"running", "infrastructure_error"}:
             raise ProtocolError("only an unresolved attempt can be recovered")
-        if not record["charged"] and record["phase"] in CHARGED_PHASES:
-            raise ProtocolError("an admitted simulator attempt cannot become uncharged")
+        if not record["spends_retry"] and record["phase"] in RETRY_PHASES:
+            raise ProtocolError("an admitted simulator attempt cannot stop spending its retry")
         if recovery.get("bundle_sha256") not in (None, record["bundle_sha256"]):
             raise ProtocolError("recovery must reuse the same frozen inputs as the interrupted attempt")
         record["recovery"] = recovery

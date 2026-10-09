@@ -667,6 +667,36 @@ def _read_json(path: Path):
         return None
 
 
+# Query names the prediction contract p1 reserves; the framework answers them.
+PREDICTION_QUERIES = frozenset({"prediction_checks", "prediction_summary"})
+
+
+def prediction_use(report: dict, trace=()) -> dict:
+    """The same classification, restricted to the reserved prediction queries.
+
+    Only sites whose queried name is a literal reserved name are counted; a site
+    with a dynamic name is not attributed to either side. Advisory like the rest.
+    """
+    sites = [site for site in report["sites"] if site.get("name") in PREDICTION_QUERIES]
+    rows = [row for row in trace if row.get("name") in PREDICTION_QUERIES]
+    counts = {status: sum(1 for s in sites if s["classification"] == status)
+              for status in (SUPPORTED, LOGGING_ONLY, INCONCLUSIVE)}
+    if report["status"] == IDENTITY_MISMATCH:
+        status = IDENTITY_MISMATCH
+    elif any(site["corroborated"] for site in sites):
+        status = SUPPORTED
+    elif not sites and not rows and all(block["parsed"] for block in report["blocks"]):
+        status = NO_QUERY
+    elif counts[INCONCLUSIVE] or not sites:
+        status = INCONCLUSIVE
+    else:
+        status = LOGGING_ONLY
+    return {"status": status, "counts": counts,
+            "recorded_queries": len([row for row in rows if not row.get("error")]),
+            "sites": [site["index"] for site in sites],
+            "corroborated_sites": [site["index"] for site in sites if site["corroborated"]]}
+
+
 def audit_trial(directory: Path | str) -> dict:
     """Audit one recorded judgment trial directory: its ``code.py`` and trace."""
     directory = Path(directory)
@@ -674,12 +704,15 @@ def audit_trial(directory: Path | str) -> dict:
     config = (_read_json(directory / "executable_world_config.json")
               or _read_json(directory / "judgment_world_config.json") or {})
     manifest = _read_json(directory / "judgment_world/manifest.json") or {}
-    report = audit(policy.read_text(), policy_path=policy,
-                   trace=read_trace(directory / "judgment_world/events.jsonl"),
+    trace = read_trace(directory / "judgment_world/events.jsonl")
+    report = audit(policy.read_text(), policy_path=policy, trace=trace,
                    expected_policy_sha256=config.get("policy_sha256"),
                    world_sha256=manifest.get("world_sha256"))
     report["trial_dir"] = str(directory)
     report["world_manifest_status"] = manifest.get("status")
+    if config.get("prediction_contract") == "p1":
+        # Only under p1: a contract-off audit stays byte-identical.
+        report["prediction_use"] = prediction_use(report, trace)
     return report
 
 
@@ -702,7 +735,7 @@ def trial_feedback(directory: Path | str, *, write: bool = True) -> dict:
             audit_path.write_text(json.dumps(report, indent=2) + "\n")
         except OSError:
             audit_path = None
-    return {
+    feedback = {
         "revision": REVISION, "trial_dir": str(directory), "status": report["status"],
         "summary": report["summary"], "counts": report["counts"],
         "recorded_queries": report["recorded_queries"],
@@ -714,6 +747,9 @@ def trial_feedback(directory: Path | str, *, write: bool = True) -> dict:
         "audit": str(audit_path) if audit_path else None,
         "limits": list(LIMITS),
     }
+    if "prediction_use" in report:
+        feedback["prediction_use"] = report["prediction_use"]
+    return feedback
 
 
 def selected_pair_report(directories) -> dict:

@@ -193,58 +193,58 @@ class TotalAttemptAccounting(unittest.TestCase):
 
     def test_three_total_attempts_not_three_extra_repairs(self):
         h = self.h
-        self.assertEqual(h.state.attempts_used(52), 1)
+        self.assertEqual(h.state.retries_used(52), 1)
         h.write("fix_code.py", POLICY + "# v2\n")
         for _ in range(2):
             protocol.run_trial(h.case, h.repo, h.state, "repair", 52,
                                h.task_dir / "fix_code.py", None, None, None)
-        self.assertEqual(h.state.attempts_used(52), 3)
-        self.assertEqual(h.state.budget_remaining(52), 0)
-        with self.assertRaisesRegex(ledger.ProtocolError, "all 3 simulator attempts"):
+        self.assertEqual(h.state.retries_used(52), 3)
+        self.assertEqual(h.state.retries_remaining(52), 0)
+        with self.assertRaisesRegex(ledger.ProtocolError, "all 3 retries"):
             protocol.run_trial(h.case, h.repo, h.state, "repair", 52,
                                h.task_dir / "fix_code.py", None, None, None)
 
     def test_snapshot_is_outside_the_budget_and_taken_once(self):
         h = self.h
         snapshot = h.state.records("snapshot")[0]
-        self.assertFalse(snapshot["charged"])
+        self.assertFalse(snapshot["spends_retry"])
         # Seed 51 spent exactly one attempt: the initial run, not the snapshot.
-        self.assertEqual(h.state.attempts_used(51), 1)
-        self.assertEqual([r["phase"] for r in h.state.charged(51)], ["initial"])
+        self.assertEqual(h.state.retries_used(51), 1)
+        self.assertEqual([r["phase"] for r in h.state.retries(51)], ["initial"])
         with self.assertRaises(ledger.ProtocolError):
             h.trial("snapshot", 51)
 
-    def test_diagnostic_and_smoke_charge_the_same_count(self):
+    def test_diagnostic_and_smoke_spend_from_the_same_count(self):
         h = self.h
         h.write("diagnostic_session.py", "print(get_observation(), flush=True)\n")
         h.results.pop(53)
         protocol.run_trial(h.case, h.repo, h.state, "diagnostic", 53,
                            h.task_dir / "diagnostic_session.py", None, None,
                            h.task_dir / "diagnostic_session.py")
-        self.assertEqual(h.state.attempts_used(53), 2)
-        charged = {r["phase"] for r in h.state.charged(53)}
-        self.assertEqual(charged, {"initial", "diagnostic"})
+        self.assertEqual(h.state.retries_used(53), 2)
+        spent = {r["phase"] for r in h.state.retries(53)}
+        self.assertEqual(spent, {"initial", "diagnostic"})
 
-    def test_failed_and_interrupted_attempts_stay_charged(self):
+    def test_failed_and_interrupted_attempts_keep_their_retry_spent(self):
         h = self.h
         h.results.pop(54)
         h.replay.return_value = (143, "watchdog killed the child")
         record = protocol.run_trial(h.case, h.repo, h.state, "repair", 54,
                                     h.write("fix_code.py", POLICY + "# v3\n"), None, None, None)
         self.assertEqual(record["status"], "infrastructure_error")
-        self.assertTrue(record["charged"])
-        self.assertEqual(h.state.attempts_used(54), 2)
+        self.assertTrue(record["spends_retry"])
+        self.assertEqual(h.state.retries_used(54), 2)
         h.state.resolve_interrupted(record, result=None, exit_code=143, error="",
-                                    recovery={"charged": False})
-        self.assertTrue(record["charged"])
-        self.assertEqual(h.state.attempts_used(54), 2)
+                                    recovery={"spends_retry": False})
+        self.assertTrue(record["spends_retry"])
+        self.assertEqual(h.state.retries_used(54), 2)
 
-    def test_invalid_revision_is_recorded_without_charging(self):
+    def test_invalid_revision_is_recorded_without_spending(self):
         h = self.h
         with self.assertRaises(ledger.ProtocolError):
             protocol.run_trial(h.case, h.repo, h.state, "repair", 55,
                                h.write("broken.py", "def ("), None, None, None)
-        self.assertEqual(h.state.attempts_used(55), 1)  # Only the existing initial run.
+        self.assertEqual(h.state.retries_used(55), 1)  # Only the existing initial run.
         rejected = h.state.data["rejected"]
         self.assertEqual(len(rejected), 1)
         self.assertFalse(rejected[0]["executed"])
@@ -256,8 +256,8 @@ class TotalAttemptAccounting(unittest.TestCase):
             h.snapshot()
             h.trial("smoke", 51)
             alias = h.state.alias_smoke_as_initial(51)
-            self.assertEqual(h.state.attempts_used(51), 1)
-            self.assertFalse(alias["charged"])
+            self.assertEqual(h.state.retries_used(51), 1)
+            self.assertFalse(alias["spends_retry"])
             self.assertFalse(alias["executed"])
             self.assertTrue(alias["alias_of"])
 
@@ -285,7 +285,7 @@ class SameSeedRepairAndRegression(unittest.TestCase):
         record = protocol.run_trial(h.case, h.repo, h.state, "repair", 57,
                                     h.write("fix_code.py", POLICY + "# v2\n"), None, None, None)
         self.assertEqual(record["phase"], "repair")
-        self.assertEqual(h.state.attempts_used(57), 2)
+        self.assertEqual(h.state.retries_used(57), 2)
 
     def test_a_seed_exhausted_during_smoke_does_not_block_other_seeds(self):
         h = Harness(self.stack)
@@ -353,7 +353,7 @@ class SelectionAndFreeze(unittest.TestCase):
                            h.task_dir / "diagnostic_session.py")
         self.assertNotIn(ledger.bundle_identity({"policy": ledger.code_hash(session)}),
                          h.state.candidates())
-        self.assertTrue(h.state.charged(62), "the session still consumed an attempt")
+        self.assertTrue(h.state.retries(62), "the session still consumed an attempt")
 
     def test_world_condition_freezes_world_and_inventory_with_the_policy(self):
         import contextlib
@@ -462,7 +462,7 @@ class PromptConditions(unittest.TestCase):
             for forbidden in ("30 actions", "1 recovery", "4 queries", "15 revisions",
                               "query budget of", "three repairs"):
                 self.assertNotIn(forbidden, text, f"{condition} introduced {forbidden}")
-            self.assertIn("3 TOTAL simulator replay attempts per seed", text)
+            self.assertIn("3 TOTAL retries per seed", text)
 
     def test_diagnostic_repl_is_retained_and_counted(self):
         for condition, text in self.prompts.items():
@@ -582,9 +582,9 @@ class OldProtocolUnchanged(unittest.TestCase):
     def test_new_ledger_is_a_separate_module(self):
         import fix_loop_state
         self.assertIsNot(ledger.NativeWorldState, fix_loop_state.Stage1State)
-        self.assertEqual(ledger.ATTEMPT_LIMIT, 3)
-        self.assertIn("diagnostic", ledger.CHARGED_PHASES)
-        self.assertNotIn("snapshot", ledger.CHARGED_PHASES)
+        self.assertEqual(ledger.RETRY_LIMIT, 3)
+        self.assertIn("diagnostic", ledger.RETRY_PHASES)
+        self.assertNotIn("snapshot", ledger.RETRY_PHASES)
 
     def test_old_protocol_cli_still_imports(self):
         import native_cc_protocol
@@ -632,7 +632,7 @@ class CampaignChain(unittest.TestCase):
             self.assertEqual(result["model_served"], {"claude-opus-4-6": 1})
             # Actual served window, not only the configured environment value.
             self.assertEqual(result["model_context_windows"], [1000000])
-            self.assertEqual(result["attempt_limit"], 3)
+            self.assertEqual(result["retry_limit"], 3)
             self.assertIn("tested_bundles", result)
             self.assertTrue((h.task_dir / "stage1_result.json").is_file())
 
@@ -785,7 +785,7 @@ class CampaignChain(unittest.TestCase):
 
 
 class WorldProgramFailures(unittest.TestCase):
-    """An authored world bug is charged feedback, not a permanent blocker."""
+    """An authored world bug is retry-spending feedback, not a permanent blocker."""
 
     def test_invalid_world_program_is_rejected_before_any_process_starts(self):
         import contextlib
@@ -797,9 +797,9 @@ class WorldProgramFailures(unittest.TestCase):
                     "def initialize(context):\n    return {}\n")
             with self.assertRaisesRegex(ledger.ProtocolError, "assimilate"):
                 h.trial("initial", 52)
-            self.assertEqual(h.state.attempts_used(52), 0)
+            self.assertEqual(h.state.retries_used(52), 0)
             self.assertTrue(h.state.data["rejected"])
-            self.assertFalse(h.state.data["rejected"][-1]["charged"])
+            self.assertFalse(h.state.data["rejected"][-1]["spends_retry"])
             # The refused bytes are preserved, not just the path.
             self.assertIn("world", h.state.data["rejected"][-1]["submitted"])
 
@@ -813,9 +813,9 @@ class WorldProgramFailures(unittest.TestCase):
                  {"id": "cup", "label": "cup", "role": "manipulated"}]))
             with self.assertRaisesRegex(ledger.ProtocolError, "exactly one"):
                 h.trial("initial", 52)
-            self.assertEqual(h.state.attempts_used(52), 0)
+            self.assertEqual(h.state.retries_used(52), 0)
 
-    def test_world_program_error_is_charged_and_separated_from_infrastructure(self):
+    def test_world_program_error_spends_retry_and_is_separated_from_infrastructure(self):
         import contextlib
         with contextlib.ExitStack() as stack:
             h = Harness(stack, condition="B")
@@ -831,9 +831,9 @@ class WorldProgramFailures(unittest.TestCase):
                              "child_status": "completed"},
                 raw_result={"sandbox_rc": 0, "reward": 1.0, "task_completed": 1})
             self.assertEqual(record["status"], "world_program_error")
-            self.assertTrue(record["charged"])
+            self.assertTrue(record["spends_retry"])
             outcome = h.state.outcome(52)
-            self.assertEqual(outcome["attempts_used"], 1)
+            self.assertEqual(outcome["retries_used"], 1)
             self.assertTrue(outcome["world_program_errors"])
             # Not an infrastructure blocker, and not a silent success either.
             self.assertFalse(outcome["infrastructure_errors"])

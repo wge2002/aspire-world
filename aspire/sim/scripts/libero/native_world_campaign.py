@@ -193,6 +193,43 @@ a grade, and it never gates a trial, a selection or the completion of this cell.
 """
 
 
+def is_sealed(case: dict) -> bool:
+    """A cell whose development outcome is sealed behind a development gate.
+
+    Same spelling as `native_world_protocol.sealed_gate`; local so rendering does
+    not import the protocol module. An absent or `oracle` gate renders exactly as
+    before.
+    """
+    return bool(case.get("development_gate")) and case["development_gate"] != "oracle"
+
+
+#: Pristine-template sentences that read the task outcome off the replay
+#: directory name. A sealed cell renders them against the recorded gate verdict
+#: instead. Each anchor must occur exactly once or the template has drifted.
+SEALED_OUTCOME_WORDING = (
+    ("For each seed 51–65, check the reward in the replay output dir name: `_reward_1.000` = "
+     "success, `_reward_0.000` = failure. List which seeds passed and which failed.",
+     "For each seed 51–65, read the recorded trial result's `gate` (or `status` → "
+     "`seeds_passing` and `tested_bundles.passes`): `gate.passed` true = passed the development "
+     "gate, false = did not. This cell never shows the simulator's reward or task label. List "
+     "which seeds passed and which failed."),
+    ("  - `summary.txt` — stdout/stderr/reward",
+     "  - `summary.txt` — stdout/stderr and the sandbox exit code (the task outcome is sealed)"),
+    ("The recorded result names the reward. Check reward in output dir name: `_reward_1.000` = "
+     "success, `_reward_0.000` = failure.",
+     "The recorded result names the gate verdict: `gate.passed` true = passed the development "
+     "gate. The output dir name carries only the sandbox exit code; no reward is shown in this cell."),
+)
+
+
+def seal_outcome_wording(text: str) -> str:
+    for anchor, replacement in SEALED_OUTCOME_WORDING:
+        if text.count(anchor) != 1:
+            raise ProtocolFailure(f"sealed render anchor missing or duplicated: {anchor[:60]!r}")
+        text = text.replace(anchor, replacement)
+    return text
+
+
 def world_use_enabled(case: dict) -> bool:
     """The opt-in NEW-C world-use revision: judgment profile, condition C, `r1`.
 
@@ -318,7 +355,7 @@ mkdir -p "$TASK_DIR/attempts"
 
 INITIAL_BLOCK = """```bash
 # One initial program on every development seed, one process per Bash call.
-# Each of these charges that seed's total attempt count.
+# Each of these spends one of that seed's three retries.
 {initial}```
 
 Wait for each call to return before starting the next; the tool result and the
@@ -353,7 +390,7 @@ def _rewrite_commands(text: str, case: dict, task_dir: str) -> str:
         "Write `$TASK_DIR/initial_code.py` using only allowed APIs. Smoke-test seed 51 first "
         "and fix any crash before continuing.",
         "Write `$TASK_DIR/initial_code.py` using only allowed APIs. You may smoke-test it on "
-        "seed 51 first with `--phase smoke`; a smoke charges that seed's attempt count like "
+        "seed 51 first with `--phase smoke`; a smoke spends one of that seed's retries like "
         "any other execution. If the smoke ran the identical program bundle you then submit "
         "as the initial run, record it as that seed's initial evidence with\n\n"
         f"  .venv-libero/bin/python3 {PROTOCOL} alias-smoke --seed 51\n\n"
@@ -390,10 +427,10 @@ def _rewrite_commands(text: str, case: dict, task_dir: str) -> str:
     return _rewrite_accounting(text, case, task_dir)
 
 
-ACCOUNTING = """**Hard limit: 3 TOTAL simulator replay attempts per seed** — not three extra repairs.
-Smoke, initial, repair and interactive diagnostic sessions all charge the same
-per-seed count; the one observation-only scene snapshot does not. Failures,
-timeouts and crashes stay charged. There is no cap on how many times you edit
+ACCOUNTING = """**Hard limit: 3 TOTAL retries per seed** — every simulator replay is one retry, so
+this is not three extra repairs. Smoke, initial, repair and interactive diagnostic
+sessions all spend from the same per-seed retry count; the one observation-only
+scene snapshot does not. Failures, timeouts and crashes still spend their retry. There is no cap on how many times you edit
 code, and no global revision budget: static reading of the API reference,
 sources, traces and images is free and unlimited.
 
@@ -401,9 +438,9 @@ The recorded ledger holds the count. Ask it rather than guessing:
 
   .venv-libero/bin/python3 {protocol} status
 
-When a seed reaches 3, write BLOCKED.md for it and continue with another seed. An
-interrupted run that really executed keeps its slot; report it as a blocker
-instead of retrying it as if it never happened. A seed whose budget was spent
+When a seed has spent 3 retries, write BLOCKED.md for it and continue with another
+seed. An interrupted run that really executed keeps its retry spent; report it as a blocker
+instead of retrying it as if it never happened. A seed whose retries were spent
 during smoke has no initial run left, and that fact is recorded — do not try to
 force one.
 
@@ -428,7 +465,7 @@ Save to TWO locations (create `outputs/working_codes` first if missing):
 success evidence — most development successes, then fewer crashes, then simpler
 observation-driven behavior — never merely the last version that did not crash.
 If your synthesis differs from anything already executed, spend a remaining
-attempt on it; otherwise select a bundle that was already tested. Then record the
+retry on it; otherwise select a bundle that was already tested. Then record the
 choice and its reason:
 
   .venv-libero/bin/python3 {protocol} select --reason "<why this bundle>"
@@ -497,6 +534,8 @@ def _rewrite_accounting(text: str, case: dict, task_dir: str) -> str:
     if case["condition"] in WORLD_CONDITIONS:
         text = text.replace("\n---\n\n## Stage 1: Debug Seeds 51–65",
                             world_section(case) + "\n---\n\n## Stage 1: Debug Seeds 51–65")
+    if is_sealed(case):
+        text = seal_outcome_wording(text)
     return text
 
 

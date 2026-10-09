@@ -3,7 +3,7 @@
 
 This module has no LLM client, agent loop, or context management: native Claude
 Code owns generation, tools, notifications, and compaction. It records what the
-solver actually executed, charges each admitted task replay to that seed's three
+solver actually executed, counts each admitted task replay as one of that seed's three
 total attempts, and refuses held-out seeds.
 
 Conditions:
@@ -24,7 +24,7 @@ results stay under --args.output-dir; only the legacy adapter relocates them.
 A NEW judgment cell may additionally set `world_use_revision` to opt into
 bounded world-use feedback (see cap/world_model/world_use_audit.py). Without that
 key nothing in this module behaves differently, and the mechanism status it adds
-is reported beside the task result: it never enters `errors`, charges no attempt,
+is reported beside the task result: it never enters `errors`, spends no retry,
 and gates no trial, selection or finalization.
 
 The world adapter puts the real simulator results under
@@ -43,7 +43,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from native_world_fixloop_state import (ATTEMPT_LIMIT, NativeWorldState, ProtocolError,
+from native_world_fixloop_state import (RETRY_LIMIT, NativeWorldState, ProtocolError,
                                        bundle_identity, code_hash, inventory_errors,
                                        valid_program, world_module_errors)
 
@@ -63,7 +63,20 @@ IN_PROCESS_PROFILES = frozenset({"simple", JUDGMENT_PROFILE})
 NON_TRIAL_PHASES = {"snapshot", "diagnostic"}
 # Phases whose recorded artifacts are an ordinary development trial of the pair.
 TRIAL_PHASES = ("smoke", "initial", "repair")
+#: A sealed trial's public directory carries the sandbox exit code and nothing else.
+SEALED_TRIAL_RE_TEMPLATE = r"trial_{seed:02d}_sandboxrc_(\d+)_sealed"
 _world_use_module = None
+
+
+def gate_module():
+    """The opt-in development gate, imported only where a case names one."""
+    from aspire.sim.cap.world_model import development_gate
+    return development_gate
+
+
+def sealed_gate(case: dict) -> bool:
+    """True only for a cell whose development outcome is sealed from the solver."""
+    return bool(case.get("development_gate")) and case["development_gate"] != "oracle"
 
 
 def is_judgment(case: dict) -> bool:
@@ -121,9 +134,14 @@ def load_case(path: Path) -> tuple[dict, Path, Path]:
 
 def identity(case: dict, repo: Path) -> dict:
     """The protocol identity a resume must reproduce exactly."""
-    if case.get("executable_world_revision"):
+    if (case.get("executable_world_revision") or case.get("closed_loop_revision")
+            or case.get("prediction_contract")):
         from executable_world_profile import validate
         validate(case)
+    if case.get("development_gate"):
+        # Refused before anything runs, and part of the identity a resume must
+        # reproduce: an oracle cell can never be resumed as a sealed one.
+        gate_module().validate(case)
     sources = "".join(Path(__file__).with_name(name).read_text() for name in
                       ("native_world_protocol.py", "native_world_fixloop_state.py"))
     if case.get("world_use_revision"):
@@ -137,7 +155,7 @@ def identity(case: dict, repo: Path) -> dict:
         "harness": "claude-code", "model": case["model"], "condition": case["condition"],
         "cell": case["id"], "suite": case["suite"], "task": case["task"],
         **({"profile": case["profile"]} if "profile" in case else {}),
-        "dev_seeds": case["dev_seeds"], "attempt_limit": ATTEMPT_LIMIT,
+        "dev_seeds": case["dev_seeds"], "retry_limit": RETRY_LIMIT,
         "max_steps": case["max_steps"], "trial_timeout": case["trial_timeout"],
         "context_tokens": case["context_tokens"],
         "max_output_tokens": case["max_output_tokens"], "effort": case["effort"],
@@ -147,6 +165,15 @@ def identity(case: dict, repo: Path) -> dict:
            if case.get("foundation_revision") else {}),
         **({"executable_world_revision": case["executable_world_revision"], "c_arm": case["c_arm"]}
            if case.get("executable_world_revision") else {}),
+        # Added only when set: an unflagged cell's identity is byte-identical,
+        # and a resume cannot silently switch an observational study online.
+        **({"closed_loop_revision": case["closed_loop_revision"]}
+           if case.get("closed_loop_revision") else {}),
+        **({"development_gate": case["development_gate"]}
+           if case.get("development_gate") else {}),
+        # "off" is the absent contract, so only p1 adds a key.
+        **({"prediction_contract": case["prediction_contract"]}
+           if case.get("prediction_contract") == "p1" else {}),
         "world_interface": case["condition"] in WORLD_CONDITIONS,
         "strategy_md": case["condition"] in {"A", "B"},
         "config_sha256": code_hash((repo / case["env_config"]).read_text()),
@@ -176,7 +203,14 @@ def runtime_env(case: dict, repo: Path, base: dict[str, str] | None = None) -> d
     return env
 
 
-def check_policy(source: str) -> None:
+def check_policy(source: str, *, sealed: bool = False) -> None:
+    if sealed:
+        # A sealed cell also refuses every route from authored code to the task
+        # label: the env object's success/reward methods, the APIS mapping, bound
+        # method owners and any handle attribute other than the task language.
+        problems = gate_module().source_errors(source)
+        if problems:
+            raise ProtocolError("; ".join(problems))
     patterns = [r"env\.handle\.env\b", r"sim\.(?:data|model|forward)\b",
                 r"\b(?:body_xpos|get_site_xpos|set_joint_qpos|_eval_predicate|obj_body_id"
                 r"|parsed_problem|_step_once)\b"]
@@ -207,7 +241,7 @@ def collect_bundle(case: dict, task_dir: Path, phase: str, code: Path | None,
     source = policy.read_text()
     if not valid_program(source):
         raise ProtocolError("program must contain executable Python, not an empty file or prose")
-    check_policy(source)
+    check_policy(source, sealed=sealed_gate(case))
     bundle = {"policy": code_hash(source)}
     sources = {"policy": str(policy)}
     if case["condition"] in WORLD_CONDITIONS and phase != "diagnostic":
@@ -235,7 +269,7 @@ def collect_bundle(case: dict, task_dir: Path, phase: str, code: Path | None,
                                     for t in n.targets)]
                 if not declarations or not isinstance(declarations[-1].value, ast.Constant) or declarations[-1].value.value != "r1":
                     problems.append('foundation world must declare FOUNDATION_REVISION = "r1"')
-            check_policy(world_source)
+            check_policy(world_source, sealed=sealed_gate(case))
             if problems:
                 raise ProtocolError("; ".join(problems))
             bundle["world"] = code_hash(world_source)
@@ -248,7 +282,7 @@ def collect_bundle(case: dict, task_dir: Path, phase: str, code: Path | None,
             world_path = authored_path(task_dir, world, "--world-program")
             world_source = world_path.read_text()
             problems = module_errors(world_source)
-            check_policy(world_source)
+            check_policy(world_source, sealed=sealed_gate(case))
             if problems:
                 raise ProtocolError("; ".join(problems))
             bundle["world"] = code_hash(world_source)
@@ -268,7 +302,7 @@ def collect_bundle(case: dict, task_dir: Path, phase: str, code: Path | None,
         problems += inventory_errors(inventory_path.read_text())
         if problems:
             raise ProtocolError("; ".join(problems))
-        check_policy(world_source)
+        check_policy(world_source, sealed=sealed_gate(case))
         bundle["world"] = code_hash(world_source)
         bundle["inventory"] = code_hash(inventory_path.read_text())
         sources.update(world=str(world_path), inventory=str(inventory_path))
@@ -306,6 +340,19 @@ def write_world_config(case: dict, directory: Path, sources: dict) -> Path:
         path = write_in_process_config(case, directory, sources, MODE, JUDGMENT_PROFILE, "executable_world_config.json")
         config = json.loads(path.read_text())
         config["c_arm"] = case["c_arm"]
+        if sealed_gate(case):
+            # Provenance only: the sealing itself is the replay's environment
+            # variable, never a value generated code could read from this file.
+            config["development_gate"] = case["development_gate"]
+        if case.get("closed_loop_revision"):
+            # The frozen trial config carries the revision, so development and
+            # held-out replays run the same online semantics. Absent otherwise.
+            config["closed_loop"] = True
+            config["closed_loop_revision"] = case["closed_loop_revision"]
+        if case.get("prediction_contract") == "p1":
+            # Read back by run_executable_world, so development and held-out
+            # replays score predictions identically. Absent when off.
+            config["prediction_contract"] = "p1"
         path.write_text(json.dumps(config, indent=2) + "\n")
         return path
     if is_judgment(case):
@@ -361,7 +408,7 @@ def world_evidence(results: Path) -> dict | None:
     incomplete, so a nonzero outer exit alone cannot tell the two apart. The
     child receipt says whether the world child actually ran to completion; the
     tape and manifest say whether the authored world program or inventory was
-    what broke. An authored failure is charged model/program failure with usable
+    what broke. An authored failure is a retry-spending model/program failure with usable
     feedback, and the loop continues.
     """
     receipt = read_json(results / "child_exit.json")
@@ -511,7 +558,7 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
     try:
         bundle, sources = collect_bundle(case, state.task_dir, phase, code, world, inventory)
     except ProtocolError as exc:
-        # An invalid generated revision is recorded, and charges nothing: no
+        # An invalid generated revision is recorded, and spends no retry: no
         # simulator process started. It stays separate from executed failures.
         state.reject(phase, seed, str(exc), {"code": str(code) if code else None,
                                              "world": str(world) if world else None,
@@ -521,28 +568,51 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
         if stdin_code is None:
             raise ProtocolError("--code holds the authored diagnostic program for the batch REPL")
         stdin_code = authored_path(state.task_dir, stdin_code, "--code")
+        try:
+            # The REPL runs the file as one script; one that cannot compile
+            # would execute nothing, so it is refused here and spends no retry.
+            compile(stdin_code.read_bytes(), str(stdin_code), "exec", dont_inherit=True)
+        except (SyntaxError, ValueError) as exc:
+            reason = f"diagnostic program does not compile: {type(exc).__name__}: {exc}"
+            state.reject(phase, seed, reason, sources)
+            raise ProtocolError(reason) from exc
+    # Pre-admission validation before any offline screening: a candidate that
+    # would be refused at begin_trial must not spend screening time. This
+    # is non-mutating, so a ProtocolError/TerminalBlocker here spends no retry.
+    digest = bundle_identity(bundle)
+    state.validate_admission(phase, seed, digest)
+    # Baseline initial exception: the exact previously-executed initial bundle
+    # may run as a REAL retry-spending grading trial even if offline screening
+    # reproduces an authored program_error, because the simulator already ran it
+    # and its real result must be recorded — a claimed screen pass would be a
+    # fiction.  Conditions: initial phase, exact hash match, no prior settled
+    # initial result on this seed, and all infrastructure checks successful.
+    # A mixed report (authored error AND infrastructure failure) still blocks.
+    _run_as_baseline_initial = False
     screening = None
     if case.get("executable_world_revision") and phase not in NON_TRIAL_PHASES:
-        from executable_world_profile import checks
+        from executable_world_profile import checks, screening_infrastructure_ok
         screening = checks(case, repo, state, sources, runtime_env(case, repo))
-        if screening["status"] == "rejected":
-            # An authored Python error in the supported part of the screening.
-            # That IS the candidate's fault, so it is refused before any
-            # simulator runs and, like any refused revision, charges nothing.
-            reason = "offline candidate error; inspect " + screening["directory"]
-            state.reject(phase, seed, reason, sources)
-            raise ProtocolError(reason)
-        if screening["status"] == "blocked":
+        baseline_initial = (
+            phase == "initial" and state.initial_bundle() == digest
+            # A legitimate smoke alias freezes a bundle without another replay;
+            # require its actual graded smoke, never the alias row alone.
+            and any(r["phase"] in {"initial", "smoke"} and r.get("executed") is True
+                    and r["bundle_sha256"] == digest for r in state.graded())
+        )
+        mixed_or_missing = (screening["status"] == "rejected" and baseline_initial
+                            and not screening_infrastructure_ok(screening.get("reports")))
+        if screening["status"] == "blocked" or mixed_or_missing:
             # The screening itself failed — a watchdog kill or a missing report.
             # Nothing was learned about the candidate, so this must stop here:
             # before begin_trial, before any simulator invocation, consuming zero
-            # new attempts. Attaching `blocked` to a charged row instead would
-            # make the infrastructure's failure cost a real attempt. Returned as
+            # new retries. Attaching `blocked` to a retry-spending row instead would
+            # make the infrastructure's failure cost a real retry. Returned as
             # a structured record rather than raised, so the blocker is machine
             # readable and the same candidate can be retried unchanged.
             reason = ("offline screening could not run; this is infrastructure, not "
                       "the candidate. Retry the same unchanged candidate once it "
-                      "recovers. No attempt was consumed and none should be spent "
+                      "recovers. No retry was spent and none should be spent "
                       "to work around it; inspect " + str(screening.get("directory")))
             detail = {k: screening.get(k) for k in
                       ("status", "conclusions", "retryable", "cached", "directory",
@@ -552,21 +622,52 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
                        "identity", "reports")}
             blocker = state.record_blocker(phase, seed, reason, sources, detail, bundle=bundle)
             return {**blocker, "status": "screening_blocked", "screening": detail,
-                    "attempts_used": state.attempts_used(seed),
-                    "attempts_remaining": state.budget_remaining(seed)}
+                    "retries_used": state.retries_used(seed),
+                    "retries_remaining": state.retries_remaining(seed)}
+        if screening["status"] == "rejected":
+            # An authored Python error in the supported part of the screening.
+            # Normally refused before any simulator runs and spends no retry.
+            # Exception: the frozen initial bundle that was ALREADY graded on
+            # another development seed is known to have run; its real
+            # result is what matters, not a screening reproduction.  Record the
+            # screening exception explicitly so the trial row names both facts.
+            if baseline_initial:
+                _run_as_baseline_initial = True
+            else:
+                reason = "offline candidate error; inspect " + screening["directory"]
+                state.reject(phase, seed, reason, sources)
+                raise ProtocolError(reason)
     record = state.begin_trial(phase, seed, bundle, sources)
+    if _run_as_baseline_initial and screening is not None:
+        # Mark the row explicitly so reviewers know the real trial ran despite
+        # the authored error that the screening reproduced.
+        record["screening_baseline_exception"] = {
+            "screening_status": "rejected",
+            "note": ("exact previously-executed initial bundle admitted for real retry-spending "
+                     "grading; screening-reproduced error kept for audit"),
+            "screening_conclusions": screening.get("conclusions", [])}
     if screening is not None:
         # The screening outcome travels with the attempt it preceded. A `blocked`
         # screening cannot reach here — it returned above, before begin_trial —
-        # so a charged row always carries a `checked` screening, and the earlier
-        # blocker stays its own uncharged record that this admission resolves.
+        # The exact frozen-initial exception retains `rejected`; it never claims
+        # a screening pass. Earlier blockers remain separate records that spent no retry.
         record["screening"] = {k: screening.get(k) for k in
-                               ("status", "conclusions", "retryable", "cached", "directory")}
+                               ("status", "conclusions", "retryable", "cached", "directory",
+                                "identity", "reports")}
     directory = state.task_dir / record["directory"]
     (directory / "code.py").write_bytes(Path(sources["policy"]).read_bytes())
     env = runtime_env(case, repo)
     env["SNAPSHOT_DIR"] = str(state.task_dir)
     env["ASPIRE_MAX_STEPS"] = str(case["max_steps"])
+    sealed_dir = None
+    if sealed_gate(case):
+        # Every phase of a sealed cell runs sealed: the replay writes the real
+        # outcome under the control root, outside the solver's read boundary,
+        # names its public artifacts without it, and the diagnostic REPL gets
+        # the read-only env view. The gate verdict is computed below.
+        sealed_dir = gate_module().sealed_trial_dir(case, record["directory"])
+        sealed_dir.mkdir(parents=True, exist_ok=True)
+        env[gate_module().SEALED_ENV] = str(sealed_dir / "outcome.json")
     results = result_root(case, directory, phase, seed)
     command = [str(repo / ".venv-libero/bin/python3"), "scripts/libero/replay_trial.py",
                "--args.suite", case["suite"], "--args.task", case["task"],
@@ -575,7 +676,7 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
                "--args.output-dir", str(directory / "results")]
     if phase == "diagnostic":
         # Identical API execution semantics, authored code read from a file, one
-        # session charged once. Inspection is never silently prohibited.
+        # session spends one retry. Inspection is never silently prohibited.
         command += ["--args.interactive"]
     else:
         command += ["--args.replay-code", str(directory / "code.py")]
@@ -592,7 +693,13 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
     exit_code, error = run_replay(command, repo=repo, env=env, directory=directory,
                                   timeout=case["trial_timeout"] + grace,
                                   stdin_path=stdin_code if phase == "diagnostic" else None)
-    result = parse_result(results, seed)
+    oracle = None
+    if sealed_dir is not None:
+        oracle = parse_sealed_result(results, seed, sealed_dir / "outcome.json")
+        result = None if oracle is None else gate_module().public_result(
+            oracle, gate_module().not_evaluated(case, f"{phase} grades nothing"))
+    else:
+        result = parse_result(results, seed)
     if phase == "snapshot" and (not result or result["sandbox_rc"] or not all(
             (state.task_dir / n).is_file() for n in ("scene_snapshot.jpg", "scene_snapshot_wrist.jpg"))):
         result, error = None, "snapshot did not produce both camera images; inspect replay.log"
@@ -620,10 +727,10 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
                                 ("statements", "error_count", "errors")}
             diagnostic_error["session_dir"] = str(results)
         else:
-            # Charged inspection that reached its own end. Never a score: the
+            # Retry-spending inspection that reached its own end. Never a score: the
             # outcome fields are fixed here rather than taken from any artifact.
-            result = ({"sandbox_rc": 0, "reward": 0.0, "task_completed": 0,
-                       "trial_dir": observed, "session": "diagnostic"}
+            result = ({"sandbox_rc": 0, "trial_dir": observed, "session": "diagnostic",
+                       **state.failure_outcome("diagnostic session grades nothing")}
                       if exit_code == 0 else None)
     try:
         verify_runtime(case, repo)
@@ -631,9 +738,16 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
         error = str(exc)
     if error:
         result = None
+    gate_report = None
+    if (sealed_dir is not None and result is not None and phase in TRIAL_PHASES
+            and exit_code == 0):
+        # The only grade this cell sees. Computed after the simulator exited and
+        # before the row is settled, so the ledger row carries it from the start.
+        gate_report = gate_module().evaluate(case, directory, trial_dir=Path(oracle["trial_dir"]))
+        result = gate_module().public_result(oracle, gate_report)
     world_error = None
     if not error and exit_code not in (None, 0):
-        # A broken authored world is a charged program failure with feedback, and
+        # A broken authored world is a retry-spending program failure with feedback, and
         # the raw simulator outcome is preserved separately so a rejected world can
         # never be read back as a valid B/C success.
         world_error = world_failure(case, directory, phase, seed)
@@ -645,14 +759,58 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
         # other artifacts, and is never consulted by `status`, so a missing or
         # inconclusive mechanism costs no attempt and blocks nothing.
         record["world_use"] = module.trial_feedback(directory)
+    raw_result = None
+    if world_error:
+        # The raw simulator outcome of a rejected world stays with the row in an
+        # oracle cell; in a sealed cell it goes to the sealed ledger only.
+        raw_result = oracle if sealed_dir is not None else parse_result(results, seed)
     state.finish_trial(record, result=result, exit_code=exit_code, error=error,
                        world_error=world_error, diagnostic_error=diagnostic_error,
-                       raw_result=parse_result(results, seed) if world_error else None)
-    if case.get("foundation_revision") == "r1" and phase in TRIAL_PHASES:
+                       raw_result=None if sealed_dir is not None else raw_result)
+    if case.get("foundation_revision") == "r1" and phase in TRIAL_PHASES and sealed_dir is None:
         from aspire.sim.cap.world_model.foundation_audit import trial_feedback
         record["foundation_calibration"] = trial_feedback(directory, record)
         state.save()
+    if sealed_dir is not None:
+        # Oracle beside gate, outside the solver boundary. The public row says
+        # only that the outcome is sealed and where the outer analysis reads it.
+        module = gate_module()
+        self_eval = module.final_self_evaluation(directory) if phase in TRIAL_PHASES else None
+        gate_report = record.get("gate") or module.not_evaluated(case, record["status"])
+        sealed_row = module.seal(case, record, oracle, gate_report, self_eval=self_eval,
+                                 judge_report=gate_report if gate_report.get("source") == "vlm_judge" else None)
+        record["sealed"] = {"outcome": "sealed", "ledger": str(module.sealed_ledger(case)),
+                            "self_eval_verdict": sealed_row.get("self_eval_verdict")}
+        state.save()
+    if case.get("closed_loop_revision") and phase in TRIAL_PHASES:
+        # Online decisions the policy made, reported apart from the framework's
+        # final shadow judgment. Never raises and never touches the retry count.
+        from aspire.sim.cap.world_model.decision_revision import feedback
+        record["closed_loop"] = feedback(directory)
+        state.save()
     return record
+
+
+def parse_sealed_result(results: Path, seed: int, outcome_path: Path) -> dict | None:
+    """A sealed trial's real outcome, read from the protocol's sealed file.
+
+    The public directory is named without the label. The file the replay wrote
+    outside the solver boundary must exist and agree on the directory and the
+    sandbox exit code; otherwise the trial is unresolved infrastructure evidence.
+    """
+    pattern = re.compile(SEALED_TRIAL_RE_TEMPLATE.format(seed=seed))
+    matches = [(p, pattern.fullmatch(p.name)) for p in results.rglob("trial_*") if p.is_dir()]
+    matches = [(p, m) for p, m in matches if m]
+    if len(matches) != 1:
+        return None
+    path, match = matches[0]
+    outcome = gate_module().read_sealed_outcome(outcome_path)
+    if (outcome is None or Path(outcome["trial_dir"]).resolve() != path.resolve()
+            or int(outcome["sandbox_rc"]) != int(match[1])):
+        return None
+    return {"sandbox_rc": int(match[1]), "reward": float(outcome["reward"]),
+            "task_completed": int(bool(outcome["task_completed"])), "trial_dir": str(path),
+            "terminated": outcome.get("terminated"), "truncated": outcome.get("truncated")}
 
 
 def parse_result(results: Path, seed: int) -> dict | None:
@@ -679,16 +837,42 @@ def selected_bundle(case: dict, state: NativeWorldState) -> dict:
 
 
 def check(case: dict, repo: Path, state: NativeWorldState) -> dict:
+    """Assess cell readiness.
+
+    Every returned dict carries a ``decision_type`` key so a machine-readable
+    driver never has to parse the ``errors`` list to distinguish the three
+    situations that surface here:
+
+    ``"terminal"``   — irrecoverable: a TerminalBlocker applies and no amount of
+                       repair work can make this cell ready.  ``ready`` is False.
+    ``"incomplete"`` — recoverable: at least one error exists but it is not
+                       terminal; more development work or a missing file can fix it.
+                       ``ready`` is False.
+    ``"ready"``      — no errors, the cell may be finalized.  ``ready`` is True.
+    """
     working = repo / "outputs/working_codes" / f"{case['suite']}_{case['task']}_fix.py"
     progress = state.progress()
+    terminal_seeds = progress.get("seeds_exhausted_without_graded_evidence", [])
+    # Present on every check output of a sealed cell, ready or not, so the
+    # solver always reads what grades its progress.
+    gate_status = ({"source": case["development_gate"], "sealed": True,
+                    "note": "progress, triage and selection use each trial's recorded gate verdict; "
+                            "the simulator's task label is sealed from this cell until the outer evaluation"}
+                   if sealed_gate(case) else None)
+    incomplete = {"ready": False, "progress": progress,
+                  "decision_type": "terminal" if terminal_seeds else "incomplete",
+                  "terminal_seeds": terminal_seeds,
+                  **({"development_gate": gate_status} if gate_status else {})}
     fix = state.task_dir / "fix_code.py"
     if not fix.is_file():
-        return {"ready": False, "errors": ["missing executable fix_code.py"], "progress": progress}
+        return {**incomplete, "errors": ["missing executable fix_code.py"]}
     try:
         bundle = selected_bundle(case, state)
     except OSError as exc:
-        return {"ready": False, "errors": [f"selected bundle is incomplete: {exc}"],
-                "progress": progress}
+        return {**incomplete, "errors": [f"selected bundle is incomplete: {exc}"]}
+    # Check for terminal blockers (exhausted-without-graded seeds) before
+    # computing completion_errors, so the decision_type is accurate even when
+    # completion_errors also returns those seeds in its own list.
     errors = state.completion_errors(bundle=bundle, working_code=working,
                                      world_required=case["condition"] in WORLD_CONDITIONS)
     selection = state.data.get("selected")
@@ -696,11 +880,25 @@ def check(case: dict, repo: Path, state: NativeWorldState) -> dict:
         errors.append("record the selection reason with `select` so coverage stays reviewable")
     elif selection["bundle_sha256"] != bundle_identity(bundle):
         errors.append("the recorded selection does not match the frozen files on disk")
-    status = {"ready": not errors, "errors": errors, "progress": progress,
+    if errors and terminal_seeds:
+        decision_type = "terminal"
+    elif errors:
+        decision_type = "incomplete"
+    else:
+        decision_type = "ready"
+    status = {"ready": not errors, "decision_type": decision_type,
+              "errors": errors, "progress": progress,
               "selected": selection, "coverage": state.final_coverage(bundle)}
-    if case.get("foundation_revision") == "r1":
+    if terminal_seeds:
+        status["terminal_seeds"] = terminal_seeds
+    if case.get("foundation_revision") == "r1" and not sealed_gate(case):
         from aspire.sim.cap.world_model.foundation_audit import aggregate
         status["foundation_calibration"] = aggregate(state.data["trials"])
+    if gate_status:
+        status["development_gate"] = gate_status
+    if case.get("closed_loop_revision"):
+        from aspire.sim.cap.world_model.decision_revision import aggregate as closed_loop_aggregate
+        status["closed_loop"] = closed_loop_aggregate(state.data["trials"])
     module = world_use(case)
     if module is not None:
         # The selected pair's own executed development trials, audited again as a
@@ -760,13 +958,13 @@ def finalize(case: dict, repo: Path, state: NativeWorldState, transcripts: list[
         "model_served": served, "usage": usage,
         # Actual served context window, not only the configured environment.
         "model_context_windows": sorted(contexts),
-        "attempt_limit": ATTEMPT_LIMIT,
-        "attempts_used_per_seed": status["progress"]["attempts_used_per_seed"],
+        "retry_limit": RETRY_LIMIT,
+        "retries_used_per_seed": status["progress"]["retries_used_per_seed"],
         "seed_outcomes": status["progress"]["seeds"],
         "tested_bundles": status["progress"]["tested_bundles"],
         "rejected_revisions": state.data["rejected"], "aliases": state.data["aliases"],
         "world_program_errors": status["progress"]["world_program_errors"],
-        # Authored REPL failures and uncharged pre-admission blockers, reported
+        # Authored REPL failures and pre-admission blockers that spent no retry, reported
         # separately from graded evidence so neither can be read as a result.
         "diagnostic_program_errors": status["progress"]["diagnostic_program_errors"],
         "screening_blockers": status["progress"]["screening_blockers"],
@@ -786,6 +984,7 @@ def finalize(case: dict, repo: Path, state: NativeWorldState, transcripts: list[
         result["world_use"] = status["world_use"]
     if "foundation_calibration" in status:
         result["foundation_calibration"] = status["foundation_calibration"]
+    result["development_gate"] = case.get("development_gate") or "oracle"
     (state.task_dir / "stage1_result.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
 

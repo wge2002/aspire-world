@@ -156,16 +156,32 @@ class CodeExecutionEnvBase(Env):
             docs.append(f"\n{text.strip()}")
         return f"{self._task_prompt}\nAPIs:\n" + "\n".join(docs)
 
+    #: Opt-in sandbox narrowing for a sealed development gate. Both defaults keep
+    #: the legacy behaviour byte for byte: generated code sees the low-level env
+    #: object and the APIS mapping. A sealed trial installs a read-only view that
+    #: exposes only `env.handle.task_language` and hides APIS, so no route from
+    #: generated code reaches the task label or the simulator state.
+    sandbox_env_proxy: Any = None
+    sandbox_hidden_names: tuple[str, ...] = ()
+
+    def _sandbox_env(self) -> Any:
+        return self.low_level_env if self.sandbox_env_proxy is None else self.sandbox_env_proxy
+
+    def _hide_sandbox_names(self) -> None:
+        for name in self.sandbox_hidden_names:
+            self._exec_globals.pop(name, None)
+
     def _exec_user_code(self, code: str) -> dict[str, Any]:
         obs = self._get_observation()
         # Update dynamic obs while retaining previously defined variables
         self._exec_globals["obs"] = obs
-        self._exec_globals["env"] = self.low_level_env
+        self._exec_globals["env"] = self._sandbox_env()
         self._exec_globals["APIS"] = self._apis
         # Ensure API helper functions remain bound/current
         for api in self._apis.values():
             for fn_name, fn in api.functions().items():
                 self._exec_globals[fn_name] = fn
+        self._hide_sandbox_names()
 
         stdout_buffer = io.StringIO()
         tee_out = Tee(sys.stdout, stdout_buffer)
@@ -197,7 +213,7 @@ class CodeExecutionEnvBase(Env):
         """
         g: dict[str, Any] = {
             "__name__": "__main__",
-            "env": self.low_level_env,
+            "env": self._sandbox_env(),
             "APIS": self._apis,
             # Populated per-step/reset; keep reference stable across execs
             "INPUTS": {},
@@ -209,6 +225,7 @@ class CodeExecutionEnvBase(Env):
             for fn_name, fn in api.functions().items():
                 g[fn_name] = fn
         self._exec_globals = g
+        self._hide_sandbox_names()
 
     def _build_low_level(
         self, src: Env | str, privileged: bool = False, enable_render: bool = True, viser_debug: bool = False

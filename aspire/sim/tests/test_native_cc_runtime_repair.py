@@ -45,7 +45,7 @@ class FrozenRuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(freeze.RuntimeChanged, "frozen runtime changed"):
             freeze.verify_runtime(self.case, self.repo)
         source.write_text("# frozen\n")
-        (self.repo / "cap").mkdir()
+        (self.repo / "cap").mkdir(exist_ok=True)
         (self.repo / "cap/injected.py").write_text("# new module")
         with self.assertRaisesRegex(freeze.RuntimeChanged, "injected.py"):
             freeze.verify_runtime(self.case, self.repo)

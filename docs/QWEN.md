@@ -1,9 +1,10 @@
 # Qwen 部署配置与接口
 
-本文整理仓库已有配置，不表示本次启动或重新验证了模型服务。源码入口包括：
+本文整理仓库已有配置，2026-10-09 随核心源码对齐；本次没有启动或重新验证模型服务。源码入口包括：
 
 - [通用服务启动/状态/停止脚本](../aspire/sim/scripts/common/serve_qwen3_8_flash_next.sh)
 - [OpenAI 接口 smoke](../aspire/sim/scripts/common/smoke_qwen3_8_flash_next.py)
+- [图像交付辅助服务](../aspire/sim/cap/serving/launch_vllm_image_source.py)与[图像接口回归](../aspire/sim/tests/test_vllm_image_source.py)
 - [ASPIRE 客户端](../aspire/sim/cap/llm/client.py)
 - [native CC 连接器](../aspire/sim/scripts/common/claude_with_local_model.sh)与[接口说明](../aspire/sim/docs/experiments/claude-code-local-models.md)
 - [实验服务配置原件](../aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/model-server.json)、[路径占位符示例](../deploy/qwen/model-server.example.json)、[客户端环境示例](../deploy/qwen/client.env.example)

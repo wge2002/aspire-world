@@ -1,0 +1,50 @@
+{
+  "mode": "opus46-executable-world-c-r1",
+  "status": "complete",
+  "arm": "full",
+  "binding": "rehearsal",
+  "world_sha256": "b7522b2b1e2a86141518f5a2b44b0133a878c732f760b2e5c1f0e53a93855c1f",
+  "api_calls": 6,
+  "updates": 0,
+  "queries": 2,
+  "features": {
+    "self_eval": true,
+    "rehearsal": true
+  },
+  "self_evaluations": [
+    {
+      "verdict": "unknown",
+      "evidence_ids": [
+        4
+      ],
+      "reference_evidence_ids": [],
+      "reason": "held: no post-action observation for this fact",
+      "clauses": [
+        {
+          "name": "held",
+          "verdict": "unknown",
+          "reason": "no post-action observation for this fact",
+          "evidence_ids": [
+            4
+          ],
+          "reference_evidence_ids": [],
+          "layer": "rehearsal",
+          "facts": [
+            "grasped"
+          ],
+          "references": []
+        }
+      ],
+      "binding": "rehearsal",
+      "api_calls_before": 6,
+      "caller": {
+        "file": "/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b/aspire/sim/cap/world_model/executable_world.py",
+        "line": 261,
+        "function": "final_judgment"
+      }
+    }
+  ],
+  "closed_loop": false,
+  "errors": [],
+  "result": null
+}

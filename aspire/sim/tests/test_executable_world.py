@@ -208,16 +208,26 @@ def test_existing_prompts_unchanged_without_flag():
                     "condition": condition, "profile": "judgment" if condition == "C" else "legacy_native",
                     "skill_library_dir": "test/skills", "control": "/tmp/control"}
             if revision and condition == "C": case["world_use_revision"] = revision
-            assert new.worker_prompt(case, SIM) == old.worker_prompt(case, SIM)
+            # The user-requested retry rename (2026-10-05) changes the budget
+            # wording deliberately. Everything else must still render byte for
+            # byte: every differing line has to be budget vocabulary.
+            import difflib, re
+            before_text, after_text = old.worker_prompt(case, SIM), new.worker_prompt(case, SIM)
+            changed = [line for line in difflib.ndiff(before_text.splitlines(), after_text.splitlines())
+                       if line[:1] in "+-"]
+            vocabulary = re.compile(r"retr(y|ies)|attempt|charge|spent|spends|slot|budget|interrupted|BLOCKED|smoke|per-seed|snapshot", re.I)
+            assert changed, "the rename should have changed the budget wording"
+            assert all(vocabulary.search(line) for line in changed), [l for l in changed if not vocabulary.search(l)]
 
 
 def test_supported_rehearsal_error_rejects_without_charging_trial(tmp_path):
     import native_world_protocol as protocol
     case = {"executable_world_revision": "r1", "c_arm": "full"}
     state = types.SimpleNamespace(task_dir=tmp_path, reject=lambda *args: rejections.append(args),
+                                  validate_admission=lambda *args: None,
                                   begin_trial=lambda *args: pytest.fail("cannot charge simulator"))
     rejections = []
-    with patch.object(protocol, "verify_runtime"), patch.object(protocol, "collect_bundle", return_value=({}, {})), \
+    with patch.object(protocol, "verify_runtime"), patch.object(protocol, "collect_bundle", return_value=({"policy": "a" * 64}, {})), \
          patch.object(protocol, "runtime_env", return_value={}), \
          patch.object(profile, "checks", return_value={"status": "rejected", "directory": "/tmp/check"}):
         with pytest.raises(protocol.ProtocolError, match="offline candidate error"):

@@ -1,0 +1,3 @@
+# Three-task Qwen closed-loop round
+
+User requested a new round with three DLCs on2026-10-04. Three fresh C/full tasks: bowl-on-plate, bowl-in-top-drawer, open-middle-drawer. Enable closed_loop_revision=r1 with original Fix Loop and local Qwen settings. One independent8-L20Z job per task, priority9,max1002min, max3 submissions. Dev51–65/three charged attempts per seed including one fresh seed51 diagnostic; freeze then heldout1–50. No prior solutions or heldout feedback as solver input. Expected8–16h after scheduling. Both platform and live nonprivileged actual-work preflights required. No automatic resubmissions or recurring monitoring. Exact scope and mapping in CC_TASK.md.

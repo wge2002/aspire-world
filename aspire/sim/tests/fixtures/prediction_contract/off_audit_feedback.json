@@ -1,0 +1,113 @@
+{
+  "revision": "r1",
+  "trial_dir": "<TMP>",
+  "status": "inconclusive",
+  "summary": "the evidence does not settle whether an answer was used; see the site notes",
+  "counts": {
+    "supported_use_candidate": 0,
+    "logging_only": 2,
+    "inconclusive": 1
+  },
+  "recorded_queries": 2,
+  "trace_available": true,
+  "policy_sha256": "a4e5f65cee4ede8dbcf258a633b100eb85a71773264487057b2772c8e92b997f",
+  "world_sha256": "b7522b2b1e2a86141518f5a2b44b0133a878c732f760b2e5c1f0e53a93855c1f",
+  "sites": [
+    {
+      "index": 0,
+      "name": "prediction_summary",
+      "function": null,
+      "block": 0,
+      "block_line": 8,
+      "line": 9,
+      "column": 10,
+      "forms": [],
+      "notes": [
+        {
+          "line": 10,
+          "detail": "the answer flows into summary.get(), which this reader does not follow"
+        }
+      ],
+      "bound_names": [
+        "summary"
+      ],
+      "recorded_queries": 1,
+      "recorded_errors": 0,
+      "recorded_names": [
+        "prediction_summary"
+      ],
+      "ambiguous": false,
+      "classification": "inconclusive",
+      "corroborated": false
+    },
+    {
+      "index": 1,
+      "name": "prediction_checks",
+      "function": null,
+      "block": 0,
+      "block_line": 15,
+      "line": 16,
+      "column": 19,
+      "forms": [
+        {
+          "form": "discarded",
+          "line": 16,
+          "detail": "bound to grasp_checks and never read"
+        }
+      ],
+      "notes": [],
+      "bound_names": [
+        "grasp_checks"
+      ],
+      "recorded_queries": 0,
+      "recorded_errors": 0,
+      "recorded_names": [],
+      "ambiguous": false,
+      "classification": "logging_only",
+      "corroborated": false
+    },
+    {
+      "index": 2,
+      "name": "prediction_checks",
+      "function": null,
+      "block": 0,
+      "block_line": 16,
+      "line": 17,
+      "column": 9,
+      "forms": [
+        {
+          "form": "discarded",
+          "line": 17,
+          "detail": "bound to checks and never read"
+        }
+      ],
+      "notes": [],
+      "bound_names": [
+        "checks"
+      ],
+      "recorded_queries": 1,
+      "recorded_errors": 0,
+      "recorded_names": [
+        "prediction_checks"
+      ],
+      "ambiguous": false,
+      "classification": "logging_only",
+      "corroborated": false
+    }
+  ],
+  "sites_omitted": 0,
+  "mismatches": [],
+  "notes": [],
+  "audit": "<TMP>/world_use_audit.json",
+  "limits": [
+    "A corroborated use candidate is static syntax plus a recorded query at that call site. It is not evidence that the consumer statement executed.",
+    "Nothing here says the world's answer was correct, or that consuming it helped the task.",
+    "No minimum query count, print statement, model self-report, or forced-output counterfactual is treated as proof of use.",
+    "Dependencies through helper boundaries, containers, comprehensions or dynamic attribute access are reported inconclusive \u2014 that is missing coverage, not evidence of non-use.",
+    "Queries written inside a class body or a parameter default are not located at all; a recorded query with no matching call site is reported as an identity mismatch.",
+    "Recorded caller lines are block-local, so two blocks can share a line number. An ambiguous match is marked and corroborates no site exactly: it is reported inconclusive, never as corroboration of one of the candidates.",
+    "The blocks run in order in one namespace, so a world import in an earlier block is honored. A value bound in one block and read in a later one is cross-block dataflow this reader does not model: it is reported inconclusive, never as bound and never read.",
+    "A block that does not parse is reported inconclusive; no_query is claimed only when every block parsed and neither a call site nor a recorded query exists.",
+    "Mechanism status is separate from protocol completion and simulator success, and never gates a trial, a selection, or a finalization."
+  ]
+}

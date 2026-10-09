@@ -1,1124 +1,9 @@
 {
-  "snapshot_date": "2026-10-01",
+  "snapshot_date": "2026-10-09",
   "source_upstream": "https://github.com/NVlabs/ASPIRE",
   "source_base_commit": "7ba73d3bcac8f6b6d4a7d67ed4040988f768d282",
   "includes_uncommitted_working_tree_changes": true,
   "files": [
-    {
-      "path": "CC_USAGE.md",
-      "size": 10391,
-      "sha256": "3603cb32f9c2fff025c11c7141c5da0be6374df44c39312d90919e4884acd4d0"
-    },
-    {
-      "path": "aspire/sim/.claude/libero/code-world/INSTRUCTIONS.md",
-      "size": 9530,
-      "sha256": "57cd70ee0c570ce5d0491c9dfb43d3fabf16aa8dadc9231da63db7d489ee20a5"
-    },
-    {
-      "path": "aspire/sim/.claude/libero/code-world/SKILL.md",
-      "size": 4027,
-      "sha256": "da851dbb8976252a0cfa905ed48a23e00a1558477c0101b7c94b2c09b7790222"
-    },
-    {
-      "path": "aspire/sim/.claude/libero/code-world/main-agent-prompt.md",
-      "size": 3404,
-      "sha256": "2b8cfe79eeead62126ea876df0419fe394fc606654be26f574e3a36c634a9ae6"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/README.md",
-      "size": 6014,
-      "sha256": "8d10094ad320f7d3cb07f5778db82a63a9bad323dada2312ea5197794833ad11"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/__init__.py",
-      "size": 348,
-      "sha256": "0f314f1889b4e29b01661d7874d9a6db98cb88f04022835cec06d168aaac0ede"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/evidence_state.py",
-      "size": 5993,
-      "sha256": "994ad032989d0073b4268d6dac226f24b58a1f6cce6a9fa56871903a21cf4f3b"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/executable_world.py",
-      "size": 23194,
-      "sha256": "ca6c151beac2944ce652efbe152bd6c6fd0ff21ed3c6476a7e1976c846ef670d"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/fix_loop_scene_broker.py",
-      "size": 13273,
-      "sha256": "62ea203d8da6134c10957bc8e917d25880cf8ddaecbed88f00a57f9712c660dc"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/foundation_audit.py",
-      "size": 3812,
-      "sha256": "3d6749f33a62e14abcb3494f37b80c5d12189bc08675edc7634a676283127229"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/judgment_world.py",
-      "size": 8199,
-      "sha256": "c5fe598738b85e4069f97b666630dc4f0086691990afd2536eea12c8f2f54309"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/libero_capture.py",
-      "size": 27491,
-      "sha256": "b21b88474369262fcfb10a8622cfd9ae356596866f32e381d6b156b332b66f3c"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/live_broker.py",
-      "size": 47270,
-      "sha256": "a9156a273d27070c87d0f4eb0835d4c56a1c583367d3ef69cf8a899eac371107"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/native_world_broker.py",
-      "size": 20306,
-      "sha256": "29482e53e30b49c8a6172ec03679876a2857c3adcdb9d55ed6ba35685ec861d1"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/ordinary_fix_loop_guard.py",
-      "size": 23445,
-      "sha256": "827d4b2cf9286d0af5bacbc8e61a58b31999cd5466eb82324ad2062ae6571b37"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/program.py",
-      "size": 5581,
-      "sha256": "8e120a2e818f092584564fff97f45aa29917f149df9c93b68e05927fa03e53d2"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/reference_relational_world.py",
-      "size": 42588,
-      "sha256": "63696bbf74bb1e3cf025a1f2d3518c6bc70699e9599b368f60f5e3c76621b4ab"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/reference_scene_broker.py",
-      "size": 14001,
-      "sha256": "e8aaf87da3ac5d80ece0376a6788e5eb08249616e31c3386a73e70ea9e1a88ec"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/relational_scene_broker.py",
-      "size": 26526,
-      "sha256": "8938325623bfadb8df884d314cab7cad2de22fe5d73fef17297204cf007ef437"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/runtime.py",
-      "size": 16426,
-      "sha256": "3a50b12f603a4961c467ff25941ef9aaffa487d10bb05f45ec5bcd364e6a1d49"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/scene_broker.py",
-      "size": 18774,
-      "sha256": "19a141968cd8e4cca967934627e7845c3718a40df6f675aae64cac8d873d8074"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/simple_world.py",
-      "size": 9569,
-      "sha256": "7b364f1445cab2ec3475a9568e6d7ef435df2c0c575e2c8fa6c17b32916bf32e"
-    },
-    {
-      "path": "aspire/sim/cap/world_model/world_use_audit.py",
-      "size": 35056,
-      "sha256": "0b5272f084126bd0559492eb7016fcc37792ee46e7a50d048f2d14eeffd136d1"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/claude-code-local-models.md",
-      "size": 12999,
-      "sha256": "44cfcff1f813871427da80b152c703c7014092101d78fb8f6a8d1b73b4cdcd8c"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/NATIVE_WORLD_INTERFACE.md",
-      "size": 5929,
-      "sha256": "58f191a9c7f250706f1ce428f8b026a0bdf728c4a7c104e82b0d9d328fcaba30"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/PROTOCOL.md",
-      "size": 7223,
-      "sha256": "b9c3b7e6cf127ddacc10227c110e0ffb63fe46b78f7e3baa94cbb74bb71b4852"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/collect.py",
-      "size": 6003,
-      "sha256": "e11617dee20c93ace23c92c1335153238a2f4e4ccc8f6b33e9396f125fa00e71"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/engineering-base/scripts/libero/native_world_campaign.py",
-      "size": 40319,
-      "sha256": "712abe6f7cf1870d6b65ab0f7263efc8ba7e2fcae6e6808d49d5717bba39e18b"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/integrate.py",
-      "size": 4816,
-      "sha256": "c06358a75186866fda3da080ed308d79a647de36df5cb7dcdfa75f59754e1683"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-and-launch.py",
-      "size": 11665,
-      "sha256": "704072a9c9d2e3ff98a9b47834524a4cef6239d4faaa29cc50391f5069f93f5a"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-r2.py",
-      "size": 12001,
-      "sha256": "8258c9e536081c4fe8bdbded8c1ffbd0c0de66fbaac4885f1a6086b414acef77"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/resume-bowl-eval.py",
-      "size": 5812,
-      "sha256": "6ef147fbe1f98add93920aa357deeee935f117f5608b15c25df62e19b6f9d378"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/cell_read_guard.py",
-      "size": 4738,
-      "sha256": "bb80880b8041cecd18c51343c2ab459e8d338997d4ec484c9ef8b771c215214f"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/evaluate.py",
-      "size": 3656,
-      "sha256": "e0b9dabff6da22b3b3a6746279520c922f1f0f3f10c1deb322a895eac11920c1"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/infra_guard.py",
-      "size": 2933,
-      "sha256": "dc04d617a254ec2d95ceabd90bbb1421ee87c80a7a60a1e02eaf782629ae7589"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/legacy_stager.py",
-      "size": 35766,
-      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/lineage.py",
-      "size": 1718,
-      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_cc_stream.py",
-      "size": 9988,
-      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_lineage_r2.py",
-      "size": 22368,
-      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/run_cell.py",
-      "size": 8955,
-      "sha256": "e8a5e33075cba6fbf839a66b2eb128c3b7ba9984d0de07dfeb484782d3672665"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/PLAN.md",
-      "size": 3617,
-      "sha256": "d16bf962d783c761288e3a0558f554279e16718eebb426e69bce891930110ce1"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-entry.sh",
-      "size": 651,
-      "sha256": "f97a49d25e70b7811c477d0a8c27cc5a74388dca275a5f1ae545036583796641"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-supervisor.py",
-      "size": 14026,
-      "sha256": "4ec5f48417926131051135aafaa6dd821402d037ee562db62d33dc54ded93386"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/prepare-pilot.py",
-      "size": 20803,
-      "sha256": "5104362c03f3918be21ab2d4b5d5379cf192a1d1b2c1ba3a251ce106467d47f1"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/qwen-native-compat.py",
-      "size": 8402,
-      "sha256": "7e9cd4509efee2c6da7976767b471b54dac65e755915149f99de494e3284d67b"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/model-server.json",
-      "size": 2143,
-      "sha256": "22c61284fd39db1310bc7cecbb09ec06ddcb417aeb4156fbea8a163829985c67"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_compat.py",
-      "size": 7630,
-      "sha256": "9e2afa4e9a95b7c8541234dab43f5e525c05d930e52c7798ec12a4f220b8fa1d"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_runtime.py",
-      "size": 5789,
-      "sha256": "36a1d1d118faaec4f30723aff02b804b83fabf3cae94b1891df7d308bb32edda"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/run-dsw-preflight.py",
-      "size": 4780,
-      "sha256": "ccfa258216f7b7fcac845908badabf408131cf458ba94460841defeb98d5bb9e"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_assignment_guard.py",
-      "size": 10858,
-      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_import.py",
-      "size": 16138,
-      "sha256": "2987a80ba2c880c6a3676553e84c73bc0a09c5dccb215070a5d2a86a777199b4"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_render.py",
-      "size": 2066,
-      "sha256": "dbfa227456fe03947abb5cf28d8849680c98089387fbe7970373421fff1da4a3"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_scope.py",
-      "size": 11982,
-      "sha256": "b4c01356d79886ac03ba52a5286be91dd1bc06e976659aadfd3c3c44d2cc2afa"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/run_cell.py",
-      "size": 11401,
-      "sha256": "1533310a0fecd4d3eee3ce29c9a96d6ad7e3551f6ac21a5df2fe88c73028419a"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_local_vllm_provider.py",
-      "size": 11106,
-      "sha256": "c3cf48b6a73792e32001e483f83e2c8f7503cb07f4804121ec6c774b8377b27f"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_pilot_helpers.py",
-      "size": 21508,
-      "sha256": "48df32e72f282cbcfdbd35e3d93020109f38082593f15f778bdaf4f9ba921b37"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/ACCEPTANCE.md",
-      "size": 2449,
-      "sha256": "bb3a7447a846fc9eb965e6342fad74da6362d73275aa2f38caed8b9ba6027ade"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/IMPLEMENTATION.md",
-      "size": 4168,
-      "sha256": "dd6bd3ff190ecf393c941c1110b3a14ed304d5fc8cfaaf0c50ca08fba1406949"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/NATIVE_WORLD_INTERFACE.md",
-      "size": 11611,
-      "sha256": "20836585286b5245d640241f10d42a92461f2c9e04863204b9777598979d495f"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/PLAN.md",
-      "size": 4569,
-      "sha256": "959d63bed98f9651e67e85148887fbdd4d91844c0ba9e382da3a5b2699c5c9b2"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/foundation_import.py",
-      "size": 3603,
-      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/prepare-foundation.py",
-      "size": 32072,
-      "sha256": "99b44af060148b9429042da3e45c84ba2cb0e7a90a205480aac56508bc8b038d"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowl-c.py",
-      "size": 17521,
-      "sha256": "e3833377a92ee9df0c59993c43febd1e8e567d44a521f5b8f5233bb02c1b6d3d"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowldrawer-c.py",
-      "size": 17659,
-      "sha256": "b5a51d5433082d9c86b0aa5403c3279df64434ff6afcd9be10c2e61b568f8472"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-drawer-c.py",
-      "size": 17591,
-      "sha256": "6e486c10f2bb4d00f5c5f63ded8b649eca393ef9ca199f91514762c370203179"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/submit-foundation.py",
-      "size": 2992,
-      "sha256": "69b788df515b8272eb987c05233f8b36ca4f23f979296f052d1ec1ded93023f5"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/cell_read_guard.py",
-      "size": 6601,
-      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/dlc-supervisor.py",
-      "size": 23946,
-      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/foundation_import.py",
-      "size": 3603,
-      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/full_deadlines.py",
-      "size": 3371,
-      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/heldout_stop_on_infra.py",
-      "size": 3168,
-      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/infra_guard.py",
-      "size": 3669,
-      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/legacy_stager.py",
-      "size": 35766,
-      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/lineage.py",
-      "size": 1718,
-      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_cc_stream.py",
-      "size": 9988,
-      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_lineage_r2.py",
-      "size": 22368,
-      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/output_ownership.py",
-      "size": 5889,
-      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pilot_assignment_guard.py",
-      "size": 10858,
-      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pristine_a_render.py",
-      "size": 4587,
-      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/run_two_task_cell.py",
-      "size": 30424,
-      "sha256": "68baf4460a5aee8b2a693d4e3298381e1ac3bfebad51df2b870a541f12749733"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_render.py",
-      "size": 2095,
-      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_scope.py",
-      "size": 8266,
-      "sha256": "70220ccf9278845947f981bd89e493b43db6893ad6a0750fb3d7639227f422b8"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/NATIVE_WORLD_INTERFACE.md",
-      "size": 5929,
-      "sha256": "58f191a9c7f250706f1ce428f8b026a0bdf728c4a7c104e82b0d9d328fcaba30"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/PLAN.md",
-      "size": 5128,
-      "sha256": "0462eb6815a60b28f1c989bcc538f1c5cc381573b3d3d44c63a6d06863b8469e"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/prepare-full.py",
-      "size": 24170,
-      "sha256": "edd7e71c5bc6c78c69d947d28df60f89cb3bc70e2374ff563dbcabb224e7d7f1"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/replay-fixture-check.py",
-      "size": 5180,
-      "sha256": "c334e32e4ddc13ab2ea4b79910b35f28d33a478a77a9f15ef7362d252ff5a862"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/run-dsw-preflight.py",
-      "size": 4814,
-      "sha256": "f15916138c7dbac684b7a9343f8cce709db749924f0ebbb6fdcef989ebf132f9"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/cell_read_guard.py",
-      "size": 6601,
-      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/dlc-supervisor.py",
-      "size": 23488,
-      "sha256": "7222e51cea76bda336e65b4d4613950633e41bb2dc7c41332c13da61be5e2d49"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_deadlines.py",
-      "size": 3371,
-      "sha256": "f7f3caf6b62ff79dc484c9f1b7ef1fe08f5d7be4f263eb6b24d6469d10d46295"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_import.py",
-      "size": 16723,
-      "sha256": "b3832c2c4047dc6f3dc10f522556ee544ccfb957c551f31c1d66e592cedd2fd0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_render.py",
-      "size": 1899,
-      "sha256": "883c58abbace7797092c6969f4dc960abb0f7080b8cf1d51afb70a59ad90fb2d"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_scope.py",
-      "size": 9674,
-      "sha256": "150e34720d313e36317ce26f812fcadd5f5ff77626f0d586325ea99581a89bd0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/heldout_stop_on_infra.py",
-      "size": 3168,
-      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/infra_guard.py",
-      "size": 3669,
-      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/legacy_stager.py",
-      "size": 35766,
-      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/lineage.py",
-      "size": 1718,
-      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_cc_stream.py",
-      "size": 9988,
-      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_lineage_r2.py",
-      "size": 22368,
-      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/output_ownership.py",
-      "size": 5889,
-      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/pilot_assignment_guard.py",
-      "size": 10858,
-      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/run_full_cell.py",
-      "size": 33232,
-      "sha256": "782fb6678347788047e94088a7b72da1dd113ee5ce6554d9713cee00a26152a0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_core_acceptance.py",
-      "size": 6433,
-      "sha256": "84049d7efd759808d34a86cedb3cb55fb4ff0af1f55a025d3967cd81d6f31677"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_driver.py",
-      "size": 16407,
-      "sha256": "2eea34e38470c3a37f72b142a813c7cff7e0546f81e4ecdeac94a67793d62517"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_stager.py",
-      "size": 3138,
-      "sha256": "cdd6ff50ddad3f937b8c49acce28dcdf251b7974db461b1da6b0601b61af1144"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_output_ownership.py",
-      "size": 3124,
-      "sha256": "a3e84d807bcef8de5f1a2ae327e3caf27e23a9d2f7ef1064f66cd29647d8cbf2"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_qwen_capacity_acceptance.py",
-      "size": 1802,
-      "sha256": "6e5aabf0bc9aafe6233fc2b731c30788b1250d8d5d5d0185bd6696671c9d4ed0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/wait-checkpoint.py",
-      "size": 1236,
-      "sha256": "9ab5900c7d058bb6822c63a9fa292a0d74f2b6670f786a58943a6236a844260e"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/NATIVE_WORLD_INTERFACE.md",
-      "size": 6039,
-      "sha256": "d02a19f7c9590807e0268a4e8f929c6efe7f20e77615367755c49b3bb4faecef"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/PLAN.md",
-      "size": 3798,
-      "sha256": "df0bf8faa70c739a97380d852b1af76949542d323b704091aac0cf921459e23b"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/drawer-pair-dlc-entry.sh",
-      "size": 1516,
-      "sha256": "b9622684ec632471c4af64615ba2b7a79328e1e13c1c5495291e459f07962b0d"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/make-c-r2-driver.py",
-      "size": 15962,
-      "sha256": "bd2795b49178ec07a4f0e6b2d2a0a30b42afa7605910efb44f57972e9630c774"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/prepare-two-task.py",
-      "size": 32160,
-      "sha256": "21d02e5c1f0f09351bcf6845e7e5fc5ecdb45a3c9e569e0031f81a727ea17dd7"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-bowldrawer-c-r2.sh",
-      "size": 3502,
-      "sha256": "fa20b1de863daaac8c427b0516dbaaf897942f3c80e272eec42641116c6127d8"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-drawers.sh",
-      "size": 3892,
-      "sha256": "ff85c196c0577f1e13167e051638951eb702a0b45c8592709919bf20891c8ff4"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/reference/expected-baseline-prompts.json",
-      "size": 2659,
-      "sha256": "5a52a73485d96bb3b624c2dd5d58ed274a3ffbf35e5499add6026568a652a273"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/rescue-c-job-marker.sh",
-      "size": 1864,
-      "sha256": "4c2d0c703bdcc8742e8fc1503bf565246b3f765096daaa05e102b88b877caf8d"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-a.py",
-      "size": 7838,
-      "sha256": "a8695b61f5b7edba616192000c8dcf655fe1468cbbc6099aee0038b60c51512a"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-c.py",
-      "size": 18292,
-      "sha256": "ed489ac41ee281775db0808b7bd584c7e1c151807458530b66d5c14b499b3137"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-import-bowldrawer-a-r2.py",
-      "size": 1361,
-      "sha256": "dde286614bb4ccaf32eec676e3f56e84a02b56fb744a29e825b38418c98b9b05"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-a-r2.py",
-      "size": 14519,
-      "sha256": "4b2a8544e334202918e76f836c33844fdb287bc31fd192d34117f8e0ad8dc633"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-c-r2.py",
-      "size": 21384,
-      "sha256": "33d884068e11e443ff625dc4657443052da59b173106b9a9cbf231505db78cb9"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/cell_read_guard.py",
-      "size": 6601,
-      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume.py",
-      "size": 27401,
-      "sha256": "9144c60f3908e920f8deac422a751b1b806a417c2135dfd1b3722672b7be56a2"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume2.py",
-      "size": 28308,
-      "sha256": "76a2c79089bd5d016f1449b6fd94aa19998737190ac3aab7e5933962966d25d7"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-two-task.py",
-      "size": 25650,
-      "sha256": "88ad390b157d230dedf8e6ad3eb7b1a6e3bdfe714223bc257f2aeb041af46f66"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor.py",
-      "size": 23488,
-      "sha256": "7222e51cea76bda336e65b4d4613950633e41bb2dc7c41332c13da61be5e2d49"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/full_deadlines.py",
-      "size": 3371,
-      "sha256": "f7f3caf6b62ff79dc484c9f1b7ef1fe08f5d7be4f263eb6b24d6469d10d46295"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/heldout_stop_on_infra.py",
-      "size": 3168,
-      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/infra_guard.py",
-      "size": 3669,
-      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/legacy_stager.py",
-      "size": 35766,
-      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/lineage.py",
-      "size": 1718,
-      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_cc_stream.py",
-      "size": 9988,
-      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_lineage_r2.py",
-      "size": 22368,
-      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/output_ownership.py",
-      "size": 5889,
-      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pilot_assignment_guard.py",
-      "size": 10858,
-      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pristine_a_render.py",
-      "size": 4587,
-      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines.py",
-      "size": 1022,
-      "sha256": "9d8f14d02ca0871ba3680736e9c96c48c6b38cdec79f8184da827da57aeb9879"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines2.py",
-      "size": 1245,
-      "sha256": "1a82901e8e03fc932f76a37f294f5dfcbaeb31a6ca87c9bcdfd92c93b9101f72"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell.py",
-      "size": 34140,
-      "sha256": "11f5b9c790cc454c05b06e63bf5c217f1bb6920a943f81dc89e13ea0305159fb"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2.py",
-      "size": 41934,
-      "sha256": "941ee185c08a35c726d7f15610daebc7ac4b5c62056814261475312325282a7e"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2_resume.py",
-      "size": 41345,
-      "sha256": "09e754d2e949685ce7028a22a1c938c151b9cb010ba1d22be21c9739969bb16b"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_r2.py",
-      "size": 37869,
-      "sha256": "89856895b328425012573715b3aae50511721bdce407314af018b677eeffada2"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import.py",
-      "size": 13755,
-      "sha256": "5c6a6af0fd1797c98961f913c3f3cc58a9317772e28e46cc4132ed1e0cb386ef"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import_c.py",
-      "size": 31820,
-      "sha256": "be74852f6100f75b2a9b741e94239964bd223668f75fdc2bead51858ec94abbf"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render.py",
-      "size": 2095,
-      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render_r2.py",
-      "size": 2052,
-      "sha256": "8a187f892fa07bb1853f17267cea902d1987d6d26ad378467b7424aa40cb9be1"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope.py",
-      "size": 8844,
-      "sha256": "d7204b0786575c844258e88928f7593fe4f5bf2599fd5c7138e999700223bd66"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope_r2.py",
-      "size": 8188,
-      "sha256": "86376a28b2b8b04d7f4b989143363826e259d6e07767abed7a8206940d4e78b4"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/tests/test_lineage_default.py",
-      "size": 6554,
-      "sha256": "946f2836fe1080700c1a915457caf0fde99097d13bd9fb3eaeab3fce2d3f9ce9"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-rerun-20260919/baseline-contract.json",
-      "size": 5651,
-      "sha256": "9f2db337b9f88369f3aaf0b5320a2d30afa075443d055344dd5b30418300b1cd"
-    },
-    {
-      "path": "aspire/sim/env_configs/libero/code_world/capture.example.json",
-      "size": 462,
-      "sha256": "a7dc36067e0d7678cf82a1c2e49c33e5085b043207f36c1f16aaed2877e33459"
-    },
-    {
-      "path": "aspire/sim/scripts/common/claude_with_local_model.sh",
-      "size": 3834,
-      "sha256": "b77f6bcc1e860ae6a97734ed22e5cf5ca297583e53bb01f03c415c361dd85f1e"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_compat.py",
-      "size": 7630,
-      "sha256": "9e2afa4e9a95b7c8541234dab43f5e525c05d930e52c7798ec12a4f220b8fa1d"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_dlc_entry.sh",
-      "size": 589,
-      "sha256": "a3db4afd1b7ddc9e218131285bb1db314ffda9b3ef12e20caaf0fabbbecd1ada"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_freeze.py",
-      "size": 4961,
-      "sha256": "1436f108c077ff7651eb0d71cc1decabd8d1e53fa18335f5d486e3f22677789e"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_group.py",
-      "size": 5912,
-      "sha256": "4e77ec46a49f192afc01db4e2ee4beb35a3416aa7ef44ba2e9690d3678caf57b"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_guard.py",
-      "size": 4409,
-      "sha256": "da3b3174c49a607da99b1603e23034dadd094360e3bc2b459cbb8ce96b1bb2bc"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_permissions.py",
-      "size": 884,
-      "sha256": "abaedbbc2ce31777ef0364940c7e121199d90706b0fd631f855bb6eb35d07d05"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_runtime.py",
-      "size": 5789,
-      "sha256": "36a1d1d118faaec4f30723aff02b804b83fabf3cae94b1891df7d308bb32edda"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_skill_probe.py",
-      "size": 5571,
-      "sha256": "b441e44d6af2bb99f5bba3193f587a4754a801e5c2589b2909f6dfba994b5c31"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_stream.py",
-      "size": 6451,
-      "sha256": "aae166f204dec2d5c5182956dad42cdf09e86e2f19d224b804d17ff2e5f4f843"
-    },
-    {
-      "path": "aspire/sim/scripts/common/native_cc_trial_process.py",
-      "size": 3008,
-      "sha256": "158d96e79f850c8075929b1b9dfe021caf6ddd90bfdfb5da1ab22b29f79620d2"
-    },
-    {
-      "path": "aspire/sim/scripts/common/serve_deepseek_v4_flash_0731.sh",
-      "size": 6145,
-      "sha256": "d2a9d4586eb6339edc71441b773f550ee7e2618f4d08b45e9b628b3ff0f2177a"
-    },
-    {
-      "path": "aspire/sim/scripts/common/serve_deepseek_v4_flash_vision_exp.sh",
-      "size": 9067,
-      "sha256": "626011eb0293aecb5830acb6da61d777d249a825f14f3964e0910ed060b8f3d1"
-    },
-    {
-      "path": "aspire/sim/scripts/common/serve_qwen3_8_flash_next.sh",
-      "size": 6086,
-      "sha256": "3d8f35b97549b5a2e9e2d3507d640b174445da597bd933b044d47c289d8bc84d"
-    },
-    {
-      "path": "aspire/sim/scripts/common/smoke_deepseek_v4_flash_0731.py",
-      "size": 4414,
-      "sha256": "e4b7861fc337eb929cd2fb375236cc6dbeae65af8c6e16238c854b1e98bc7c72"
-    },
-    {
-      "path": "aspire/sim/scripts/common/smoke_deepseek_v4_flash_vision_exp.py",
-      "size": 6239,
-      "sha256": "b2b04bbd0ca62c4276305488b349b4c24d917da6e9d0e06eb8ae8d60b9dd04b4"
-    },
-    {
-      "path": "aspire/sim/scripts/common/smoke_qwen3_8_flash_next.py",
-      "size": 6878,
-      "sha256": "5c6145834fed2a5156968d295045896a587067380f79af6ae28f1c0b6c411700"
-    },
-    {
-      "path": "aspire/sim/scripts/common/submit_dlc_once.py",
-      "size": 2863,
-      "sha256": "0a1e97c00c9ba3dd46de3f908a441eb96397204cc8eaf4e5c1647e28e8229acf"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/audit_scene_bowl.py",
-      "size": 11472,
-      "sha256": "d2ac46be4d4246a7e9055e0f693ceec02932579b6053a8215b89cb241aa445c3"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/audit_scene_world_smoke.py",
-      "size": 9429,
-      "sha256": "d0bc2d7ded3b0fd1971aaef29a13bbf94e9f9fca7a12a724042d4aa2de0a581a"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/code_world.py",
-      "size": 16423,
-      "sha256": "adfb9a03a595bd282e0ba428eeec1a2e17a28300d8babb59079e3dc68aa1a4fb"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/deepseek_fix_loop_worker.py",
-      "size": 216,
-      "sha256": "8a074b70bb9e22d119ed76fe8f94254931d42c7eed43e318e7d8ea12e7a3402f"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/executable_world_profile.py",
-      "size": 17417,
-      "sha256": "b21fa8151bb28a1796924a607c8703584d52bfef5e47b109f0204673b95f3c5b"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/fix_loop_state.py",
-      "size": 11354,
-      "sha256": "1f772c4016425dc49abafb669e7ce2a1ed89c44d9c95f75fd4f7f203f8eae918"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/fix_loop_worker.py",
-      "size": 37091,
-      "sha256": "17e629b8789590f3798dbe2a7273194ce3aee852e74ef50a6510079295a76aad"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/generate_relational_world.py",
-      "size": 2864,
-      "sha256": "aa9d5b10a7a198018ebb620aa0cc2a958feec20a049862092a085b34074f3567"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_cc_campaign.py",
-      "size": 25684,
-      "sha256": "09267bc065587ff9f937c47ec3dd56763bfb0213847116c4a856d7c4f0809d3f"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_cc_protocol.py",
-      "size": 10421,
-      "sha256": "a9ea159093631bf41a0b3ce985a1622cba38857e654bb52c561c3805265e21ff"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_cc_recover_trial.py",
-      "size": 5660,
-      "sha256": "6b1b27d6fba755fee42dcdbc26bfa53081b884472c5755ffaf834af7764344e3"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_cc_toolchain_probe.py",
-      "size": 2046,
-      "sha256": "c0d1dd6b1b807104c1c3898e47907eeb61b0660d62f161fbfae8ea77bd6f62e2"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_world_campaign.py",
-      "size": 46314,
-      "sha256": "ff9fe54f4323571f3f9c223c485f23b04d78295365a542322c42611f3f099324"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_world_fixloop_state.py",
-      "size": 38507,
-      "sha256": "692cf5dcd5e29ddea35184006876c0e1551b2e125b68c23904a355c0e4fedfda"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_world_heldout.py",
-      "size": 10412,
-      "sha256": "1e81ea7c28754b9c70acfa4f5515d84b6ab3a2b33cb24f089b42b732d342a344"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/native_world_protocol.py",
-      "size": 45647,
-      "sha256": "8a15beedb07038d788149d81ff0b4c984a57d2a43e63387e8a80142a60ca4e0d"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/paired_bowl_supervisor.py",
-      "size": 18554,
-      "sha256": "2b2f5b4cb9c409a7befe05f677a459cf08e625d2accfae33004d737a0e2cc556"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/probe_scene_world_control.py",
-      "size": 7017,
-      "sha256": "49af245f6128a7bb7bc482159ae674f50e772cac9e761476c612ab166b38d47f"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/qwen_fix_loop_worker.py",
-      "size": 212,
-      "sha256": "1085acb867ac8f3e30c7e64eacd68c00771fca830c3f2760e6eedec07fdb3980"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/relational_scene_bowl_supervisor.py",
-      "size": 12176,
-      "sha256": "23050810c9e2f8781b1072e90e053431273e51fc6ec3e7e7a18fbd7a31e208ac"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/render_scene_bowl.py",
-      "size": 3626,
-      "sha256": "1f10e3a2d629164a532609743cc890c22bccaf6de6b211f96df37443f378e0d4"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/render_scene_world_diagnostic.py",
-      "size": 3878,
-      "sha256": "91d669387ddc840ee90d8dc0f30d0d77600bf514651c77d90a225e48353ec21a"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/render_scene_world_smoke.py",
-      "size": 4696,
-      "sha256": "8035081359bfd8bedced9aefa96985b7aa274039ea4f7f4946ce1c7a3dd2b761"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/scene_bowl_supervisor.py",
-      "size": 10684,
-      "sha256": "355253c211effbb8a55d5b87294f6c71c05dc40eeb26bc05de06de8e1505793f"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/scene_world_smoke.py",
-      "size": 22712,
-      "sha256": "9378f90dd32c9e8e46920070cdcea58af12d1e387d1292e46c9072e6018e378b"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/simple_world_profile.py",
-      "size": 5354,
-      "sha256": "c89a76ea51867530bd903b88e8ffeb46026d9c480c91805d6c7eecc29ee1bb12"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/world_fix_loop.py",
-      "size": 31819,
-      "sha256": "477bfb1ae099f7244ca20f9554c9ad8faf528b3e39102352405a6e7d1f84d43e"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/world_fix_loop_model.py",
-      "size": 11288,
-      "sha256": "14128bbb5ed45de849f2144c53fbc8e984d27e2861992b5e05dc66f6464c3749"
-    },
-    {
-      "path": "aspire/sim/scripts/libero/world_fix_loop_state.py",
-      "size": 30100,
-      "sha256": "a716c385a2c011e787494a2463b30a16e2303fb064842615a10adebcbce00cd0"
-    },
-    {
-      "path": "aspire/sim/tests/code_world_fake_api.py",
-      "size": 2943,
-      "sha256": "dbca3d3f017cbbdaa7d9ee0afea43fc6a4b11f8425e540138b1d485e65807311"
-    },
-    {
-      "path": "aspire/sim/tests/test_abc_conditions.py",
-      "size": 24428,
-      "sha256": "1672b8d2ddae23360c341935f6895c2efcf63b2c05a712eeb2961fe463aefed6"
-    },
-    {
-      "path": "aspire/sim/tests/test_code_world_cli.py",
-      "size": 7583,
-      "sha256": "ac0d585d50530d55ccf6e339d3ba1ba10c2120fb9d5c8596811b5127f7fd036e"
-    },
-    {
-      "path": "aspire/sim/tests/test_executable_world.py",
-      "size": 11319,
-      "sha256": "fee22c0c2c795d5ec6aa3b2fff39514bc6c2eb56bb2d908a003f3c8545f22352"
-    },
-    {
-      "path": "aspire/sim/tests/test_llm_client_deepseek_v4.py",
-      "size": 3426,
-      "sha256": "a94574618ec73f17a21b241e9d618e3a3f1080e0102d2db739f0132e062cc6f8"
-    },
-    {
-      "path": "aspire/sim/tests/test_llm_client_qwen3_8_flash_next.py",
-      "size": 4029,
-      "sha256": "62aff3d3e6f4ae99a61e95e77fa2567469e98566ab227f3fd442dcd5c68fb8eb"
-    },
-    {
-      "path": "aspire/sim/tests/test_model_fix_loop_worker.py",
-      "size": 17532,
-      "sha256": "2e72b11769c5f18e4a9c23c00319c10699b8f950b60c5c7d0f391b156c1525ef"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_cc_permissions.py",
-      "size": 947,
-      "sha256": "56277b215a31d88aac1b9aeb01653f42f91c289c8de061e487879dabb0741711"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_cc_protocol.py",
-      "size": 7485,
-      "sha256": "0571e96abccf29e77c433fe5ae852854663679104f7c39d3a741f5d9de43c2bb"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_cc_recover_trial.py",
-      "size": 4271,
-      "sha256": "671768218e8e727a1a9124245a7a732d32d6678c01df6eedf9d41a6aaaea0dd8"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_cc_runtime.py",
-      "size": 8797,
-      "sha256": "f0b1e4a7ce4faeab47f6fff0cb76bd5f0d1dd2a6efe3f5896981db40f6efe752"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_cc_runtime_repair.py",
-      "size": 8714,
-      "sha256": "16dddb7b4839769ff61e89bdc54a14bcb0292d0384b03d3fadf9ebd52fe7458f"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_cc_stream.py",
-      "size": 3513,
-      "sha256": "86da313bc9998929ea6ba6f51c50c106ed3c87a04fbf4f441a10fb9daaf0c81c"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_world_broker.py",
-      "size": 20933,
-      "sha256": "e10c135cae599756ce909943594d2161bf28b3fdc2a56e6551d23b576ed0f9fe"
-    },
-    {
-      "path": "aspire/sim/tests/test_native_world_fixloop.py",
-      "size": 53007,
-      "sha256": "3fc04b737a199f2dc4fbd778b362296ea9ff1033df36e700df3050fa38a992a7"
-    },
-    {
-      "path": "aspire/sim/tests/test_openrouter_server.py",
-      "size": 659,
-      "sha256": "fa44fbef17917a60d6cedab0d2e3e02d84fd079625801498238f9f6131952665"
-    },
-    {
-      "path": "aspire/sim/tests/test_ordinary_fix_loop.py",
-      "size": 31801,
-      "sha256": "c79ff81e390f7f4946f3fddde51c11b2017da222e4aa74795004f1b7150e4c6a"
-    },
-    {
-      "path": "aspire/sim/tests/test_qwen_full_repair.py",
-      "size": 17917,
-      "sha256": "e851cdb66ad1cc876768ffa5828c0652a5c28ad84c0f97baec183a12913e3d3e"
-    },
-    {
-      "path": "aspire/sim/tests/test_reference_relational_world.py",
-      "size": 38989,
-      "sha256": "0146a44fcfe7a519b8729258589c205572bd14cbb78ee4578a321725ebda8378"
-    },
-    {
-      "path": "aspire/sim/tests/test_submit_dlc_once.py",
-      "size": 2373,
-      "sha256": "075f1c7267754c24c603cc1640ff6464cb8d996032af43c34172753241567370"
-    },
-    {
-      "path": "aspire/sim/tests/test_world_fix_loop.py",
-      "size": 31981,
-      "sha256": "542fcb4bc4a9f0db46bd4b545e25b907004a15c5cb4300cf10148af6dee62d45"
-    },
-    {
-      "path": "aspire/sim/tests/test_world_foundation.py",
-      "size": 7897,
-      "sha256": "3976b0d6ce9c2f1a6dca2eafda99299ce7798ed80de655eec2c5d2a754208630"
-    },
-    {
-      "path": "aspire/sim/tests/test_world_model_opt_in.py",
-      "size": 22716,
-      "sha256": "0d9e6cac0870133f7f71a2d4a875386d9b7ad0e9125d6831f1aad7f5a87e2dd6"
-    },
-    {
-      "path": "aspire/sim/tests/test_world_model_runtime.py",
-      "size": 14798,
-      "sha256": "716e21818a64ab6429dc5eb94f41abaffd9a49a787984e4f3f7045fa0ac536c4"
-    },
     {
       "path": ".gitmodules",
       "size": 1082,
@@ -1126,8 +11,13 @@
     },
     {
       "path": "AGENTS.md",
-      "size": 10158,
-      "sha256": "dd8a4d2d469b18f2fdf856bdaa0cfcfe58dac1a8a4731eadd2a0b9925eb32d70"
+      "size": 11106,
+      "sha256": "9e9350611f7160c98a17bfe35d30185435c0d47c549b5d8dc82f94667987e790"
+    },
+    {
+      "path": "CC_USAGE.md",
+      "size": 4395,
+      "sha256": "4ff2a610b177fd4b8a1bad4c215827011142d3490baa8e4b5fbeffeae17cbaff"
     },
     {
       "path": "CLAUDE.md",
@@ -1242,7 +132,8 @@
     {
       "path": "README.md",
       "size": 13847,
-      "sha256": "72478a6c949e3ef53b289ab8e7b1c1adfbdc06bcd8c4a6c07f33ec1d8c493acb"
+      "sha256": "72478a6c949e3ef53b289ab8e7b1c1adfbdc06bcd8c4a6c07f33ec1d8c493acb",
+      "publication_path": "README.upstream.md"
     },
     {
       "path": "SECURITY.md",
@@ -1378,6 +269,21 @@
       "path": "aspire/sim/.claude/libero/api-reference.md",
       "size": 5318,
       "sha256": "81b962f9db2ab7dd3e6cb357a3b8b9b25a8825a60b8ff81fe679ba2a03439218"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/code-world/INSTRUCTIONS.md",
+      "size": 9555,
+      "sha256": "9301fc16ad50a56c6f6aec0a3dc98a77226d2cf1e3cafdf479f1de661fce1ad7"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/code-world/SKILL.md",
+      "size": 4027,
+      "sha256": "da851dbb8976252a0cfa905ed48a23e00a1558477c0101b7c94b2c09b7790222"
+    },
+    {
+      "path": "aspire/sim/.claude/libero/code-world/main-agent-prompt.md",
+      "size": 3404,
+      "sha256": "2b8cfe79eeead62126ea876df0419fe394fc606654be26f574e3a36c634a9ae6"
     },
     {
       "path": "aspire/sim/.claude/libero/evosearch/INSTRUCTIONS.md",
@@ -2261,8 +1167,8 @@
     },
     {
       "path": "aspire/sim/cap/envs/tasks/base.py",
-      "size": 15824,
-      "sha256": "a27f9378d0d954bcee3d86a14065cc54b8136ee328bf4c2bd9dd105c98a6aee5"
+      "size": 16642,
+      "sha256": "07165b60966adac79affa867799a66302c4e96429a32135233ec76ef0fb2b46e"
     },
     {
       "path": "aspire/sim/cap/envs/tasks/franka/__init__.py",
@@ -2660,6 +1566,11 @@
       "sha256": "460fc84db3e4576fe5f4bb50229e89b0b0fd5e9321d46e87a508470da103a7ec"
     },
     {
+      "path": "aspire/sim/cap/serving/launch_vllm_image_source.py",
+      "size": 7442,
+      "sha256": "ff07c0cc91e8b48416db107ea518552ea46b0d6560a551706b90e8079de35d8d"
+    },
+    {
       "path": "aspire/sim/cap/serving/openrouter_server.py",
       "size": 9254,
       "sha256": "67ba624cccae9fd2d412e184d93e2f1afc52e2f03c5ded29c70a6e635fdbfffb"
@@ -2795,6 +1706,126 @@
       "sha256": "840cd13a322a025919857e8caf93ed9964853d2d809100d0364f0d13c9420828"
     },
     {
+      "path": "aspire/sim/cap/world_model/README.md",
+      "size": 6014,
+      "sha256": "8d10094ad320f7d3cb07f5778db82a63a9bad323dada2312ea5197794833ad11"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/__init__.py",
+      "size": 348,
+      "sha256": "0f314f1889b4e29b01661d7874d9a6db98cb88f04022835cec06d168aaac0ede"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/decision_revision.py",
+      "size": 17830,
+      "sha256": "cf431e990f4f7c4341dccced85e038da854304ca949195105a33b242223f3bab"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/development_gate.py",
+      "size": 13565,
+      "sha256": "2b658e31af6260d9d6606214ab6476f89ca8a39a5e0e4ea94a14d1bdd6d7c6ed"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/evidence_state.py",
+      "size": 12586,
+      "sha256": "eb293e4fb21887288a03c0948490ec65c75b5fd5a5102e8eff79420791ea9841"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/executable_world.py",
+      "size": 29084,
+      "sha256": "082b98739b22577cdcc37bb1a29a3787b3483a2bc5f72a1222141c5170a6e37d"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/fix_loop_scene_broker.py",
+      "size": 13273,
+      "sha256": "62ea203d8da6134c10957bc8e917d25880cf8ddaecbed88f00a57f9712c660dc"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/foundation_audit.py",
+      "size": 3812,
+      "sha256": "3d6749f33a62e14abcb3494f37b80c5d12189bc08675edc7634a676283127229"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/judgment_world.py",
+      "size": 8199,
+      "sha256": "c5fe598738b85e4069f97b666630dc4f0086691990afd2536eea12c8f2f54309"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/libero_capture.py",
+      "size": 27491,
+      "sha256": "b21b88474369262fcfb10a8622cfd9ae356596866f32e381d6b156b332b66f3c"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/live_broker.py",
+      "size": 47270,
+      "sha256": "a9156a273d27070c87d0f4eb0835d4c56a1c583367d3ef69cf8a899eac371107"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/native_world_broker.py",
+      "size": 20306,
+      "sha256": "29482e53e30b49c8a6172ec03679876a2857c3adcdb9d55ed6ba35685ec861d1"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/ordinary_fix_loop_guard.py",
+      "size": 23445,
+      "sha256": "827d4b2cf9286d0af5bacbc8e61a58b31999cd5466eb82324ad2062ae6571b37"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/prediction_contract.py",
+      "size": 11399,
+      "sha256": "debdd8244528c5e9f78d4950ebdf81dd8945c16b9a1c7ac8bda3dfec758ed9c6"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/program.py",
+      "size": 5581,
+      "sha256": "8e120a2e818f092584564fff97f45aa29917f149df9c93b68e05927fa03e53d2"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/reference_relational_world.py",
+      "size": 42588,
+      "sha256": "63696bbf74bb1e3cf025a1f2d3518c6bc70699e9599b368f60f5e3c76621b4ab"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/reference_scene_broker.py",
+      "size": 14001,
+      "sha256": "e8aaf87da3ac5d80ece0376a6788e5eb08249616e31c3386a73e70ea9e1a88ec"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/relational_scene_broker.py",
+      "size": 26526,
+      "sha256": "8938325623bfadb8df884d314cab7cad2de22fe5d73fef17297204cf007ef437"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/runtime.py",
+      "size": 16426,
+      "sha256": "3a50b12f603a4961c467ff25941ef9aaffa487d10bb05f45ec5bcd364e6a1d49"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/scene_broker.py",
+      "size": 18774,
+      "sha256": "19a141968cd8e4cca967934627e7845c3718a40df6f675aae64cac8d873d8074"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/shadow_condition_broker.py",
+      "size": 68689,
+      "sha256": "1e538c02b985091fed69e4824d24bd448d7b46922dcd6a8de439300ac2306ced"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/simple_world.py",
+      "size": 9569,
+      "sha256": "7b364f1445cab2ec3475a9568e6d7ef435df2c0c575e2c8fa6c17b32916bf32e"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/vlm_judge.py",
+      "size": 7452,
+      "sha256": "7edf3dd2ece884a7f65a1675da0f477ff3271fdcd4a334ce3b08deee243f9f79"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/world_use_audit.py",
+      "size": 36802,
+      "sha256": "52bc8dea6340c06eb621c42ec6bf7b8a6648801cdfc171ad1440beda43957882"
+    },
+    {
       "path": "aspire/sim/docs/adding-environments.md",
       "size": 4629,
       "sha256": "c845b2bed304508d1b040710948167c64a141432aa6dc9ab00c4d70a5d765d49"
@@ -2808,6 +1839,1966 @@
       "path": "aspire/sim/docs/configuration.md",
       "size": 4083,
       "sha256": "8b4e34f8ffd4203f6cd1ccd68c35d892f2452ded277335a8f0189f6af9a0304d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/claude-code-local-models.md",
+      "size": 12999,
+      "sha256": "44cfcff1f813871427da80b152c703c7014092101d78fb8f6a8d1b73b4cdcd8c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/NATIVE_WORLD_INTERFACE.md",
+      "size": 5929,
+      "sha256": "58f191a9c7f250706f1ce428f8b026a0bdf728c4a7c104e82b0d9d328fcaba30"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/PROTOCOL.md",
+      "size": 7223,
+      "sha256": "b9c3b7e6cf127ddacc10227c110e0ffb63fe46b78f7e3baa94cbb74bb71b4852"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/collect.py",
+      "size": 6003,
+      "sha256": "e11617dee20c93ace23c92c1335153238a2f4e4ccc8f6b33e9396f125fa00e71"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/engineering-base/scripts/libero/native_world_campaign.py",
+      "size": 40319,
+      "sha256": "712abe6f7cf1870d6b65ab0f7263efc8ba7e2fcae6e6808d49d5717bba39e18b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/integrate.py",
+      "size": 4816,
+      "sha256": "c06358a75186866fda3da080ed308d79a647de36df5cb7dcdfa75f59754e1683"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-and-launch.py",
+      "size": 11665,
+      "sha256": "704072a9c9d2e3ff98a9b47834524a4cef6239d4faaa29cc50391f5069f93f5a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-r2.py",
+      "size": 12001,
+      "sha256": "8258c9e536081c4fe8bdbded8c1ffbd0c0de66fbaac4885f1a6086b414acef77"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/resume-bowl-eval.py",
+      "size": 5812,
+      "sha256": "6ef147fbe1f98add93920aa357deeee935f117f5608b15c25df62e19b6f9d378"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/cell_read_guard.py",
+      "size": 4738,
+      "sha256": "bb80880b8041cecd18c51343c2ab459e8d338997d4ec484c9ef8b771c215214f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/evaluate.py",
+      "size": 3656,
+      "sha256": "e0b9dabff6da22b3b3a6746279520c922f1f0f3f10c1deb322a895eac11920c1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/infra_guard.py",
+      "size": 2933,
+      "sha256": "dc04d617a254ec2d95ceabd90bbb1421ee87c80a7a60a1e02eaf782629ae7589"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/run_cell.py",
+      "size": 8955,
+      "sha256": "e8a5e33075cba6fbf839a66b2eb128c3b7ba9984d0de07dfeb484782d3672665"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-closed-loop-repair-20261004/IMPLEMENTATION.md",
+      "size": 4291,
+      "sha256": "3c8982c7896cd9a8d71b257d325291726fd1bc705c609527ce27602a2a1e3699"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/NATIVE_WORLD_INTERFACE.md",
+      "size": 14840,
+      "sha256": "52dd50f2115038b63fc7d1e653594ffd5b988db99a29c90c2383264318b92823"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/PLAN.md",
+      "size": 12245,
+      "sha256": "1d360f503291185c13580e399aac170bc70059e150d373bab37fab69af9078e4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/make-preflights.py",
+      "size": 9122,
+      "sha256": "3d36d0b2ddf1da91fa5245689afd73910b8e0feab18a535ce3edbd08eaa64e53"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/prepare-gate-study.py",
+      "size": 35798,
+      "sha256": "6b0d0a4196132974d9423fe2b00496c6fe8e5fe8ee80ed9e047059a2745f4ebd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-diagnostics.py",
+      "size": 1860,
+      "sha256": "b94df8da4ce8ba1f150b229efbf1c386574f1fe1b3c7cbfbe0c09d03dc3c37ce"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-oracle-r1.py",
+      "size": 19770,
+      "sha256": "c2e1b810d9fbdaebc13acc6c645653b7200742be63221c5b97614b6372126cf4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-oracle-r2.py",
+      "size": 19770,
+      "sha256": "7693101efcbb83cbc46838f6cd57070ba082e5a3208aaf2269425002b424eb50"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-selfeval-r1.py",
+      "size": 19794,
+      "sha256": "1d36f48f39a25137b45ac44979dbd0675a838b2bab44fcb863fd20cf4759287a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-selfeval-r2.py",
+      "size": 19794,
+      "sha256": "14c80b75fcfd46f3f1b36e15e0616c66af04d441c2c40db8ad5b1cb1f04e86a2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-vlmjudge-r1.py",
+      "size": 19794,
+      "sha256": "6e44059d4560af1091c73e468879c323aa2d5137a29cf07320f07e23991d483d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-vlmjudge-r2.py",
+      "size": 19794,
+      "sha256": "15ca3d013d742acc9fe3d431f7d74832c95063ce77bc0cd4ed79f6dcc4bf5920"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-oracle-r1.py",
+      "size": 19926,
+      "sha256": "8c10db752760c4bef228f5e172a6051c25666bc202166cee4a889efa83330d75"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-oracle-r2.py",
+      "size": 19926,
+      "sha256": "56adf4a2477749e972d0929c741b292bcc7264bc63c7c4c6b4c650b397b2f5ca"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-selfeval-r1.py",
+      "size": 19950,
+      "sha256": "32a0b111fb0d53906fc622f372147426147b9a00f66817c606c53cbc6435e0b3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-selfeval-r2.py",
+      "size": 19950,
+      "sha256": "87d85df6865abdfd6fcdcf4440cda970cebd1eeeda4c5230eed57222053e9e41"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-vlmjudge-r1.py",
+      "size": 19950,
+      "sha256": "3dc151268d2b4943aac0a0917e073a0c7c2f3af2d90f97c1c3dca49bc86adcd2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-vlmjudge-r2.py",
+      "size": 19950,
+      "sha256": "02e4f0e6301f9f5b5cfa23e4642c86a86c15d3ba400ad125714c983ec234dce6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-oracle-r1.py",
+      "size": 19852,
+      "sha256": "1ef25f36dda4734f8b7e300266472ce3bce2da99ec0e65fed2b3097484327879"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-oracle-r2.py",
+      "size": 19852,
+      "sha256": "7544434c4fc978661060bd2ade0e0e44facca8d6653a95b5fef5257bf66858b5"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-selfeval-r1.py",
+      "size": 19876,
+      "sha256": "c0f5dd38cf96b152d43f0ac4a97f2e4da6effa023e9356347eb6aac14bef9eb2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-selfeval-r2.py",
+      "size": 19876,
+      "sha256": "e33c8124a9c2369459a2463eba24c4959dbfe3ef3ef43c59fa11e8ca67e4ab53"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-vlmjudge-r1.py",
+      "size": 19876,
+      "sha256": "77c149d15be58ae0e943358bcbd351f89a3e3d6426ec5dd0870f981e0b359702"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-vlmjudge-r2.py",
+      "size": 19876,
+      "sha256": "1c001ba0456cc0a6a039d65697d69f1f253e5cc7587ed5fb47f6396cef8087d0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-oracle-r1.py",
+      "size": 19741,
+      "sha256": "b642a1befde53649b6a1177832abd4816ac8fb81c739683f1ad89b4f37f4b74f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-oracle-r2.py",
+      "size": 19741,
+      "sha256": "814d2e1bece3b4ab93316680f1c5c0b416d8653c968b46daa4da9ef86011663f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-selfeval-r1.py",
+      "size": 19765,
+      "sha256": "f2fe75e9a3677dddc926b893281c537f17ffd9501de3d17a0f84481713a338b8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-selfeval-r2.py",
+      "size": 19765,
+      "sha256": "5f6f882c401a968bd213ccf4a24306ca9988a45c91e137bd7bcdb148fda6e2af"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-vlmjudge-r1.py",
+      "size": 19765,
+      "sha256": "0868dc9e02e997ddb07109ca8b3c1566b7d4691e9c51e5b8266ed89f0ad7a6fc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-vlmjudge-r2.py",
+      "size": 19765,
+      "sha256": "df5f6421da86f59bbe1a8a2e510dd8ea71204e903c1cbc30fd3e7921a903f691"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-oracle-r1.py",
+      "size": 19800,
+      "sha256": "05d7075ad13624560641350cf1e9bedb462e31e996f2679d1cf52a4513879edd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-oracle-r2.py",
+      "size": 19800,
+      "sha256": "bb9e16ffc9b279193e04588d0f3450d35d02eb722d7ab020582fec76f8c2b8fc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-selfeval-r1.py",
+      "size": 19824,
+      "sha256": "f4c694b60eb92f44efdb0c8cffee04d0d05c2ed8f05c297763ec8e23c8a3b67a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-selfeval-r2.py",
+      "size": 19824,
+      "sha256": "bc3ef1beee061fbd3b9b2843c3615949965821fd7c0eafdcba57f683e1a93029"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-vlmjudge-r1.py",
+      "size": 19824,
+      "sha256": "b98a93fb7a5436e058abcc19b123cf61c2814ae20f297e0d7e3c710a7228a260"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-vlmjudge-r2.py",
+      "size": 19824,
+      "sha256": "d9bf8e783dfb45e41fc62f9e510ca720683c88b245b94066e8bee32ea486fb13"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-platform-preflights.py",
+      "size": 2317,
+      "sha256": "ddcd37d6f84d26ac6c3dc4d803ac330169f044197e73b787852d4e915cb7bdda"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-supplementary-heldout.sh",
+      "size": 929,
+      "sha256": "55ca5659fd344297f6adf67e7fee03137327f2a54fb6fd00a238a1634955284d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/submit-gate-study.py",
+      "size": 6020,
+      "sha256": "cb4e8f5b25b8da8724929abbd2a6372d03d3597a41a4a59f16850cef2ecb13f3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/cell_read_guard.py",
+      "size": 6726,
+      "sha256": "54fa6cfeedd3c868b8974d0d0f76e436fc313d4df3c252036fdb8cfac3c5a380"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/dlc-queue-entry.sh",
+      "size": 1037,
+      "sha256": "53298d3bf4eb2ebdf4b217c7ca0de3b783acdf9de1177dc799c353726318d7ff"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/dlc-supervisor.py",
+      "size": 32443,
+      "sha256": "e42d08213e8ad330e0414fa123f9d127ee22ea77b70868a3e2ac7ab5fa75e847"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/foundation_import.py",
+      "size": 3615,
+      "sha256": "caad8d5d8fc7d2e6c427b75e56722a7780085cb8c56bc67c817fad6178f0c911"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/full_deadlines.py",
+      "size": 3344,
+      "sha256": "e7979ac0617845d11cabd0ee0ce9f16974a52031e2d85a2d93d734bafbc38116"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/infra_guard.py",
+      "size": 3709,
+      "sha256": "5c809950b3c6a2b608a88105f5cf1ffa9fccb4ccf273c885a5a2f0d126fec3a3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/native_cc_stream.py",
+      "size": 13946,
+      "sha256": "5d7eea15d181410940c89dbe11e2a48e6dc57eb7a9aa5ae51fa0e73624b5c50d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/qwen-native-compat-r2.py",
+      "size": 15551,
+      "sha256": "8e98d140e9e0acddb83723219278578a733240481fa042f86e0fe0098d435d40"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/run_two_task_cell.py",
+      "size": 33769,
+      "sha256": "915ac08e083f4e539286c87993414ba88a9bdeb92dd03f20c31288e84834ef9b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/supplementary_heldout_run.py",
+      "size": 19805,
+      "sha256": "5c14fd60d5fa6a6e7be0517dbe65e6b31a954ad3fca44e886412493f36f845b0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/two_task_scope.py",
+      "size": 13154,
+      "sha256": "b4d31ea5fbcbb86f5e8aedf08c902ac41b6e65a178ccac56aa54f1b717387f1f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/sync-to-remote.sh",
+      "size": 560,
+      "sha256": "8a9cce63866d8de7c1ded5b27cc0a01d72ec221260eb807b185708e77de26a5c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/IMPLEMENTATION.md",
+      "size": 5436,
+      "sha256": "9c9f81e4e867819484169989755d517ef32061ff2b8ee06b9fb98b427d1bd701"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/NATIVE_WORLD_INTERFACE.md",
+      "size": 13131,
+      "sha256": "ff86fc78b0de21dc94163a77543a2b68e25c245e8600f93677cf416e39338a6f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/prepare-foundation.py",
+      "size": 32092,
+      "sha256": "ad4b4e626b6764eef0e7def12f5c5ca27ced919f74b5732b534d2c1e80250ec2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/run-dsw-preflight-drawer-c.py",
+      "size": 17789,
+      "sha256": "0852eacd193aa55672bc2b14fe713b30acadc409e74c0f60ace1f885433df549"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/submit-foundation.py",
+      "size": 2966,
+      "sha256": "d9aefefb063c5b38db75491922ebc73d40504ee9f2e20efc4340a8d41adeb084"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/dlc-supervisor.py",
+      "size": 23946,
+      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/native_cc_stream.py",
+      "size": 13946,
+      "sha256": "5d7eea15d181410940c89dbe11e2a48e6dc57eb7a9aa5ae51fa0e73624b5c50d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/qwen-native-compat-r2.py",
+      "size": 13829,
+      "sha256": "a644a9e71f92360b0856070458df9507a6517030e9c6e136bb311add37201af6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/run_two_task_cell.py",
+      "size": 31781,
+      "sha256": "046c7ca52b05759ffba8efff22eb52dcf9c26362288e21a825a60fb16f3c8c3c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/two_task_scope.py",
+      "size": 11557,
+      "sha256": "2d28e86dfc71a38467bfbc070c95748e93804f4a450337fee7f07e37798b1a2b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261005/MOTION_CONTRACT_REVIEW.md",
+      "size": 2142,
+      "sha256": "33dcab735ef9686fb8e34984886ea8f700ad20b3a64059569a7ac9ae739dd146"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261005/NATIVE_EVENT_FIXTURE.json",
+      "size": 24147,
+      "sha256": "42410a5b41b56af102262f9d1bcc00c08354feac4e887eba634654785f1bb45f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261005/NEXT_RUN_PLAN.md",
+      "size": 3415,
+      "sha256": "39831296552e0b038a1661fe0e1c5bfa42a31de03165eec600dd29a55e545b63"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-pipeline-repair-20261007/cc_permission_events.py",
+      "size": 1755,
+      "sha256": "e93a1f9e7f4b3a77c5274ca9121cdb4bec5077ed12dbf9c04146f8fdda7ed5e0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/NATIVE_WORLD_INTERFACE.md",
+      "size": 17819,
+      "sha256": "6963cb223ef7233e7f379bbdf606f7c9ded6578766a24b5019190fcdc1611df7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/PLAN.md",
+      "size": 4092,
+      "sha256": "f1d39895e32f01faa846ec466f46d93ebca7bf440338df693561beefc62c56e4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/make-preflights.py",
+      "size": 10415,
+      "sha256": "dd591c1e8da707b9d1c7b359d08e3654f7833c6ba158732404bd5177747f0220"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/prepare-prediction-study.py",
+      "size": 38270,
+      "sha256": "47cb3a053756ad27f27c3fa0a52f9bcbc47b7afaf42d25726bd4fb8559281fff"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-diagnostics.py",
+      "size": 2011,
+      "sha256": "bf9d53e914bc565ba23383f90361c199b7765ae1e01a9294a63adc986ba58138"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-off-r1.py",
+      "size": 20551,
+      "sha256": "413b1097e9be4280b9bdd7e9f66d25171f7d38e4a994d326c752f08061310bba"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-off-r2.py",
+      "size": 20551,
+      "sha256": "8a3b69dde6a50cee91cab931d5b72a79fda4bc05028cc8bd40d5244cb50c6b10"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-p1-r1.py",
+      "size": 20540,
+      "sha256": "9dc9f5619fa25ccb898fa2d825bba23267d12c4f68078f029f8308097c32dd3c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-p1-r2.py",
+      "size": 20540,
+      "sha256": "902c6ffb506920440456c3d1ba226cfb61cd7cd4fdd599b8c7ca96cbc19c462d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-off-r1.py",
+      "size": 20707,
+      "sha256": "0904c357bfa9f41ca1a7b1c3a5d73245b549661eb8ed6e5a00de51a6ccba2188"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-off-r2.py",
+      "size": 20707,
+      "sha256": "d8d74548f91042f3f9e76dbb91588dcf61012f37cfae0ed5ade5f618b8c777a5"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-p1-r1.py",
+      "size": 20696,
+      "sha256": "8b124707831cd777cf457e9f1e081c9b42bb816a05bbcde48321b631f5124d56"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-p1-r2.py",
+      "size": 20696,
+      "sha256": "55c11948a787a6537b2ebb0bc0a6cd8ab20dd914e324ad51fcdf0480be1ab786"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-off-r1.py",
+      "size": 20633,
+      "sha256": "c9aa77a3086fa756a0b52adcf006a8564c677389366d276c1f9683dc474b53b6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-off-r2.py",
+      "size": 20633,
+      "sha256": "d5ce34aa6fb0c77ee4a25065b05b172df595f338e1f45f44296a4389e9a4422d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-p1-r1.py",
+      "size": 20622,
+      "sha256": "b3054d5fac4f2d51c13d7672f0d500910da8a487e7b0bb007c9508b99e40886e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-p1-r2.py",
+      "size": 20622,
+      "sha256": "8ae3e1cde581f93b026031461ccd5e383bd4f908abae3d4150cc933249814727"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-off-r1.py",
+      "size": 20522,
+      "sha256": "ea2368b4590aa514b3e48d33206ac52f428acf4dfbb3c56308d7d15a789228b5"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-off-r2.py",
+      "size": 20522,
+      "sha256": "7301b684d80827a472473311ee321461326d7af6dd6053eefc4f3e90ba07fbe9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-p1-r1.py",
+      "size": 20511,
+      "sha256": "d33a05f309460288d7af4c0d7cb819b3388bd0c51f1c2baed494c60e8a6e8ec2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-p1-r2.py",
+      "size": 20511,
+      "sha256": "f8fe07078071186e75d2c1b4aa687c4fd1872f64c1dc96df3fad5b179ea2a06a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-off-r1.py",
+      "size": 20581,
+      "sha256": "935903ca20071a702e3a08593a2d8d2ce4e3f3c44742474832eee5c7a4e3e69d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-off-r2.py",
+      "size": 20581,
+      "sha256": "94f439e8efd94c8bcc04fefb597f43614861b6082968b3b0837ead820767c794"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-p1-r1.py",
+      "size": 20570,
+      "sha256": "8c8a5e86361a5846f3c811033e4619c8d67ea5dcccfccada6b0be800c0eac99f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-p1-r2.py",
+      "size": 20570,
+      "sha256": "19d6e805507e44a15d0a1e5c6b856485e1d6a3346ab14fc908b73203e3bdfb40"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-platform-preflights.py",
+      "size": 2708,
+      "sha256": "41db7680a053b4d377871019d2fbfacf9961e53934754ae851615ca76c7963c3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/submit-prediction-study.py",
+      "size": 6442,
+      "sha256": "be86661f58d3574e526ab277185976792d2889f076e4b6056b14183445d308ff"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/cell_read_guard.py",
+      "size": 6726,
+      "sha256": "54fa6cfeedd3c868b8974d0d0f76e436fc313d4df3c252036fdb8cfac3c5a380"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/dlc-queue-entry.sh",
+      "size": 1037,
+      "sha256": "53298d3bf4eb2ebdf4b217c7ca0de3b783acdf9de1177dc799c353726318d7ff"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/dlc-supervisor.py",
+      "size": 32711,
+      "sha256": "6eac699e8c9cd626e09b459a8a5fe38c29fa026e0c8f01f00b5cce9c15e08212"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/foundation_import.py",
+      "size": 3615,
+      "sha256": "caad8d5d8fc7d2e6c427b75e56722a7780085cb8c56bc67c817fad6178f0c911"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/full_deadlines.py",
+      "size": 3507,
+      "sha256": "a3e6b88c576fa48f84a992640df610a5a3d5b967adabb9eb38531d6ce899f190"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/infra_guard.py",
+      "size": 3709,
+      "sha256": "5c809950b3c6a2b608a88105f5cf1ffa9fccb4ccf273c885a5a2f0d126fec3a3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/native_cc_stream.py",
+      "size": 13946,
+      "sha256": "5d7eea15d181410940c89dbe11e2a48e6dc57eb7a9aa5ae51fa0e73624b5c50d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/qwen-native-compat-r2.py",
+      "size": 15551,
+      "sha256": "8e98d140e9e0acddb83723219278578a733240481fa042f86e0fe0098d435d40"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/run_two_task_cell.py",
+      "size": 34003,
+      "sha256": "61cf0b78508457c926a80c6dded5e6d77ae4f6db4a740e280dd44b0eb8b8b0fd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/two_task_scope.py",
+      "size": 14064,
+      "sha256": "dd95d3f779b6c415c14767e0f80d5a454b5168f3f01cc4198b3299849373cf08"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/NATIVE_WORLD_INTERFACE.md",
+      "size": 16975,
+      "sha256": "a6c5e8b260cb173f2809b1e65413a363dce910ee07cec71302443bda5629251b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/PLAN.md",
+      "size": 690,
+      "sha256": "e33b59dfb83a213d6d4eda3e545a703643ce607e63694ad86e7510e95bc4c729"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/prepare-foundation.py",
+      "size": 32286,
+      "sha256": "05adb3801c992c89c2da1ec8ce45c60d2dda7907c0dd9286bb2677e172395634"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-diagnostics-v2.py",
+      "size": 815,
+      "sha256": "91a0d68bedca6f3d90b969a2c3de11470da5511ce71c0c11093bd97edc8519fd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-diagnostics.py",
+      "size": 809,
+      "sha256": "899917cad9661b2a45f958208f901e836d74822c9af5ac451da28882c16f5bf4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-dsw-preflight-bowl-c.py",
+      "size": 19007,
+      "sha256": "f66d7fa8f4bfb41a501d3e7a39de1c3961b8bb79f30d8f35e6612e16a3b9f390"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-dsw-preflight-bowldrawer-c.py",
+      "size": 19145,
+      "sha256": "1ac160a524e185ca96ff65b1dea1e82ee5e312c07af912f8affc923e9b8a27e3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-dsw-preflight-drawer-c.py",
+      "size": 19077,
+      "sha256": "faf3d58be80813bb765c1791dba30f40fd6398d3e576e53f7eda14f058e04e04"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-platform-preflights.py",
+      "size": 1286,
+      "sha256": "e2f9e2d4f64eac4371ed34f6b2397581b37423b30dc6975db9aa949dd51b4fcb"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/submit-foundation.py",
+      "size": 3008,
+      "sha256": "dfabd9a8bbf6868cadcfeb43470b46af4bccd8469fc0def704cf58be27ae2c44"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/dlc-supervisor.py",
+      "size": 23946,
+      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/native_cc_stream.py",
+      "size": 13946,
+      "sha256": "5d7eea15d181410940c89dbe11e2a48e6dc57eb7a9aa5ae51fa0e73624b5c50d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/qwen-native-compat-r2.py",
+      "size": 13829,
+      "sha256": "a644a9e71f92360b0856070458df9507a6517030e9c6e136bb311add37201af6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/run_two_task_cell.py",
+      "size": 31781,
+      "sha256": "046c7ca52b05759ffba8efff22eb52dcf9c26362288e21a825a60fb16f3c8c3c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/two_task_scope.py",
+      "size": 11557,
+      "sha256": "2d28e86dfc71a38467bfbc070c95748e93804f4a450337fee7f07e37798b1a2b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/NATIVE_WORLD_INTERFACE.md",
+      "size": 16975,
+      "sha256": "a6c5e8b260cb173f2809b1e65413a363dce910ee07cec71302443bda5629251b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/prepare-foundation.py",
+      "size": 35108,
+      "sha256": "35658c6d6e6788b8e561b2a7a3bba4eca075b00fc4d8dcaee19391b87d9599d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-diagnostics-v2.py",
+      "size": 815,
+      "sha256": "91a0d68bedca6f3d90b969a2c3de11470da5511ce71c0c11093bd97edc8519fd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-dsw-preflight-bowl-c.py",
+      "size": 19012,
+      "sha256": "904c7874d0b48b461544ba4755fe0d926137279b3487e65023772ee23ea455d2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-dsw-preflight-bowldrawer-c.py",
+      "size": 19150,
+      "sha256": "e36ab166a603ba0e6f943ff255b0961440859d256081eadda4abc172cf96e76f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-dsw-preflight-drawer-c.py",
+      "size": 19082,
+      "sha256": "5739d0f1c91ac635abf76719e06a7a4eec337a304c719d64cf7255dedcce0fc9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-platform-preflights.py",
+      "size": 1286,
+      "sha256": "c24d34e407126cb1208975c513a82da997ffda24394a1fbeba1f4bdebce1d7b1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/submit-foundation.py",
+      "size": 3006,
+      "sha256": "9c92c81c1a8a2ab70304f88ef9e83802fbb150cf20b92c8d314bd35ab5590ad3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/dlc-supervisor.py",
+      "size": 26647,
+      "sha256": "34d9b236d5badc74fa916efb48a9ffaf5b8cd028ea564f541a5e12d3a4242dc1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/foundation_import.py",
+      "size": 3619,
+      "sha256": "6de218c9c4c416f3a7307ec92d7e0c82a76105fa9937ae1ec385cdd7a510cee6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/infra_guard.py",
+      "size": 3689,
+      "sha256": "ce1ed94b674490a2850d677f49dac31b15dc96b3b3c671364ac2bc8c33609bd6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/native_cc_stream.py",
+      "size": 15781,
+      "sha256": "72370d272b8ff26114eebba595d0a6745ebb87afd5e866a0b63e6241cd3d0ebc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/qwen-native-compat-r2.py",
+      "size": 13829,
+      "sha256": "a644a9e71f92360b0856070458df9507a6517030e9c6e136bb311add37201af6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/run_two_task_cell.py",
+      "size": 31781,
+      "sha256": "046c7ca52b05759ffba8efff22eb52dcf9c26362288e21a825a60fb16f3c8c3c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/two_task_scope.py",
+      "size": 11544,
+      "sha256": "5000f1539e0ad6ea1ffb5c6464a1c0ca77e87d4e2bd5a8c03acd434a76038810"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/NATIVE_WORLD_INTERFACE.md",
+      "size": 16975,
+      "sha256": "a6c5e8b260cb173f2809b1e65413a363dce910ee07cec71302443bda5629251b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/RUN_PLAN.md",
+      "size": 3777,
+      "sha256": "3747bdd1810471ab2b3f45082ff3361193439460701997280eb154c76b0b00fd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/prepare-foundation.py",
+      "size": 35145,
+      "sha256": "7ed14e9c7e09fe655a787e2e3ae2e3d2107767a7f99feba7e671a3ea6f81b378"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-diagnostics-v2.py",
+      "size": 815,
+      "sha256": "91a0d68bedca6f3d90b969a2c3de11470da5511ce71c0c11093bd97edc8519fd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-dsw-preflight-bowl-c.py",
+      "size": 19012,
+      "sha256": "6d2229356115695d7d6958f4d12b6ccb3b11187b882694d7fde462080c22a063"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-dsw-preflight-bowldrawer-c.py",
+      "size": 19150,
+      "sha256": "fe1016b88f0949144f56ef2ef6bfcb7ce98081a646c05714f14547ce3fec20fc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-dsw-preflight-drawer-c.py",
+      "size": 19082,
+      "sha256": "80d8abc51e32104b1c44b064364697ae68e416bbcab8320bf414ecdc70728061"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-platform-preflights.py",
+      "size": 1286,
+      "sha256": "0aa99767ec80f7b0d90550f221764d729e44e760b3a402948dab1c2a6a89f1dc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/submit-foundation.py",
+      "size": 3118,
+      "sha256": "9f552712c2297ab0f9c1d30eecaa5d66af920c5e9b2948c90f489e5289bdb381"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/closeout.py",
+      "size": 18798,
+      "sha256": "7dfaa6a1e001ce2195c4130f07ac0809aec9d538d6fac65ad4d3b69bb40bd3a6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/dlc-supervisor.py",
+      "size": 26958,
+      "sha256": "04ee242286f1268aa47b3c1b795c65eb58bbb133f9b72833fc9922a846bdc05e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/foundation_import.py",
+      "size": 3619,
+      "sha256": "6de218c9c4c416f3a7307ec92d7e0c82a76105fa9937ae1ec385cdd7a510cee6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/full_deadlines.py",
+      "size": 3056,
+      "sha256": "03aec3f65bf014eab35004b22d216cd47338cba104c92140f8ab87455569982f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/infra_guard.py",
+      "size": 3689,
+      "sha256": "ce1ed94b674490a2850d677f49dac31b15dc96b3b3c671364ac2bc8c33609bd6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/native_cc_stream.py",
+      "size": 15781,
+      "sha256": "72370d272b8ff26114eebba595d0a6745ebb87afd5e866a0b63e6241cd3d0ebc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/qwen-native-compat-r2.py",
+      "size": 13829,
+      "sha256": "a644a9e71f92360b0856070458df9507a6517030e9c6e136bb311add37201af6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/run_two_task_cell.py",
+      "size": 41189,
+      "sha256": "90af17bc9d911939a25fd9b1fddd80a7e38d0615407b5a4a47ce5902a8e85546"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/two_task_scope.py",
+      "size": 11544,
+      "sha256": "5000f1539e0ad6ea1ffb5c6464a1c0ca77e87d4e2bd5a8c03acd434a76038810"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/PLAN.md",
+      "size": 3617,
+      "sha256": "d16bf962d783c761288e3a0558f554279e16718eebb426e69bce891930110ce1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-entry.sh",
+      "size": 651,
+      "sha256": "f97a49d25e70b7811c477d0a8c27cc5a74388dca275a5f1ae545036583796641"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-supervisor.py",
+      "size": 14026,
+      "sha256": "4ec5f48417926131051135aafaa6dd821402d037ee562db62d33dc54ded93386"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/prepare-pilot.py",
+      "size": 20803,
+      "sha256": "5104362c03f3918be21ab2d4b5d5379cf192a1d1b2c1ba3a251ce106467d47f1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/qwen-native-compat.py",
+      "size": 8402,
+      "sha256": "7e9cd4509efee2c6da7976767b471b54dac65e755915149f99de494e3284d67b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/model-server.json",
+      "size": 2143,
+      "sha256": "22c61284fd39db1310bc7cecbb09ec06ddcb417aeb4156fbea8a163829985c67"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_compat.py",
+      "size": 7630,
+      "sha256": "9e2afa4e9a95b7c8541234dab43f5e525c05d930e52c7798ec12a4f220b8fa1d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_runtime.py",
+      "size": 5789,
+      "sha256": "36a1d1d118faaec4f30723aff02b804b83fabf3cae94b1891df7d308bb32edda"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/run-dsw-preflight.py",
+      "size": 4780,
+      "sha256": "ccfa258216f7b7fcac845908badabf408131cf458ba94460841defeb98d5bb9e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_import.py",
+      "size": 16138,
+      "sha256": "2987a80ba2c880c6a3676553e84c73bc0a09c5dccb215070a5d2a86a777199b4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_render.py",
+      "size": 2066,
+      "sha256": "dbfa227456fe03947abb5cf28d8849680c98089387fbe7970373421fff1da4a3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_scope.py",
+      "size": 11982,
+      "sha256": "b4c01356d79886ac03ba52a5286be91dd1bc06e976659aadfd3c3c44d2cc2afa"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/run_cell.py",
+      "size": 11401,
+      "sha256": "1533310a0fecd4d3eee3ce29c9a96d6ad7e3551f6ac21a5df2fe88c73028419a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_local_vllm_provider.py",
+      "size": 11106,
+      "sha256": "c3cf48b6a73792e32001e483f83e2c8f7503cb07f4804121ec6c774b8377b27f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_pilot_helpers.py",
+      "size": 21508,
+      "sha256": "48df32e72f282cbcfdbd35e3d93020109f38082593f15f778bdaf4f9ba921b37"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/ACCEPTANCE.md",
+      "size": 2449,
+      "sha256": "bb3a7447a846fc9eb965e6342fad74da6362d73275aa2f38caed8b9ba6027ade"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/IMPLEMENTATION.md",
+      "size": 4168,
+      "sha256": "dd6bd3ff190ecf393c941c1110b3a14ed304d5fc8cfaaf0c50ca08fba1406949"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/NATIVE_WORLD_INTERFACE.md",
+      "size": 11611,
+      "sha256": "20836585286b5245d640241f10d42a92461f2c9e04863204b9777598979d495f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/PLAN.md",
+      "size": 4569,
+      "sha256": "959d63bed98f9651e67e85148887fbdd4d91844c0ba9e382da3a5b2699c5c9b2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/prepare-foundation.py",
+      "size": 32072,
+      "sha256": "99b44af060148b9429042da3e45c84ba2cb0e7a90a205480aac56508bc8b038d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowl-c.py",
+      "size": 17521,
+      "sha256": "e3833377a92ee9df0c59993c43febd1e8e567d44a521f5b8f5233bb02c1b6d3d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowldrawer-c.py",
+      "size": 17659,
+      "sha256": "b5a51d5433082d9c86b0aa5403c3279df64434ff6afcd9be10c2e61b568f8472"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-drawer-c.py",
+      "size": 17591,
+      "sha256": "6e486c10f2bb4d00f5c5f63ded8b649eca393ef9ca199f91514762c370203179"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/submit-foundation.py",
+      "size": 2992,
+      "sha256": "69b788df515b8272eb987c05233f8b36ca4f23f979296f052d1ec1ded93023f5"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/dlc-supervisor.py",
+      "size": 23946,
+      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/run_two_task_cell.py",
+      "size": 30424,
+      "sha256": "68baf4460a5aee8b2a693d4e3298381e1ac3bfebad51df2b870a541f12749733"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_scope.py",
+      "size": 8266,
+      "sha256": "70220ccf9278845947f981bd89e493b43db6893ad6a0750fb3d7639227f422b8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/IMPLEMENTATION.md",
+      "size": 2447,
+      "sha256": "4084e895a248495682bc2df9f842ede201a76b147685ae95006664e0d2fdc1f0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/NATIVE_WORLD_INTERFACE.md",
+      "size": 11611,
+      "sha256": "20836585286b5245d640241f10d42a92461f2c9e04863204b9777598979d495f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/PLAN.md",
+      "size": 2128,
+      "sha256": "22abd2b58064aae2ca4c4929a49e4724366f52d927bb52e15c3735fd89b83e8b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/prepare-foundation.py",
+      "size": 32228,
+      "sha256": "2cbd3ac7f2c6fb41ab237440891242f8beea34bb0fde073617c37e3c8d464822"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowl-c.py",
+      "size": 17527,
+      "sha256": "1c84ce8620258877950af3950de74a4d22ca306f107434e900f3ce2177924ea4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowldrawer-c.py",
+      "size": 17665,
+      "sha256": "47cd2670153a4303b4058c9179a997585f11abdcc4c826ec7bec1752f12579ca"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-drawer-c.py",
+      "size": 17597,
+      "sha256": "a22885488aca7399b3ce72bfef82e53b387be9e9bda88a1829ccdb36dce8d0e5"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-preflights.sh",
+      "size": 316,
+      "sha256": "5b281563c4a7d7b04fb94dc6a5966baed7513f195575d5f2a1aa39e645ae76c3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/submit-foundation.py",
+      "size": 2991,
+      "sha256": "40248cda4a81e50d8b6885bc6571f36841ea5b3fdc1e0a6cefbd116395f20a1d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/dlc-supervisor.py",
+      "size": 23946,
+      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/qwen-native-compat-r2.py",
+      "size": 9372,
+      "sha256": "48de7d88473a9e8c97d926f8298ce70eb1a7e4102be0e6c9402deaaeb37a6230"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/run_two_task_cell.py",
+      "size": 30424,
+      "sha256": "68baf4460a5aee8b2a693d4e3298381e1ac3bfebad51df2b870a541f12749733"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_scope.py",
+      "size": 11557,
+      "sha256": "2d28e86dfc71a38467bfbc070c95748e93804f4a450337fee7f07e37798b1a2b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/IMPLEMENTATION.md",
+      "size": 3281,
+      "sha256": "d02aa1947da8afb491d988242a32de432a0a1f3f806e5bf77d448cdbd104c4b3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/NATIVE_WORLD_INTERFACE.md",
+      "size": 11611,
+      "sha256": "20836585286b5245d640241f10d42a92461f2c9e04863204b9777598979d495f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/PLAN.md",
+      "size": 1898,
+      "sha256": "e1cb54e4602c06c5713d8b391cfd20b6a214997f02591a647cae38248ec017f0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/prepare-foundation.py",
+      "size": 32184,
+      "sha256": "4e6054b8aa11c2270aa8600d8888d84ed05ba9c6a0f831198c4761adf60e8b57"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/run-dsw-preflight-bowl-c.py",
+      "size": 17527,
+      "sha256": "9aa817a5f1267d96fef88e1dc5fd9715fc311f4b857321e2f072935eebc8582b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/run-dsw-preflight-drawer-c.py",
+      "size": 17597,
+      "sha256": "d6340e6e738430fdd6bb8abfaaa37a6180a7b21d76eba6b63ba14afe661c99eb"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/run-preflights.sh",
+      "size": 305,
+      "sha256": "a2ab9b334e38a634c2437cfcec8f53a1e96e9b3fa3b62d1ec277f4a2339dfc64"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/submit-foundation.py",
+      "size": 2987,
+      "sha256": "d8ab90f00a8e21c74f3d4b3043ffbfb2d90d6f6c8d7c16964623a64ce8a3d4e3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/dlc-supervisor.py",
+      "size": 23946,
+      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/foundation_import.py",
+      "size": 3603,
+      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/native_cc_stream.py",
+      "size": 13946,
+      "sha256": "5d7eea15d181410940c89dbe11e2a48e6dc57eb7a9aa5ae51fa0e73624b5c50d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/qwen-native-compat-r2.py",
+      "size": 13829,
+      "sha256": "a644a9e71f92360b0856070458df9507a6517030e9c6e136bb311add37201af6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/run_two_task_cell.py",
+      "size": 30424,
+      "sha256": "68baf4460a5aee8b2a693d4e3298381e1ac3bfebad51df2b870a541f12749733"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/two_task_scope.py",
+      "size": 11557,
+      "sha256": "2d28e86dfc71a38467bfbc070c95748e93804f4a450337fee7f07e37798b1a2b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/NATIVE_WORLD_INTERFACE.md",
+      "size": 5929,
+      "sha256": "58f191a9c7f250706f1ce428f8b026a0bdf728c4a7c104e82b0d9d328fcaba30"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/PLAN.md",
+      "size": 5128,
+      "sha256": "0462eb6815a60b28f1c989bcc538f1c5cc381573b3d3d44c63a6d06863b8469e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/prepare-full.py",
+      "size": 24170,
+      "sha256": "edd7e71c5bc6c78c69d947d28df60f89cb3bc70e2374ff563dbcabb224e7d7f1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/replay-fixture-check.py",
+      "size": 5180,
+      "sha256": "c334e32e4ddc13ab2ea4b79910b35f28d33a478a77a9f15ef7362d252ff5a862"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/run-dsw-preflight.py",
+      "size": 4814,
+      "sha256": "f15916138c7dbac684b7a9343f8cce709db749924f0ebbb6fdcef989ebf132f9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/dlc-supervisor.py",
+      "size": 23488,
+      "sha256": "7222e51cea76bda336e65b4d4613950633e41bb2dc7c41332c13da61be5e2d49"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "f7f3caf6b62ff79dc484c9f1b7ef1fe08f5d7be4f263eb6b24d6469d10d46295"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_import.py",
+      "size": 16723,
+      "sha256": "b3832c2c4047dc6f3dc10f522556ee544ccfb957c551f31c1d66e592cedd2fd0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_render.py",
+      "size": 1899,
+      "sha256": "883c58abbace7797092c6969f4dc960abb0f7080b8cf1d51afb70a59ad90fb2d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_scope.py",
+      "size": 9674,
+      "sha256": "150e34720d313e36317ce26f812fcadd5f5ff77626f0d586325ea99581a89bd0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/run_full_cell.py",
+      "size": 33232,
+      "sha256": "782fb6678347788047e94088a7b72da1dd113ee5ce6554d9713cee00a26152a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_core_acceptance.py",
+      "size": 6433,
+      "sha256": "84049d7efd759808d34a86cedb3cb55fb4ff0af1f55a025d3967cd81d6f31677"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_driver.py",
+      "size": 16407,
+      "sha256": "2eea34e38470c3a37f72b142a813c7cff7e0546f81e4ecdeac94a67793d62517"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_stager.py",
+      "size": 3138,
+      "sha256": "cdd6ff50ddad3f937b8c49acce28dcdf251b7974db461b1da6b0601b61af1144"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_output_ownership.py",
+      "size": 3124,
+      "sha256": "a3e84d807bcef8de5f1a2ae327e3caf27e23a9d2f7ef1064f66cd29647d8cbf2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_qwen_capacity_acceptance.py",
+      "size": 1802,
+      "sha256": "6e5aabf0bc9aafe6233fc2b731c30788b1250d8d5d5d0185bd6696671c9d4ed0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-full-20260924/wait-checkpoint.py",
+      "size": 1236,
+      "sha256": "9ab5900c7d058bb6822c63a9fa292a0d74f2b6670f786a58943a6236a844260e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/NATIVE_WORLD_INTERFACE.md",
+      "size": 6039,
+      "sha256": "d02a19f7c9590807e0268a4e8f929c6efe7f20e77615367755c49b3bb4faecef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/PLAN.md",
+      "size": 3798,
+      "sha256": "df0bf8faa70c739a97380d852b1af76949542d323b704091aac0cf921459e23b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/drawer-pair-dlc-entry.sh",
+      "size": 1516,
+      "sha256": "b9622684ec632471c4af64615ba2b7a79328e1e13c1c5495291e459f07962b0d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/make-c-r2-driver.py",
+      "size": 15962,
+      "sha256": "bd2795b49178ec07a4f0e6b2d2a0a30b42afa7605910efb44f57972e9630c774"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/prepare-two-task.py",
+      "size": 32160,
+      "sha256": "21d02e5c1f0f09351bcf6845e7e5fc5ecdb45a3c9e569e0031f81a727ea17dd7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-bowldrawer-c-r2.sh",
+      "size": 3502,
+      "sha256": "fa20b1de863daaac8c427b0516dbaaf897942f3c80e272eec42641116c6127d8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-drawers.sh",
+      "size": 3892,
+      "sha256": "ff85c196c0577f1e13167e051638951eb702a0b45c8592709919bf20891c8ff4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/reference/expected-baseline-prompts.json",
+      "size": 2659,
+      "sha256": "5a52a73485d96bb3b624c2dd5d58ed274a3ffbf35e5499add6026568a652a273"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/rescue-c-job-marker.sh",
+      "size": 1864,
+      "sha256": "4c2d0c703bdcc8742e8fc1503bf565246b3f765096daaa05e102b88b877caf8d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-a.py",
+      "size": 7838,
+      "sha256": "a8695b61f5b7edba616192000c8dcf655fe1468cbbc6099aee0038b60c51512a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-c.py",
+      "size": 18292,
+      "sha256": "ed489ac41ee281775db0808b7bd584c7e1c151807458530b66d5c14b499b3137"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-import-bowldrawer-a-r2.py",
+      "size": 1361,
+      "sha256": "dde286614bb4ccaf32eec676e3f56e84a02b56fb744a29e825b38418c98b9b05"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-a-r2.py",
+      "size": 14519,
+      "sha256": "4b2a8544e334202918e76f836c33844fdb287bc31fd192d34117f8e0ad8dc633"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-c-r2.py",
+      "size": 21384,
+      "sha256": "33d884068e11e443ff625dc4657443052da59b173106b9a9cbf231505db78cb9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/cell_read_guard.py",
+      "size": 6601,
+      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume.py",
+      "size": 27401,
+      "sha256": "9144c60f3908e920f8deac422a751b1b806a417c2135dfd1b3722672b7be56a2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume2.py",
+      "size": 28308,
+      "sha256": "76a2c79089bd5d016f1449b6fd94aa19998737190ac3aab7e5933962966d25d7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-two-task.py",
+      "size": 25650,
+      "sha256": "88ad390b157d230dedf8e6ad3eb7b1a6e3bdfe714223bc257f2aeb041af46f66"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor.py",
+      "size": 23488,
+      "sha256": "7222e51cea76bda336e65b4d4613950633e41bb2dc7c41332c13da61be5e2d49"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/full_deadlines.py",
+      "size": 3371,
+      "sha256": "f7f3caf6b62ff79dc484c9f1b7ef1fe08f5d7be4f263eb6b24d6469d10d46295"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/heldout_stop_on_infra.py",
+      "size": 3168,
+      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/infra_guard.py",
+      "size": 3669,
+      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/lineage.py",
+      "size": 1718,
+      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_cc_stream.py",
+      "size": 9988,
+      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines.py",
+      "size": 1022,
+      "sha256": "9d8f14d02ca0871ba3680736e9c96c48c6b38cdec79f8184da827da57aeb9879"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines2.py",
+      "size": 1245,
+      "sha256": "1a82901e8e03fc932f76a37f294f5dfcbaeb31a6ca87c9bcdfd92c93b9101f72"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell.py",
+      "size": 34140,
+      "sha256": "11f5b9c790cc454c05b06e63bf5c217f1bb6920a943f81dc89e13ea0305159fb"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2.py",
+      "size": 41934,
+      "sha256": "941ee185c08a35c726d7f15610daebc7ac4b5c62056814261475312325282a7e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2_resume.py",
+      "size": 41345,
+      "sha256": "09e754d2e949685ce7028a22a1c938c151b9cb010ba1d22be21c9739969bb16b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_r2.py",
+      "size": 37869,
+      "sha256": "89856895b328425012573715b3aae50511721bdce407314af018b677eeffada2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import.py",
+      "size": 13755,
+      "sha256": "5c6a6af0fd1797c98961f913c3f3cc58a9317772e28e46cc4132ed1e0cb386ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import_c.py",
+      "size": 31820,
+      "sha256": "be74852f6100f75b2a9b741e94239964bd223668f75fdc2bead51858ec94abbf"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render_r2.py",
+      "size": 2052,
+      "sha256": "8a187f892fa07bb1853f17267cea902d1987d6d26ad378467b7424aa40cb9be1"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope.py",
+      "size": 8844,
+      "sha256": "d7204b0786575c844258e88928f7593fe4f5bf2599fd5c7138e999700223bd66"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope_r2.py",
+      "size": 8188,
+      "sha256": "86376a28b2b8b04d7f4b989143363826e259d6e07767abed7a8206940d4e78b4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/tests/test_lineage_default.py",
+      "size": 6554,
+      "sha256": "946f2836fe1080700c1a915457caf0fde99097d13bd9fb3eaeab3fce2d3f9ce9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-rerun-20260919/baseline-contract.json",
+      "size": 5651,
+      "sha256": "9f2db337b9f88369f3aaf0b5320a2d30afa075443d055344dd5b30418300b1cd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/model-fix-loop-worker.md",
+      "size": 6095,
+      "sha256": "4326a10aee0a5c49975d9064e776494d2365769342296470edfb4335f1a63d69"
+    },
+    {
+      "path": "aspire/sim/env_configs/libero/code_world/capture.example.json",
+      "size": 462,
+      "sha256": "a7dc36067e0d7678cf82a1c2e49c33e5085b043207f36c1f16aaed2877e33459"
     },
     {
       "path": "aspire/sim/env_configs/libero/franka_libero_baseline_debug.yaml",
@@ -2955,6 +3946,61 @@
       "sha256": "6d5f07dd350d5109dc4b6ebf7a4337a2463498060bd109ac8fc7788d81c0e48f"
     },
     {
+      "path": "aspire/sim/scripts/common/claude_with_local_model.sh",
+      "size": 3834,
+      "sha256": "b77f6bcc1e860ae6a97734ed22e5cf5ca297583e53bb01f03c415c361dd85f1e"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_compat.py",
+      "size": 7630,
+      "sha256": "9e2afa4e9a95b7c8541234dab43f5e525c05d930e52c7798ec12a4f220b8fa1d"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_dlc_entry.sh",
+      "size": 589,
+      "sha256": "a3db4afd1b7ddc9e218131285bb1db314ffda9b3ef12e20caaf0fabbbecd1ada"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_freeze.py",
+      "size": 5492,
+      "sha256": "ec52b32cf8b000753de37c6b45fb3e7f040c97d2b4611fd651e0b84346f4d09e"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_group.py",
+      "size": 5912,
+      "sha256": "4e77ec46a49f192afc01db4e2ee4beb35a3416aa7ef44ba2e9690d3678caf57b"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_guard.py",
+      "size": 4409,
+      "sha256": "da3b3174c49a607da99b1603e23034dadd094360e3bc2b459cbb8ce96b1bb2bc"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_permissions.py",
+      "size": 884,
+      "sha256": "abaedbbc2ce31777ef0364940c7e121199d90706b0fd631f855bb6eb35d07d05"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_runtime.py",
+      "size": 5789,
+      "sha256": "36a1d1d118faaec4f30723aff02b804b83fabf3cae94b1891df7d308bb32edda"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_skill_probe.py",
+      "size": 5571,
+      "sha256": "b441e44d6af2bb99f5bba3193f587a4754a801e5c2589b2909f6dfba994b5c31"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_stream.py",
+      "size": 15781,
+      "sha256": "72370d272b8ff26114eebba595d0a6745ebb87afd5e866a0b63e6241cd3d0ebc"
+    },
+    {
+      "path": "aspire/sim/scripts/common/native_cc_trial_process.py",
+      "size": 3008,
+      "sha256": "158d96e79f850c8075929b1b9dfe021caf6ddd90bfdfb5da1ab22b29f79620d2"
+    },
+    {
       "path": "aspire/sim/scripts/common/plot_subagent_token_trace.py",
       "size": 7571,
       "sha256": "cb414a68e2c63d0cdda42d27a77765a2ad6171e30ea93125c1d85738671e1f1b"
@@ -2968,6 +4014,21 @@
       "path": "aspire/sim/scripts/common/scan_progress.py",
       "size": 6921,
       "sha256": "69d718776b19b6fbed1de199515b70992b7666422f52d15869bdbbfbf2f9e222"
+    },
+    {
+      "path": "aspire/sim/scripts/common/serve_deepseek_v4_flash_0731.sh",
+      "size": 6145,
+      "sha256": "d2a9d4586eb6339edc71441b773f550ee7e2618f4d08b45e9b628b3ff0f2177a"
+    },
+    {
+      "path": "aspire/sim/scripts/common/serve_deepseek_v4_flash_vision_exp.sh",
+      "size": 9067,
+      "sha256": "626011eb0293aecb5830acb6da61d777d249a825f14f3964e0910ed060b8f3d1"
+    },
+    {
+      "path": "aspire/sim/scripts/common/serve_qwen3_8_flash_next.sh",
+      "size": 6086,
+      "sha256": "3d8f35b97549b5a2e9e2d3507d640b174445da597bd933b044d47c289d8bc84d"
     },
     {
       "path": "aspire/sim/scripts/common/skill_library_compilation/README.md",
@@ -3000,9 +4061,29 @@
       "sha256": "f4383480df0c9bd5a9fd530ed0c5dd751dda6b70c3ddf95289f8146aacb01b45"
     },
     {
+      "path": "aspire/sim/scripts/common/smoke_deepseek_v4_flash_0731.py",
+      "size": 4414,
+      "sha256": "e4b7861fc337eb929cd2fb375236cc6dbeae65af8c6e16238c854b1e98bc7c72"
+    },
+    {
+      "path": "aspire/sim/scripts/common/smoke_deepseek_v4_flash_vision_exp.py",
+      "size": 6239,
+      "sha256": "b2b04bbd0ca62c4276305488b349b4c24d917da6e9d0e06eb8ae8d60b9dd04b4"
+    },
+    {
+      "path": "aspire/sim/scripts/common/smoke_qwen3_8_flash_next.py",
+      "size": 6878,
+      "sha256": "5c6145834fed2a5156968d295045896a587067380f79af6ae28f1c0b6c411700"
+    },
+    {
       "path": "aspire/sim/scripts/common/start_perception_servers.sh",
       "size": 5731,
       "sha256": "ea288935fb34cb9db2645dc3dc45369a2a0f73c718aee6d34bc2f76deff65367"
+    },
+    {
+      "path": "aspire/sim/scripts/common/submit_dlc_once.py",
+      "size": 2863,
+      "sha256": "0a1e97c00c9ba3dd46de3f908a441eb96397204cc8eaf4e5c1647e28e8229acf"
     },
     {
       "path": "aspire/sim/scripts/libero/analyze_evosearch_traces.py",
@@ -3018,6 +4099,26 @@
       "path": "aspire/sim/scripts/libero/annotate_snapshot_tokens.py",
       "size": 7843,
       "sha256": "1e594ea826688797788a5e1a2a7139caa5db8842028f18378314b0f87dd81688"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/audit_scene_bowl.py",
+      "size": 11472,
+      "sha256": "d2ac46be4d4246a7e9055e0f693ceec02932579b6053a8215b89cb241aa445c3"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/audit_scene_world_smoke.py",
+      "size": 9429,
+      "sha256": "d0bc2d7ded3b0fd1971aaef29a13bbf94e9f9fca7a12a724042d4aa2de0a581a"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/code_world.py",
+      "size": 16423,
+      "sha256": "adfb9a03a595bd282e0ba428eeec1a2e17a28300d8babb59079e3dc68aa1a4fb"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/deepseek_fix_loop_worker.py",
+      "size": 216,
+      "sha256": "8a074b70bb9e22d119ed76fe8f94254931d42c7eed43e318e7d8ea12e7a3402f"
     },
     {
       "path": "aspire/sim/scripts/libero/eval_checkpoint_n5.sh",
@@ -3055,6 +4156,26 @@
       "sha256": "fb650cc7b105e6408a5af22b1a6059d87e8bf9ac9f404e602761c8a4a5c6ccb3"
     },
     {
+      "path": "aspire/sim/scripts/libero/executable_world_profile.py",
+      "size": 33850,
+      "sha256": "3204f7ac8e2acecb1250c03aa12934c42f769039c584fcfbe2b03613fcbd7aeb"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/fix_loop_state.py",
+      "size": 11354,
+      "sha256": "1f772c4016425dc49abafb669e7ce2a1ed89c44d9c95f75fd4f7f203f8eae918"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/fix_loop_worker.py",
+      "size": 37091,
+      "sha256": "17e629b8789590f3798dbe2a7273194ce3aee852e74ef50a6510079295a76aad"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/gate_study_analysis.py",
+      "size": 22374,
+      "sha256": "29b0a20dbfcbb5eea481a9384f81afba05a59bee6f84daf4bd3577dcbe230751"
+    },
+    {
       "path": "aspire/sim/scripts/libero/gen_progress.py",
       "size": 11951,
       "sha256": "c26bdc6dca5e8cbcd05fec5249f7ca706074e4e964f72236fb4863af4202d015"
@@ -3080,6 +4201,11 @@
       "sha256": "fc79f02d8d0efd103fc6b48e047e7d7a2c5327b77a982ecb6e5e96db8f2c409c"
     },
     {
+      "path": "aspire/sim/scripts/libero/generate_relational_world.py",
+      "size": 2864,
+      "sha256": "aa9d5b10a7a198018ebb620aa0cc2a958feec20a049862092a085b34074f3567"
+    },
+    {
       "path": "aspire/sim/scripts/libero/make_libero_pro_master_table.py",
       "size": 20373,
       "sha256": "db01faff1754021e8d58ec6c743ac198bc4912ecd46546298a59c0f17b6d7fc9"
@@ -3088,6 +4214,51 @@
       "path": "aspire/sim/scripts/libero/make_snapshot_table.py",
       "size": 10541,
       "sha256": "cd01253f7ad44804934fe4c45fe3637b65025ee607278f30c85aaea0df05d9aa"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_campaign.py",
+      "size": 25684,
+      "sha256": "09267bc065587ff9f937c47ec3dd56763bfb0213847116c4a856d7c4f0809d3f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_protocol.py",
+      "size": 10421,
+      "sha256": "a9ea159093631bf41a0b3ce985a1622cba38857e654bb52c561c3805265e21ff"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_recover_trial.py",
+      "size": 5660,
+      "sha256": "6b1b27d6fba755fee42dcdbc26bfa53081b884472c5755ffaf834af7764344e3"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_cc_toolchain_probe.py",
+      "size": 2046,
+      "sha256": "c0d1dd6b1b807104c1c3898e47907eeb61b0660d62f161fbfae8ea77bd6f62e2"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_campaign.py",
+      "size": 48398,
+      "sha256": "3d713e8c156713419a03c1242754571aff1d69245f8aaeae743d5b6e45098dc8"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_fixloop_state.py",
+      "size": 42488,
+      "sha256": "b3bb95d4e5141745157ea5bf1b38a1d5ca7c4eaff26ef3617367494c9cb3098c"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_heldout.py",
+      "size": 11144,
+      "sha256": "3b5801949620789a4657fc6626f12ea5b3dae6fb15b8de931575996353334557"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/native_world_protocol.py",
+      "size": 57794,
+      "sha256": "6e62f79a2b79ea6bdcea79133603e9427da5a242e2dc36de271be92bbcecf86f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/paired_bowl_supervisor.py",
+      "size": 18554,
+      "sha256": "2b2f5b4cb9c409a7befe05f677a459cf08e625d2accfae33004d737a0e2cc556"
     },
     {
       "path": "aspire/sim/scripts/libero/plot_baseline_vs_fix.py",
@@ -3135,14 +4306,49 @@
       "sha256": "c7cb151645ccbba5e9dc347d1091b5c461dd0361238eae9923746e486db8bba0"
     },
     {
+      "path": "aspire/sim/scripts/libero/prediction_study_analysis.py",
+      "size": 15396,
+      "sha256": "b9536daf39c8c859279be5c0dd67630cdead0577e845f0aad3a0ed74134576c9"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/probe_scene_world_control.py",
+      "size": 7017,
+      "sha256": "49af245f6128a7bb7bc482159ae674f50e772cac9e761476c612ab166b38d47f"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/qwen_fix_loop_worker.py",
+      "size": 212,
+      "sha256": "1085acb867ac8f3e30c7e64eacd68c00771fca830c3f2760e6eedec07fdb3980"
+    },
+    {
       "path": "aspire/sim/scripts/libero/record_skill_promotion.py",
       "size": 13166,
       "sha256": "82171aaf7c3bb6d465bfeb5db38dcb1c66b7b536a779fde6e70bdd945c659128"
     },
     {
+      "path": "aspire/sim/scripts/libero/relational_scene_bowl_supervisor.py",
+      "size": 12176,
+      "sha256": "23050810c9e2f8781b1072e90e053431273e51fc6ec3e7e7a18fbd7a31e208ac"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/render_scene_bowl.py",
+      "size": 3626,
+      "sha256": "1f10e3a2d629164a532609743cc890c22bccaf6de6b211f96df37443f378e0d4"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/render_scene_world_diagnostic.py",
+      "size": 3878,
+      "sha256": "91d669387ddc840ee90d8dc0f30d0d77600bf514651c77d90a225e48353ec21a"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/render_scene_world_smoke.py",
+      "size": 4696,
+      "sha256": "8035081359bfd8bedced9aefa96985b7aa274039ea4f7f4946ce1c7a3dd2b761"
+    },
+    {
       "path": "aspire/sim/scripts/libero/replay_trial.py",
-      "size": 29280,
-      "sha256": "0dbf88675ab9f6bc343aa75a9d2a21b11a33d25f984f2cfb0c426c2b1a2b73d6"
+      "size": 35489,
+      "sha256": "f90395c670b832b19591f3e56aaebad86b771a258f9bb460ef7000db7cb33596"
     },
     {
       "path": "aspire/sim/scripts/libero/resume_eval_gpu.sh",
@@ -3170,9 +4376,39 @@
       "sha256": "db64e5ec5777c14a210fc531f4f991d05b6754fe7770245f28d26728a828e6d3"
     },
     {
+      "path": "aspire/sim/scripts/libero/scene_bowl_supervisor.py",
+      "size": 10684,
+      "sha256": "355253c211effbb8a55d5b87294f6c71c05dc40eeb26bc05de06de8e1505793f"
+    },
+    {
       "path": "aspire/sim/scripts/libero/scene_snapshot.py",
       "size": 1915,
       "sha256": "6c07958405fe48e65d4169b64a648cd90ba1152dd4fda7ab4e3a51f0d49384b1"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/scene_world_smoke.py",
+      "size": 22712,
+      "sha256": "9378f90dd32c9e8e46920070cdcea58af12d1e387d1292e46c9072e6018e378b"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/simple_world_profile.py",
+      "size": 5354,
+      "sha256": "c89a76ea51867530bd903b88e8ffeb46026d9c480c91805d6c7eecc29ee1bb12"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/world_fix_loop.py",
+      "size": 31819,
+      "sha256": "477bfb1ae099f7244ca20f9554c9ad8faf528b3e39102352405a6e7d1f84d43e"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/world_fix_loop_model.py",
+      "size": 11288,
+      "sha256": "14128bbb5ed45de849f2144c53fbc8e984d27e2861992b5e05dc66f6464c3749"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/world_fix_loop_state.py",
+      "size": 30100,
+      "sha256": "a716c385a2c011e787494a2463b30a16e2303fb064842615a10adebcbce00cd0"
     },
     {
       "path": "aspire/sim/scripts/robosuite/gen_progress_robosuite.py",
@@ -3225,6 +4461,61 @@
       "sha256": "7a7ff506d4ff797be6471fed9a2f95ae198f2ef94aea973facdba1b116c08cb1"
     },
     {
+      "path": "aspire/sim/tests/code_world_fake_api.py",
+      "size": 2943,
+      "sha256": "dbca3d3f017cbbdaa7d9ee0afea43fc6a4b11f8425e540138b1d485e65807311"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_audit_feedback.json",
+      "size": 3943,
+      "sha256": "a9c54db06fe5087999efe0a18fc5970df00a0ae0bc10c7dca5599d82372a198c"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_audit_report.json",
+      "size": 4442,
+      "sha256": "c4839a174de0a4f4c26092fca971ff65a8ad7168b131b33359e71b5b94b3c854"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_prompt_sha256.json",
+      "size": 368,
+      "sha256": "6dcdb4a65c64c273c3e7a32726990637c8d152c28feabf7c9c3426a7daa77029"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_events.jsonl",
+      "size": 9598,
+      "sha256": "79315062f51504031a89d13d4fd7d0a237ac6af379c94c4b9d85b2c0af734d79"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_manifest.json",
+      "size": 1237,
+      "sha256": "9eb0d5d69a0f20943cb8b9d2a2f959d9a75108ee442d06870480367bd83f73fd"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_offline_result.json",
+      "size": 1081,
+      "sha256": "8677976ae92c30a44d839fa48e7cc087b4e076b7108335df3e523badea450991"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_public_tape.jsonl",
+      "size": 3942,
+      "sha256": "55ce0c0e1b433c00b95fc8a925683c964af8ac4698a966257f23043959a609f9"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_session_events.jsonl",
+      "size": 10499,
+      "sha256": "a5bbc50cfc03bb2bfc7c68b50bf62da91e6f945db908d14bec5f1e79e72cf3e3"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_session_manifest.json",
+      "size": 1259,
+      "sha256": "1acf91458d91cf73668f36451a2272b3f05ee792c5b83950c0bb8a84766b8502"
+    },
+    {
+      "path": "aspire/sim/tests/fixtures/prediction_contract/off_session_public_tape.jsonl",
+      "size": 3941,
+      "sha256": "a036d48f432acab05b02e3aa8f8e009bb1b39faf5081845dd8c7972e4493f01b"
+    },
+    {
       "path": "aspire/sim/tests/integrations/test_grasp_graspnet.py",
       "size": 1855,
       "sha256": "be687b23758989cdf82ff52ff0f8820e23d24bf62a9e7700e7fe126da3df3e16"
@@ -3275,14 +4566,64 @@
       "sha256": "2feb02fc1a12bae670b8f1bfeb15289bcdbc4f8ecbce1852eb1ad4099906c4e9"
     },
     {
+      "path": "aspire/sim/tests/prediction_contract_fixture.py",
+      "size": 10095,
+      "sha256": "2b5027b8ad3e15ef71d774b153a47d09f383549106a2b89a49ab883912827c30"
+    },
+    {
+      "path": "aspire/sim/tests/test_abc_conditions.py",
+      "size": 24428,
+      "sha256": "1672b8d2ddae23360c341935f6895c2efcf63b2c05a712eeb2961fe463aefed6"
+    },
+    {
+      "path": "aspire/sim/tests/test_closed_loop_r2_image_launch.py",
+      "size": 8385,
+      "sha256": "1deb5379a3b7936879edbffd2e9ee1114f9b8e4c9076e703dd58377cf7e5a061"
+    },
+    {
+      "path": "aspire/sim/tests/test_closed_loop_revision.py",
+      "size": 26471,
+      "sha256": "ee6261304d353dd040656e1d8fb9799188471d68837b13722fc7f3c3179667f9"
+    },
+    {
+      "path": "aspire/sim/tests/test_code_world_cli.py",
+      "size": 7583,
+      "sha256": "ac0d585d50530d55ccf6e339d3ba1ba10c2120fb9d5c8596811b5127f7fd036e"
+    },
+    {
       "path": "aspire/sim/tests/test_dep_compat.py",
       "size": 2480,
       "sha256": "3a38d29529fac0da2b553202bf6e421066f5f984abb08d7b5961e65f93529b75"
     },
     {
+      "path": "aspire/sim/tests/test_development_gate.py",
+      "size": 23542,
+      "sha256": "0a682255a857676e5fb45a026796f3328ae141e65efcea12d2a597620b3ab751"
+    },
+    {
       "path": "aspire/sim/tests/test_environments.py",
       "size": 4019,
       "sha256": "1b288d48f17f0c7ff46930aa37ac27361fe25f6ffc6cac0d6b4e663aa7f07d20"
+    },
+    {
+      "path": "aspire/sim/tests/test_executable_world.py",
+      "size": 12174,
+      "sha256": "2913c537ccb37442cf452e097a3f7efd4c6a838cd426b66500a0182fd7c8f826"
+    },
+    {
+      "path": "aspire/sim/tests/test_foundation_r2_repairs.py",
+      "size": 7229,
+      "sha256": "808d3b8827ec96463ae89f500511eff24d6272fe1a67ed3a887b18d0a5d991d2"
+    },
+    {
+      "path": "aspire/sim/tests/test_gate_study_queue.py",
+      "size": 6615,
+      "sha256": "7a90526252477acab7f768ae6b56596257c22e9eb349888c301aa937b6fb87f7"
+    },
+    {
+      "path": "aspire/sim/tests/test_gate_study_support.py",
+      "size": 18010,
+      "sha256": "9b7b4661acb880950ce8f8269279c8bf4da2bd8e480f68f181252b72b4a6016a"
     },
     {
       "path": "aspire/sim/tests/test_gen_progress.py",
@@ -3300,9 +4641,119 @@
       "sha256": "64da6a406b26f5d92d723816a80f1183349c7366d1f0bb793c27f09b34aa0eb0"
     },
     {
+      "path": "aspire/sim/tests/test_llm_client_deepseek_v4.py",
+      "size": 3426,
+      "sha256": "a94574618ec73f17a21b241e9d618e3a3f1080e0102d2db739f0132e062cc6f8"
+    },
+    {
+      "path": "aspire/sim/tests/test_llm_client_qwen3_8_flash_next.py",
+      "size": 4029,
+      "sha256": "62aff3d3e6f4ae99a61e95e77fa2567469e98566ab227f3fd442dcd5c68fb8eb"
+    },
+    {
+      "path": "aspire/sim/tests/test_model_fix_loop_worker.py",
+      "size": 17532,
+      "sha256": "2e72b11769c5f18e4a9c23c00319c10699b8f950b60c5c7d0f391b156c1525ef"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_completion.py",
+      "size": 17808,
+      "sha256": "1d37b5ba7c37e58004de0e6d46cc169b5cd5ad699a793fa825714fc7047435e4"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_permissions.py",
+      "size": 947,
+      "sha256": "56277b215a31d88aac1b9aeb01653f42f91c289c8de061e487879dabb0741711"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_protocol.py",
+      "size": 7485,
+      "sha256": "0571e96abccf29e77c433fe5ae852854663679104f7c39d3a741f5d9de43c2bb"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_recover_trial.py",
+      "size": 4271,
+      "sha256": "671768218e8e727a1a9124245a7a732d32d6678c01df6eedf9d41a6aaaea0dd8"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_runtime.py",
+      "size": 8797,
+      "sha256": "f0b1e4a7ce4faeab47f6fff0cb76bd5f0d1dd2a6efe3f5896981db40f6efe752"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_runtime_repair.py",
+      "size": 8727,
+      "sha256": "1a6ceb45d57229f1777a13b832e612c0ad0bf9bc7f205d74d96dbe6550007293"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_cc_stream.py",
+      "size": 15722,
+      "sha256": "89e39fb35e4e41c1e6b44bf23333f11a1d86a41c4b6af5dc96eb59d48c389ca1"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_world_broker.py",
+      "size": 20933,
+      "sha256": "e10c135cae599756ce909943594d2161bf28b3fdc2a56e6551d23b576ed0f9fe"
+    },
+    {
+      "path": "aspire/sim/tests/test_native_world_fixloop.py",
+      "size": 53016,
+      "sha256": "ffdef843ac1dfafd4e1ab60f3f7c58dfd02ed98a2cde7961509a2e5ac155261f"
+    },
+    {
+      "path": "aspire/sim/tests/test_openrouter_server.py",
+      "size": 659,
+      "sha256": "fa44fbef17917a60d6cedab0d2e3e02d84fd079625801498238f9f6131952665"
+    },
+    {
+      "path": "aspire/sim/tests/test_ordinary_fix_loop.py",
+      "size": 31801,
+      "sha256": "c79ff81e390f7f4946f3fddde51c11b2017da222e4aa74795004f1b7150e4c6a"
+    },
+    {
+      "path": "aspire/sim/tests/test_pipeline_driver_terminal.py",
+      "size": 5656,
+      "sha256": "3b9d466d81f17c8fce1a05f0b61823f2b63faaca682de7f5aa22539d0fbe889c"
+    },
+    {
+      "path": "aspire/sim/tests/test_pipeline_repair_20261003.py",
+      "size": 30626,
+      "sha256": "9cad2e47d90b07b1b99e1f231ba9ed7d815005e574dfbef843faede8d6610ffb"
+    },
+    {
+      "path": "aspire/sim/tests/test_pipeline_repair_20261005.py",
+      "size": 7136,
+      "sha256": "8ea55226de299df09a3d51240361430f3f6a948d3a0c2ff557898ca6daf9a9a4"
+    },
+    {
+      "path": "aspire/sim/tests/test_prediction_contract.py",
+      "size": 22918,
+      "sha256": "1eb5eb16b284e5fbd686e32713b794aae7625623b598b91254d76235f75522d2"
+    },
+    {
+      "path": "aspire/sim/tests/test_prediction_study_support.py",
+      "size": 15440,
+      "sha256": "2be516149a0c4f825848a555d0dd3bf65670f445c18a53adec120d2aae6e04c7"
+    },
+    {
+      "path": "aspire/sim/tests/test_qwen_full_repair.py",
+      "size": 19749,
+      "sha256": "712b5d08fcc1af4226f68ef042e61105064c2a0f91fd45b463ee3000a5a51dcb"
+    },
+    {
+      "path": "aspire/sim/tests/test_r3_closeout.py",
+      "size": 29309,
+      "sha256": "4b2f9e2bc08d72ad7c431a37bea8cdac3b0ab86e9eec644efeca3d3ad2ab46a1"
+    },
+    {
       "path": "aspire/sim/tests/test_record_skill_promotion.py",
       "size": 5450,
       "sha256": "7a090961ff8399d947302733880c809f2d67c21d90ba58a7dd165c74d387edf3"
+    },
+    {
+      "path": "aspire/sim/tests/test_reference_relational_world.py",
+      "size": 38989,
+      "sha256": "0146a44fcfe7a519b8729258589c205572bd14cbb78ee4578a321725ebda8378"
     },
     {
       "path": "aspire/sim/tests/test_robosuite_setup.py",
@@ -3310,149 +4761,64 @@
       "sha256": "67630fa6294e56e6b2c7d2c30b80f57faa8a3027f4e45c64eabc1ca0eb2e59fd"
     },
     {
+      "path": "aspire/sim/tests/test_simple_world.py",
+      "size": 8629,
+      "sha256": "85c4c1d0e6a219db7d30b78a14a2f58ea14f9f7fcc6887195c5c8244882cc54e"
+    },
+    {
+      "path": "aspire/sim/tests/test_submit_dlc_once.py",
+      "size": 2373,
+      "sha256": "075f1c7267754c24c603cc1640ff6464cb8d996032af43c34172753241567370"
+    },
+    {
+      "path": "aspire/sim/tests/test_vllm_image_source.py",
+      "size": 10529,
+      "sha256": "31a71bf9556bbb6d1057992868e47c7cf7f729870129ecadda4e220ca9a0ab75"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_fix_loop.py",
+      "size": 31981,
+      "sha256": "542fcb4bc4a9f0db46bd4b545e25b907004a15c5cb4300cf10148af6dee62d45"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_foundation.py",
+      "size": 7899,
+      "sha256": "49c137bdd5bf28c644db421b4c1204b06c9b81a4c3cb0b95d50d01a8fc390b83"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_model_opt_in.py",
+      "size": 22716,
+      "sha256": "0d9e6cac0870133f7f71a2d4a875386d9b7ad0e9125d6831f1aad7f5a87e2dd6"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_model_runtime.py",
+      "size": 14798,
+      "sha256": "716e21818a64ab6429dc5eb94f41abaffd9a49a787984e4f3f7045fa0ac536c4"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_use_audit.py",
+      "size": 18656,
+      "sha256": "f354aca114793eda555f9ee184004b47310bb564e4f5471a32607b1735b3143a"
+    },
+    {
+      "path": "aspire/sim/tests/test_world_use_revision_compat.py",
+      "size": 5933,
+      "sha256": "c311d705b6328946e35393eecd326cf9ec7b533a076e7f9d07960d30236c9b8f"
+    },
+    {
       "path": "aspire/sim/uv.lock",
       "size": 1529751,
       "sha256": "25f59b0c20c647af981ca3c11df58fbd2e6f3760d986f2e5c726cbc94f1439ef"
     },
     {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/IMPLEMENTATION.md",
-      "size": 2447,
-      "sha256": "4084e895a248495682bc2df9f842ede201a76b147685ae95006664e0d2fdc1f0"
+      "path": "deploy/qwen/client.env.example",
+      "size": 372,
+      "sha256": "8822545a72d98ae2880d18107c6d720b66fa1ccb50eabdfc89ccbf36e2b4124b"
     },
     {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/NATIVE_WORLD_INTERFACE.md",
-      "size": 11611,
-      "sha256": "20836585286b5245d640241f10d42a92461f2c9e04863204b9777598979d495f"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/PLAN.md",
-      "size": 2128,
-      "sha256": "22abd2b58064aae2ca4c4929a49e4724366f52d927bb52e15c3735fd89b83e8b"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/foundation_import.py",
-      "size": 3603,
-      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/prepare-foundation.py",
-      "size": 32228,
-      "sha256": "2cbd3ac7f2c6fb41ab237440891242f8beea34bb0fde073617c37e3c8d464822"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowl-c.py",
-      "size": 17527,
-      "sha256": "1c84ce8620258877950af3950de74a4d22ca306f107434e900f3ce2177924ea4"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowldrawer-c.py",
-      "size": 17665,
-      "sha256": "47cd2670153a4303b4058c9179a997585f11abdcc4c826ec7bec1752f12579ca"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-drawer-c.py",
-      "size": 17597,
-      "sha256": "a22885488aca7399b3ce72bfef82e53b387be9e9bda88a1829ccdb36dce8d0e5"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-preflights.sh",
-      "size": 316,
-      "sha256": "5b281563c4a7d7b04fb94dc6a5966baed7513f195575d5f2a1aa39e645ae76c3"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/submit-foundation.py",
-      "size": 2991,
-      "sha256": "40248cda4a81e50d8b6885bc6571f36841ea5b3fdc1e0a6cefbd116395f20a1d"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/cell_read_guard.py",
-      "size": 6601,
-      "sha256": "1b1bdb636566ebd893b78ab10b0a95878f662c6afce8aa2b3a32045c911e1882"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/dlc-supervisor.py",
-      "size": 23946,
-      "sha256": "38fae7db40cb7c1ffda10c21734ec93d010efb2bd88cf0b34a1084d693f12118"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/foundation_import.py",
-      "size": 3603,
-      "sha256": "49b9d2b68901257e81c2065304ad737232ded8601ad8265208770c7db56fb470"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/full_deadlines.py",
-      "size": 3371,
-      "sha256": "04e81bc5b2874fabe0316f95d1a49b4a2f30c3e77e16cb6da8e7edb47bf6b4c4"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/heldout_stop_on_infra.py",
-      "size": 3168,
-      "sha256": "e7f914f714803decdfd57b6997617fc8b6368f9960291f8b78d5156c3540f79c"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/infra_guard.py",
-      "size": 3669,
-      "sha256": "3c18b224bf5647650f655dbac07e81ad9300e15ef79d910ada06f5138d0882d3"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/legacy_stager.py",
-      "size": 35766,
-      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/lineage.py",
-      "size": 1718,
-      "sha256": "040440e2db89176de148b5413df24e2835e53e95b794a859b746abde9361c1a0"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_cc_stream.py",
-      "size": 9988,
-      "sha256": "2b52149625791adf7e63c9415b7bf38fe78d88da1bb20b69efdd0b99649a9c58"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_lineage_r2.py",
-      "size": 22368,
-      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/output_ownership.py",
-      "size": 5889,
-      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pilot_assignment_guard.py",
-      "size": 10858,
-      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pristine_a_render.py",
-      "size": 4587,
-      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/qwen-native-compat-r2.py",
-      "size": 9372,
-      "sha256": "48de7d88473a9e8c97d926f8298ce70eb1a7e4102be0e6c9402deaaeb37a6230"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/run_two_task_cell.py",
-      "size": 30424,
-      "sha256": "68baf4460a5aee8b2a693d4e3298381e1ac3bfebad51df2b870a541f12749733"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_render.py",
-      "size": 2095,
-      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
-    },
-    {
-      "path": "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_scope.py",
-      "size": 11557,
-      "sha256": "2d28e86dfc71a38467bfbc070c95748e93804f4a450337fee7f07e37798b1a2b"
-    },
-    {
-      "path": "aspire/sim/tests/test_foundation_r2_repairs.py",
-      "size": 7229,
-      "sha256": "808d3b8827ec96463ae89f500511eff24d6272fe1a67ed3a887b18d0a5d991d2"
+      "path": "deploy/qwen/model-server.example.json",
+      "size": 1904,
+      "sha256": "09ecceff6507255f5f3a2a7b54e9bc7e8331f58c4cc020385c8d0579dc4219a4"
     }
   ],
   "submodules": [
@@ -3485,7 +4851,7 @@
       "commit": "6fe87d64a5beb9084923d7a9e002741178635b09"
     }
   ],
-  "note": "SHA256 values describe copied source inputs. README renamed; AGENTS and CLAUDE replaced by personal-repository guidance. Newly authored export docs/configuration are not source inputs.",
+  "note": "SHA256 values identify the synchronized source inputs. publication_path defaults to path. Common documents are synchronized separately; this manifest excludes its own hash. Git metadata and the personal root README/.gitignore are publication-specific.",
   "updates": [
     {
       "date": "2026-10-01",
@@ -3525,5 +4891,78 @@
       ],
       "scope": "Foundation R2 source, tests, and core protocols only; no runtime artifacts."
     }
-  ]
+  ],
+  "common_documents": [
+    {
+      "path": "docs/LATEST_EXPERIMENTS.md",
+      "size": 3643,
+      "sha256": "6126081fa5a1365b30c482136adf77423ca9d0e4e9aa87af365d074f5421e2f1",
+      "mode": 420
+    },
+    {
+      "path": "docs/REPOSITORY_SCOPE.md",
+      "size": 2258,
+      "sha256": "90b1d2052ceb66b6e34553cf5892e3bd2079c10b17751cc1ef60111f8364ff2a",
+      "mode": 420
+    },
+    {
+      "path": "docs/QWEN.md",
+      "size": 3352,
+      "sha256": "6187f6b70e6d664dac74a59d30ba21450ca4341783b14b4b16285084ccb89f5c",
+      "mode": 420
+    },
+    {
+      "path": "docs/SYNC_SCOPE.md",
+      "size": 2659,
+      "sha256": "301b059617bd9787c2661d9d2fb43a047d1b5a4762aa1b44f5bec08c77746458",
+      "mode": 420
+    }
+  ],
+  "synchronization": {
+    "date": "2026-10-09",
+    "remote_host": "rbs-debug",
+    "remote_root": "/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b",
+    "local_root": "/Users/wge/git/ASPIRE",
+    "personal_root": "/Users/wge/git/ASPIRE-personal",
+    "github": "git@github.com:wge2002/aspire-world.git",
+    "source_scope_sha256": "3539ceaad64af33fe4e018d43912a2aeb67b8a304121ded395c44b9cb9fb70da",
+    "excluded": "logs, raw results, media, weights, credentials, caches, environments, frozen runtimes",
+    "root_readme_mapping": "source README.md -> personal README.upstream.md; personal README.md is navigation",
+    "remote_sources_retained": [
+      "aspire/sim/cap/world_model/shadow_condition_broker.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-oracle-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-oracle-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-selfeval-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-selfeval-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-vlmjudge-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-vlmjudge-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-oracle-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-oracle-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-selfeval-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-selfeval-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-vlmjudge-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowldrawer-vlmjudge-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-oracle-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-oracle-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-selfeval-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-selfeval-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-vlmjudge-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-drawer-vlmjudge-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-oracle-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-oracle-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-selfeval-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-selfeval-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-vlmjudge-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-stove-vlmjudge-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-oracle-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-oracle-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-selfeval-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-selfeval-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-vlmjudge-r1.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-vlmjudge-r2.py",
+      "aspire/sim/scripts/common/native_cc_freeze.py",
+      "aspire/sim/tests/test_world_use_audit.py",
+      "aspire/sim/tests/test_world_use_revision_compat.py"
+    ]
+  }
 }
