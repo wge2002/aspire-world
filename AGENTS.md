@@ -4,6 +4,13 @@ This is the model-neutral entry point for repository-aware coding agents. Read i
 
 ## Shared source and publication scope (2026-10-09)
 
+Current RS handoff (2026-10-12): read [docs/RS_HANDOFF_20261012.md](docs/RS_HANDOFF_20261012.md).
+Engineering checkout is `rs:/root/github/aspire-world`, simulation root
+`/root/github/aspire-world/aspire/sim`, publication branch `SZ-DEV`.
+The older Mac/rbs-debug paths below are historical. Do not edit frozen runtime
+trees or infer that prepared cases are already running. The user authorized
+fresh RS v3 drawer, stove, wine pilot cells in that order; no new DLC allocation.
+
 Core code and protocols are synchronized across the remote engineering checkout,
 local ASPIRE checkout, and `wge2002/aspire-world`; see [docs/SYNC_SCOPE.md](docs/SYNC_SCOPE.md).
 Current source navigation is [docs/LATEST_EXPERIMENTS.md](docs/LATEST_EXPERIMENTS.md).
@@ -17,7 +24,9 @@ privileged APIs. Preserve the user's explicit model, seed and budget choices.
 
 ## Codex Coordination
 
-When Codex coordinates implementation, follow [CC_USAGE.md](CC_USAGE.md). Substantial
+When Codex coordinates implementation, follow [CC_USAGE.md](CC_USAGE.md). The CC
+handoff rules apply on the RS server only; local implementation and verification
+are handled directly by Codex (user clarification, 2026-10-10). On RS, substantial
 code changes normally belong to Claude Code (CC). If the matching project session
 is absent or CC has exited, start a dedicated CC in tmux in the confirmed project
 checkout, reusing that project's previous settings, and hand off the work. Codex
@@ -29,6 +38,22 @@ failure exception also permits substantial code changes; a missing session alone
 does not. Avoid simultaneous edits by CC and Codex during the handoff.
 
 ## Request Routing
+
+### Current RS Streaming World line and shared comparison protocol (2026-10-10)
+
+For this development line, follow
+[the common LIBERO-Pro protocol](aspire/sim/docs/libero-pro-common-protocol.md)
+and its [machine-readable constraints](aspire/sim/docs/libero-pro-common-protocol.json).
+It fixes five `libero_goal_swap` tasks, C inputs without high-level strategy MD,
+local Qwen3.8-Flash-Next/native CC 2.1.220/xhigh/1M/64K, nonprivileged actual
+perception, oracle development gate, seeds 51–65 with three TOTAL charged
+attempts per seed, and frozen evaluation 1–50. Trial/development/evaluation
+watchdogs are 900 seconds/14 hours/5 hours; resuming never resets budgets.
+Each method has five tasks x two independent fresh repeats (10 cells).
+Declare method differences and keep cell isolation, frozen hashes, four outcome
+classes and incomplete cells visible. These current explicit constraints
+supersede historical defaults for this line only. Writing or synchronizing this
+protocol does not authorize launching an entire comparison or a DLC allocation.
 
 ### Default for the ongoing world-code study
 

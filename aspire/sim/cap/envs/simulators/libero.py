@@ -22,6 +22,7 @@ from aspire.sim.cap.envs.base import BaseEnv
 from aspire.sim.cap.integrations.libero import load_libero_task
 from aspire.sim.cap.utils.camera_utils import obs_get_rgb
 from aspire.sim.cap.utils.depth_utils import depth_color_to_pointcloud
+from aspire.sim.cap.world_model.control_progress import ControlProgress, reset_scope
 
 here = os.path.dirname(os.path.abspath(__file__))
 vendor_root = os.path.normpath(os.path.join(here, "..", "third_party", "LIBERO"))
@@ -122,6 +123,7 @@ class FrankaLiberoEnv(BaseEnv):
             self._panda_joint_qpos_addrs.append(int(addr))
 
         self.home_joint_position: np.ndarray | None = None
+        self._streaming_progress = ControlProgress()
 
         # Viser debugging
         self.viser_debug = viser_debug
@@ -152,6 +154,7 @@ class FrankaLiberoEnv(BaseEnv):
 
         self.reset()
 
+    @reset_scope
     def reset(
         self, *, seed: int | None = None, options: dict[str, Any] | None = None
     ) -> tuple[dict[str, Any], dict[str, Any]]:
@@ -159,18 +162,13 @@ class FrankaLiberoEnv(BaseEnv):
             # NOTE: currently not used
             self._rng = np.random.default_rng(seed)
 
-        # We call handle.reset, but then we might want to override the init state
+        # One env reset, then the seed's initial state is loaded once by the
+        # handle, which returns the observation of that state. No reset follows
+        # it. With the common registry (ASPIRE_LIBERO_INITIAL_STATE_MANIFEST):
+        # test seeds 1-50 -> original slots 0-49, development seeds 51-65 ->
+        # the 15 common development states; legacy runs without it keep
+        # (N - 1) % len(init_states), None -> 0.
         libero_obs, libero_info = self.handle.reset(seed=seed)
-        
-        # Override the init state based on the seed (which corresponds to trial ID)
-        if self.handle.init_states is not None and len(self.handle.init_states) > 0:
-            if seed is not None:
-                # Assuming seed is the trial number (1-based)
-                state_idx = (seed - 1) % len(self.handle.init_states)
-                self.handle.env.set_init_state(self.handle.init_states[state_idx])
-                # Reset simulation again to apply the new init state
-                libero_obs = self.handle.env.reset()
-                libero_info = {}
 
         self._current_obs = libero_obs
         self._current_info = libero_info
@@ -213,6 +211,30 @@ class FrankaLiberoEnv(BaseEnv):
         info: dict[str, Any] = {}
         return obs, reward, terminated, truncated, info
 
+    def add_control_progress_callback(self, callback):
+        """Trusted optional observer of public robot data during motor execution."""
+        return self._streaming_progress.add("progress", callback)
+
+    def add_streaming_reset_callback(self, callback):
+        return self._streaming_progress.add("reset", callback)
+
+    def add_streaming_close_callback(self, callback):
+        return self._streaming_progress.add("close", callback)
+
+    def _publish_control_progress(self):
+        hooks = getattr(self, "_streaming_progress", None)
+        if hooks is not None and hooks.active:
+            hooks.publish(self.get_robot_observation(),
+                self.get_current_time_s(), self._sim_step_count)
+
+    def close(self):
+        try:
+            self._streaming_progress.close()
+        finally:
+            close = getattr(self.handle, "close", None)
+            if close is not None:
+                close()
+
     # ----------------------- FrankaControlApi Interface -----------------------
 
     def move_to_joints_blocking(
@@ -227,6 +249,8 @@ class FrankaLiberoEnv(BaseEnv):
         """
         target = np.asarray(joints, dtype=np.float64).reshape(7)
         self._current_joints = target
+        self._last_motion_report = {"converged": False, "status": "running",
+                                    "target_joints": target.tolist()}
 
         steps = 0
         while steps < max_steps:
@@ -268,7 +292,16 @@ class FrankaLiberoEnv(BaseEnv):
             if self._record_frames and self._sim_step_count % self._subsample_rate == 0:
                 self._record_frame()
 
+            self._publish_control_progress()
             steps += 1
+
+        measured = np.asarray(self.get_robot_observation()["robot_joint_pos"], dtype=float)[:7]
+        final_error = float(np.linalg.norm(measured - target))
+        self._last_motion_report = {"converged": final_error < tolerance,
+            "status": "converged" if final_error < tolerance else "step_limit",
+            "target_joints": target.tolist(), "measured_joints": measured.tolist(),
+            "joint_error": final_error, "steps": steps, "step_limit": max_steps,
+            "tolerance": tolerance, "captured_at": self.get_current_time_s()}
 
     def _set_gripper(self, fraction: float) -> None:
         """Set gripper opening fraction.
@@ -302,6 +335,8 @@ class FrankaLiberoEnv(BaseEnv):
 
         if self._record_frames and self._sim_step_count % self._subsample_rate == 0:
             self._record_frame()
+
+        self._publish_control_progress()
 
     def _get_object_pose(self, obj_name: str) -> tuple[np.ndarray, np.ndarray]:
         """Get the pose of an object in the environment as a position (3,) and WXYZ quaternion (4,).
@@ -498,6 +533,12 @@ class FrankaLiberoEnv(BaseEnv):
                     camera_name + "_segmentation_" + self.segmentation_level
                 ][::-1]
 
+        obs.update(self.get_robot_observation())
+        return obs
+
+    def get_robot_observation(self) -> dict[str, Any]:
+        """Public proprioception only, without RGB-D acquisition or evaluator data."""
+        obs = {}
         gripper_robot_base = (
             vtf.SE3(wxyz_xyz=self.base_link_wxyz_xyz).inverse()
             @ vtf.SE3(wxyz_xyz=self.gripper_link_wxyz_xyz)
@@ -519,6 +560,11 @@ class FrankaLiberoEnv(BaseEnv):
                 [self._current_obs["robot0_gripper_qpos"][0] / self.gripper_metric_length],
             ]
         )
+        hand_world = vtf.SE3(wxyz_xyz=self.base_link_wxyz_xyz) @ gripper_robot_base
+        obs["robot_hand_pose_world"] = np.concatenate(
+            [hand_world.translation(), hand_world.rotation().wxyz])
+        obs["robot_cartesian_reference"] = "robot_base/panda_hand"
+        obs["robot_hand_pose_reference"] = "world/panda_hand"
         return obs
 
     def get_current_time_s(self) -> float:

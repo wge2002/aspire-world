@@ -11,6 +11,8 @@ import re
 from dataclasses import dataclass
 from typing import Any
 
+from aspire.sim.cap.integrations.libero.initial_states import InitialStateRegistry
+
 os.environ["TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD"] = "1"
 
 
@@ -21,17 +23,53 @@ class LiberoHandle:
     task_id: int
     task_language: str
     init_states: Any
+    # Common-environment registry (initial_states.py). When present it is the only
+    # source of initial states: test seeds 1-50 -> original slots, development
+    # seeds 51-65 -> the common development states; no modulo fallback.
+    initial_state_registry: InitialStateRegistry | None = None
 
     def reset(self, seed: int | None = None) -> tuple[Any, dict[str, Any]]:
+        """Reset once, then load the seed's initial state exactly once.
+
+        LIBERO's ``set_init_state`` restores the MuJoCo state, runs forward
+        kinematics and returns fresh observations; resetting again afterwards
+        would discard the selected state, so the returned observation is the
+        one produced by ``set_init_state``.
+        """
+        if self.initial_state_registry is not None:
+            if seed is None:
+                # FrankaLiberoEnv's construction-time reset: no protocol state is
+                # loaded; the trial's own reset(seed=N) selects the exact slot.
+                self.env.seed(seed)
+                return self.env.reset(), {"init_state_partition": None}
+            # Verify before touching the env: a bad registry or seed fails the reset.
+            state, info = self.initial_state_registry.state_for(seed)
+            self.env.seed(seed)
+            self.env.reset()
+            return self.env.set_init_state(state), info
         self.env.seed(seed)
         obs = self.env.reset()
-        if self.init_states is not None:
-            self.env.set_init_state(self.init_states[0])
-        return obs, {}
+        info: dict[str, Any] = {}
+        if self.init_states is not None and len(self.init_states) > 0:
+            idx = init_state_index(seed, len(self.init_states))
+            obs = self.env.set_init_state(self.init_states[idx])
+            info["init_state_index"] = idx
+        return obs, info
 
     def step(self, action: list[float]) -> tuple[Any, float, bool, dict[str, Any]]:
         obs, reward, done, info = self.env.step(action)
         return obs, float(reward), bool(done), info
+
+
+def init_state_index(seed: int | None, num_init_states: int) -> int:
+    """Legacy (no registry) seed -> LIBERO initial-state index: trial seed N
+    (1-based) uses ``(N - 1) % num_init_states``; ``seed=None`` uses state 0.
+    Formal common-protocol runs use the registry and never reach this."""
+    if num_init_states <= 0:
+        raise ValueError("num_init_states must be positive")
+    if seed is None:
+        return 0
+    return (int(seed) - 1) % num_init_states
 
 
 def _extract_language_from_bddl(bddl_path: str) -> str | None:
@@ -120,6 +158,16 @@ def load_libero_task(
     if not task_language:
         task_language = task.language
 
+    suite_init_states_path = os.path.join(
+        get_libero_path("init_states"), task.problem_folder, task.init_states_file
+    )
+    # Trusted boundary: the outer case binds the manifest into the trial env.
+    # Raises when required but absent, or when it does not match this task.
+    registry = InitialStateRegistry.from_environment(
+        suite_name, task.name, definition_path=bddl_file_path,
+        test_states_path=suite_init_states_path,
+    )
+
     # Handle init states path resolution
     # Libero's get_task_init_states uses get_libero_path("init_states") internally
     # We need to manually load them if the default path fails
@@ -158,5 +206,6 @@ def load_libero_task(
         task_id=task_id,
         task_language=task_language,
         init_states=init_states,
+        initial_state_registry=registry,
     )
     return handle

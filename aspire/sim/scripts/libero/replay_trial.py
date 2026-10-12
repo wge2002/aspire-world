@@ -45,6 +45,7 @@ import os
 import re
 import sys
 import time
+from contextlib import nullcontext
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -120,6 +121,9 @@ class ReplayTrialArgs:
 
     ordinary_budget_config: str | None = None
     """Opt in to world-free budget accounting (condition A) using a JSON config."""
+
+    streaming_world_config: str | None = None
+    """Explicit SAM2 streaming World profile for a saved policy; separate from frozen studies."""
 
 
 def _find_task_id(suite_name: str, task_name: str) -> int:
@@ -501,6 +505,11 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
 
 def main(args: ReplayTrialArgs) -> None:
     """Main replay entry point."""
+    if getattr(args, "streaming_world_config", None) is not None:
+        if args.world_model_config is not None or args.ordinary_budget_config is not None:
+            raise ValueError("streaming world is a separate profile; do not combine it with frozen study configs")
+        if not args.replay_code or args.interactive:
+            raise ValueError("streaming world currently requires an explicit saved policy")
     if args.world_model_config is not None and args.ordinary_budget_config is not None:
         # The two configs name different conditions; refuse rather than let
         # precedence silently decide which one a trial actually ran under.
@@ -561,6 +570,12 @@ def main(args: ReplayTrialArgs) -> None:
 
 def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
     """Original replay path; the optional collector is owned by the opt-in runner."""
+    if getattr(args, "streaming_world_config", None) is not None:
+        if (_world_capture is not None or getattr(args, "world_model_config", None) is not None
+                or getattr(args, "ordinary_budget_config", None) is not None):
+            raise ValueError("streaming world cannot attach to a frozen profile collector")
+        if not args.replay_code or args.interactive:
+            raise ValueError("streaming world currently requires an explicit saved policy")
     mode = "Interactive REPL" if args.interactive else ("Replay code" if args.replay_code else "Fresh LLM query")
     print(f"=" * 80)
     print(f"Replay Trial {args.trial}")
@@ -651,6 +666,7 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
     terminated = False
     truncated = False
     info_step: dict[str, Any] = {"sandbox_rc": -1, "stdout": "", "stderr": "", "task_completed": False}
+    streaming_session = None
 
     multi_turn_prompt_template = config["env"].get("cfg", {}).get("multi_turn_prompt")
 
@@ -661,20 +677,36 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
         code_block_metadata = [{"generation": 0, "regenerated": False}] * len(code_blocks)
         print(f"  Found {len(code_blocks)} code blocks")
 
-        for i, code in enumerate(code_blocks):
-            print(f"\n--- Executing code block {i} ---")
-            obs_next, reward, terminated, truncated, info_step = env.step(code)
-            obs = obs_next
-            if sealed_outcome:
-                print(f"  sandbox_rc={info_step.get('sandbox_rc')} (task outcome sealed for the development gate)")
-            else:
-                print(f"  reward={reward}, terminated={terminated}, task_completed={info_step.get('task_completed')}")
-            if info_step.get("stderr"):
-                print(f"  stderr: {info_step['stderr'][:200]}")
-            # A sealed trial runs every block: stopping early on success would
-            # tell the program's own log which block achieved the task.
-            if truncated or (terminated and not sealed_outcome):
-                break
+        if getattr(args, "streaming_world_config", None) is not None:
+            from aspire.sim.cap.world_model.streaming_replay import StreamingReplay, StreamingSeedError
+            try:
+                streaming_session = StreamingReplay(env, args.streaming_world_config,
+                    episode_id=f"{args.suite}/{args.task}/{args.trial}")
+            except Exception as exc:
+                # Public startup receipt: an authored prompt that cannot seed is a
+                # program fault; anything else (weights, imports) is infrastructure.
+                run_dir.mkdir(parents=True, exist_ok=True)
+                (run_dir / "streaming_world_startup_error.json").write_text(json.dumps(
+                    {"authored": isinstance(exc, StreamingSeedError),
+                     "error": f"{type(exc).__name__}: {exc}"}, indent=2) + "\n")
+                raise
+        with streaming_session if streaming_session is not None else nullcontext():
+            for i, code in enumerate(code_blocks):
+                print(f"\n--- Executing code block {i} ---")
+                obs_next, reward, terminated, truncated, info_step = env.step(code)
+                obs = obs_next
+                if sealed_outcome:
+                    print(f"  sandbox_rc={info_step.get('sandbox_rc')} (task outcome sealed for the development gate)")
+                else:
+                    print(f"  reward={reward}, terminated={terminated}, task_completed={info_step.get('task_completed')}")
+                if info_step.get("stderr"):
+                    print(f"  stderr: {info_step['stderr'][:200]}")
+                if streaming_session is not None and info_step.get("sandbox_rc", 0) != 0:
+                    break  # do not start another block after an uncaught interruption/failure
+                # A sealed trial runs every block: stopping early on success would
+                # tell the program's own log which block achieved the task.
+                if truncated or (terminated and not sealed_outcome):
+                    break
 
     else:
         # Mode 1: Fresh LLM query
@@ -795,6 +827,11 @@ def _run_replay(args: ReplayTrialArgs, _world_capture: Any = None) -> None:
     else:
         trial_dir = run_dir / f"trial_{args.trial:02d}_sandboxrc_{sandbox_rc}_reward_{reward:.3f}_taskcompleted_{int(task_completed or False)}"
     trial_dir.mkdir(parents=True, exist_ok=True)
+    if streaming_session is not None:
+        with (trial_dir / "streaming_world_snapshot.json").open("x") as stream:
+            json.dump(streaming_session.final_snapshot, stream, indent=2, allow_nan=False)
+            stream.write("\n")
+        streaming_session.write_journal(trial_dir / "streaming_world_journal.jsonl")
 
     (trial_dir / "code.py").write_text(final_code)
     (trial_dir / "summary.txt").write_text("\n".join(log_lines))

@@ -1,0 +1,24 @@
+{
+  "mode": "sam2-streaming-world-v1",
+  "camera": "agentview",
+  "sam2": {
+    "source_root": "/path/to/SAM2_streaming",
+    "config_file": "sam2.1/sam2.1_hiera_s.yaml",
+    "checkpoint": "/path/to/sam2.1_hiera_small.pt",
+    "device": "cuda"
+  },
+  "objects": [
+    {"identity": "bowl", "prompt": "bowl", "min_seed_score": 0.5}
+  ],
+  "cadence": {
+    "robot_period": 0.0,
+    "object_period": 0.2,
+    "relation_period": 0.5,
+    "robot_max_age": 0.2,
+    "object_max_age": 0.6,
+    "relation_max_age": 0.6,
+    "relation_max_skew": 0.05,
+    "min_depth_points": 10,
+    "max_mask_iou": 0.85
+  }
+}

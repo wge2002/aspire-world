@@ -1,5 +1,10 @@
 # 核心源码与 Markdown 对齐
 
+2026-10-12 当前 RS 线补充：本地工程目录 `/home/zheng/github/aspire-world`，
+服务器工程目录 `rs:/root/github/aspire-world`，GitHub 发布分支 `SZ-DEV`。
+接手状态、验证范围及部署产物地址见 [RS_HANDOFF_20261012.md](RS_HANDOFF_20261012.md)。
+下文2026-10-09的路径/963文件摘要是历史对齐记录，不是当前新增源码清单。
+
 对齐日期：2026-10-09。范围：963 个源码/协议输入文件，以及此目录下的共同导航文档。逐文件 SHA256 与发布路径见 [source-manifest.json](source-manifest.json)。
 
 | 位置 | 路径 / 分支 |

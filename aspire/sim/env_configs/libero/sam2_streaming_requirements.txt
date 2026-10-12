@@ -1,0 +1,12 @@
+# Method-specific runtime requirements of the SAM2_streaming World
+# (profile sam2-streaming-native-v1). Installed by the outer deployment into the
+# isolated LIBERO venv on top of its installed, locked base; this file does not
+# change pyproject.toml, uv.lock or the base/suite extras.
+#
+# Reproduce: uv pip install --python <libero-venv>/bin/python -r env_configs/libero/sam2_streaming_requirements.txt
+# The SAM2_streaming source (commit 9be0199) is put on PYTHONPATH by the protocol,
+# not pip-installed. Its CUDA extension sam2/_C*.so is built by the outer
+# deployment from that same source (CUDA 12.1, Torch 2.12.1+cu126, SM90); the
+# protocol's SAM2 identity hashes the sam2 tree including .cu/.cpp/headers and the .so.
+hydra-core==1.3.2
+iopath==0.1.10

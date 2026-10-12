@@ -1,5 +1,9 @@
 # Optional numeric world programs
 
+For the separate opt-in multi-rate `World.py` with actual SAM2 temporal tracking
+and in-motion policy checkpoints, see [streaming-world](../../docs/streaming-world.md).
+This engineering profile leaves the historical protocols below unchanged.
+
 `replay_trial.py` activates this package only when
 `--args.world-model-config PATH` is explicitly supplied. Omitting the flag
 retains the existing replay/generation behavior, configuration and lifecycle.
@@ -97,3 +101,18 @@ candidate via `ASPIRE_RELATIONAL_TEST_SOURCE`; do not point it at the reference
 to hide a missing candidate. See the
 [revision and verification log](../../docs/logs/2026-09-10-world-code-revision.md)
 for the complete regression command and results.
+# Semantic streaming v2
+
+The explicitly declared semantic part/revision profile is documented in
+[semantic-streaming-world.md](../../docs/semantic-streaming-world.md). It adds
+public evidence-backed part hypotheses, identity association, execution reports
+and interaction checks; historical frozen runtimes are unchanged.
+
+# Articulated streaming v3
+
+The explicit `sam2-articulation-native-v3` profile adds public RGB-D rigid-motion
+estimates, parent-relative parametric joint fitting and event-driven local Qwen
+review. See [articulation-streaming-world.md](../../docs/articulation-streaming-world.md).
+Numeric fitting validates proposed model families; runtime structural changes
+remain evidence-backed hypotheses. Engineering validation and benchmark results
+are reported separately. No DLC launch is implied by this source update.

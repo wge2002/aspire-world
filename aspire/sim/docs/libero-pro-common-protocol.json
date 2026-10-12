@@ -1,0 +1,249 @@
+{
+  "protocol_id": "libero-pro-common-v1",
+  "specified_at": "2026-10-10",
+  "documentation": "libero-pro-common-protocol.md",
+  "working_root": "aspire/sim",
+  "source_branch": "SZ-DEV",
+  "suite": "libero_goal_swap",
+  "tasks": {
+    "bowl": "put_the_bowl_on_the_plate",
+    "bowldrawer": "open_the_top_drawer_and_put_the_bowl_inside",
+    "drawer": "open_the_middle_drawer_of_the_cabinet",
+    "wine": "put_the_wine_bottle_on_the_rack",
+    "stove": "turn_on_the_stove"
+  },
+  "environment": {
+    "config": "env_configs/libero/franka_libero_traced.yaml",
+    "api": "FrankaLiberoApiReducedSkillLibraryTraced",
+    "privileged": false,
+    "max_steps": 4000,
+    "environment_version": "libero-pro-common-env-v3-statepack-2026-10-10",
+    "reset": {
+      "implementation": [
+        "cap/integrations/libero/__init__.py:LiberoHandle.reset",
+        "cap/integrations/libero/initial_states.py:InitialStateRegistry",
+        "cap/envs/simulators/libero.py:FrankaLiberoEnv.reset"
+      ],
+      "sequence": [
+        "verify registry manifest sha256, task/suite entry and the selected state file (every reset)",
+        "env.seed(seed)",
+        "env.reset() once",
+        "env.set_init_state(selected state) once; its returned observation is used",
+        "no further env.reset()",
+        "10 settling steps"
+      ],
+      "seed_to_init_state_index": "test seeds 1-50 -> original LIBERO init file slots 0-49; development seeds 51-65 -> common development states 0-14 (one file each); no modulo, no cross-partition reuse",
+      "scope": "common environment fix for all new comparisons; not a SAM2/streaming method factor",
+      "supersedes": [
+        "reset-then-set_init_state-then-reset, which discarded the selected initial state (fixed in libero-reset-v2-2026-10-10)",
+        "(seed - 1) % 50, which made development seeds 51-65 reuse test states 1-15 (libero-reset-v2-2026-10-10)"
+      ],
+      "frozen_old_runtimes_and_outputs_unchanged": true,
+      "source_sha256": "recorded by the outer coordinator at freeze"
+    },
+    "verify_actual_task_and_initial_state_mapping": true,
+    "require_versions_and_sha256": true,
+    "initial_states": {
+      "approved": "2026-10-10 by the user: each task's init file has only 50 states; 15 fixed development states are added for seeds 51-65",
+      "test": {
+        "seeds": "1-50",
+        "source": "original LIBERO-Pro init file of each task, byte/sha256 unchanged, slot = seed - 1"
+      },
+      "development": {
+        "seeds": "51-65",
+        "count_per_task": 15,
+        "source": "pre-generated once by the outer operator with scripts/libero/prepare_common_initial_states.py; one .npy per seed; slot = seed - 51"
+      },
+      "modulo_or_cross_partition_reuse": false,
+      "duplicate_state": "recorded in the manifest and the generation fails; no seed is substituted or resampled",
+      "generation": {
+        "tasks_and_files": "the suite's own registration (task index, definition file, init file) with sha256, checked against the outer asset preflight",
+        "env_args": "same as FrankaLiberoEnv: JOINT_POSITION, 800x512 cameras with depth, control_freq 20, horizon 4000",
+        "seeding": "np.random.seed(s); env.seed(s); s = int(sha256('<environment_version>|<suite>|<task>|<seed>')[:8], 16)",
+        "capture": "env.get_sim_state() right after one env.reset(); 0 settling steps before capture",
+        "forbidden": [
+          "policy or world execution",
+          "env steps/actions",
+          "oracle or success predicate",
+          "held-out trajectories",
+          "object inventories",
+          "historical solutions"
+        ],
+        "resume": "same identity only; recorded states are never regenerated or overwritten; in-flight seeds are marked sampling"
+      },
+      "manifest": "initial_state_manifest.json: schema aspire-libero-common-initial-states-v1, partitions, seed mapping, per-task definition/test file paths and sha256, 50 test-state digests, per development state path/file sha256/array digest/shape/dtype/finite/sampling seed, source file hashes, simulator package versions",
+      "location": "an outer runtime-assets directory outside the source checkout, generated once and shared read-only by every method and cell of this line",
+      "trial_binding": "case.initial_state_manifest + initial_state_manifest_sha256 -> ASPIRE_LIBERO_INITIAL_STATE_MANIFEST/_SHA256 and ASPIRE_LIBERO_INITIAL_STATE_REQUIRED=1 in the trial process only",
+      "formal_cases_require_registry": true,
+      "cpu_test_fake_fixture": "may omit the registry; every identity then records the legacy loader and it is never evidence",
+      "solver_access": "none: the guard refuses the statepack, its manifest and the generator; authored code may not call get_sim_state/set_init_state/init_states, load npy/npz/pt/pkl or reference bddl/xml/urdf/init files; state contents never enter the policy, world or solver namespace"
+    }
+  },
+  "input_condition": {
+    "condition": "C",
+    "high_level_strategy_md": false,
+    "prearranged_object_inventory": false,
+    "historical_task_solutions": false,
+    "public_api_documentation": true,
+    "current_public_scene_observations": true,
+    "actual_perception_services": true,
+    "simulator_ground_truth_access": false,
+    "hidden_object_state_access": false,
+    "policy_or_world_success_predicate_access": false,
+    "development_gate": "oracle",
+    "oracle_access": "outer_development_feedback_and_final_scoring_only"
+  },
+  "solver": {
+    "model": "Qwen3.8-Flash-Next",
+    "deployment": "local",
+    "agent": "native Claude Code",
+    "agent_version": "2.1.220",
+    "effort": "xhigh",
+    "context_config": 1000000,
+    "max_output_config": 64000,
+    "record_actual_service_and_request_parameters": true,
+    "model_perception_or_agent_changes_require_declared_factor": true
+  },
+  "development": {
+    "seeds": [
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65
+    ],
+    "workflow": "native Fix Loop",
+    "charged_attempts_per_seed": 3,
+    "max_charged_attempts_per_cell": 45,
+    "budget_resets_on_revision_or_restart": false,
+    "extra_free_program_trials": false,
+    "pure_initial_public_snapshot_is_charged": false,
+    "global_revision_limit": null,
+    "require_distinct_program_per_seed": false,
+    "gate": "oracle",
+    "watchdog_seconds": 50400
+  },
+  "evaluation": {
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50
+    ],
+    "heldout_development_access": false,
+    "frozen_bundle_for_all_seeds": true,
+    "per_seed_program_selection": false,
+    "repairs_during_evaluation": false,
+    "scoring_reference": "scripts/libero/native_world_heldout.py",
+    "statuses": [
+      "success",
+      "failure",
+      "crash",
+      "infrastructure_error"
+    ],
+    "success_rate_denominator": 50,
+    "program_error_overrides_oracle_success": true,
+    "report_incomplete_cells_separately": true,
+    "unexecuted_seed_status": "not_run",
+    "watchdog_seconds": 18000
+  },
+  "budget_and_repetition": {
+    "independent_development_repeats": 2,
+    "cells_per_method": 10,
+    "cells_for_two_methods": 20,
+    "experimental_unit": "method_task_independent_development_repeat",
+    "trial_timeout_seconds": 900,
+    "cross_cell_generated_code_feedback_or_learned_skill_sharing": false,
+    "retain_ledger_and_consumed_budget_on_timeout_or_infrastructure_error": true,
+    "reset_phase_watchdog_on_resume": false
+  },
+  "freeze": {
+    "selection_uses_development_evidence_only": true,
+    "require_sha256": true,
+    "components": [
+      "policy",
+      "method_world_if_used",
+      "engineered_world_runtime_if_used",
+      "configuration",
+      "runtime_dependencies",
+      "perception_implementation_and_weights"
+    ],
+    "verify_before_and_after_each_seed": true
+  },
+  "report": {
+    "group_by": [
+      "task",
+      "method",
+      "independent_repeat"
+    ],
+    "separate_development_and_evaluation_statistics": true,
+    "fresh_output_directory": true,
+    "preserve_old_outputs": true,
+    "require_declared_method_differences": true,
+    "required_artifacts": [
+      "configuration_and_version_manifest",
+      "development_attempt_ledger",
+      "program_revisions_and_selection_evidence",
+      "frozen_hash_manifest",
+      "per_seed_evaluation_results",
+      "failure_reasons_and_durations",
+      "incomplete_seed_list"
+    ]
+  }
+}

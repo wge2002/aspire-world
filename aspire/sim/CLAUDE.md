@@ -4,6 +4,15 @@
 
 This file is the constitution for Claude Code working in this repository. Read it fully before doing anything.
 
+For the current RS Streaming World development/comparison line, read
+[the common LIBERO-Pro protocol](docs/libero-pro-common-protocol.md) and its
+[fixed parameters](docs/libero-pro-common-protocol.json) before setup or trials.
+Its C input restrictions, fixed native Qwen solver, seed/attempt budgets,
+watchdogs, oracle gate and frozen scoring govern this line. Do not load shared
+high-level strategy skills, historical solutions or other cells' feedback;
+new skills stay within the current cell. Generic skill-library accumulation
+instructions below do not permit sharing between these independent cells.
+
 ---
 
 ## STARTUP: Read This First

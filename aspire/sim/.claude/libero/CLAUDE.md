@@ -1,5 +1,13 @@
 # LIBERO Suite Guide
 
+The current RS Streaming World comparison follows the
+[common LIBERO-Pro protocol](../../docs/libero-pro-common-protocol.md) and its
+[fixed parameters](../../docs/libero-pro-common-protocol.json): five Goal-Swap
+tasks, C inputs, local Qwen/native CC 2.1.220, independent cells, fixed budgets
+and frozen evaluation. Use public API documentation and current observations;
+do not supply the shared high-level strategy library or historical task
+solutions to these cells. Their generated skills remain cell-local.
+
 This is the suite-level reference for all LIBERO experiments in ASPIRE. Use it for benchmark roles, shared APIs, environment conventions, and links to experiment entrypoints.
 
 ## Experiment Entrypoints

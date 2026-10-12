@@ -1,0 +1,106 @@
+{
+  "_notes": {
+    "schema": "fixed; one file = one 2-worker x 8-GPU DLC job = four cells",
+    "ranks": "DLC RANK -> slots; slot A = perception GPU 0, simulator/SAM2/EGL 1, ports 8214-8216; slot B = perception 6, simulator/EGL 7, ports 8114-8116; one shared Qwen on 2,3,4,5 :8121 per node",
+    "case/case_sha256": "outer-prepared case per cell (sha-bound). Slot A cases bind their own perception manifest whose URLs are 8214-8216 and whose other fields equal perception_descriptor; slot B binds the common descriptor",
+    "mode": "fresh (no ledger; campaign init), resume (ledger of an earlier DLC attempt), migrate (RS cell continued after the outer handoff)",
+    "migration": "the ORIGINAL bowl r1 development clock; the outer writes <control>/dlc_migration_handoff.json after rank0 services_ready.json appears",
+    "identity": "fresh uid/gid 30010-30012, own group, plus runtime_group 999 for the public read-only runtime; HOME and control 0700",
+    "entry_root": "root-only entry records, node-level Qwen cache/logs (rank<N>/) and per-cell perception cache/logs (cells/<cell>/); outside every cell",
+    "flashinfer_seed_cache": "prebuilt FlashInfer workspace, copied once per node into entry_root",
+    "case_sha256 placeholders": "this example does not load as a real deployment until the outer side writes the four cases and their sha256"
+  },
+  "schema": "aspire-streaming-dlc-pair-v1",
+  "workers": 2,
+  "gpus_per_worker": 8,
+  "runtime_root": "/mnt/workspace/aspire-world-runtimes/streaming-common-v3-SZ-DEV-20261010",
+  "source_checkout_prefix": "/root/github/aspire-world",
+  "envs": {
+    "qwen": "/mnt/workspace/aspire-world-envs/qwen38-vllm",
+    "libero": "/mnt/workspace/aspire-world-envs/libero",
+    "cuda_compat": "/mnt/workspace/aspire-world-envs/cuda-compat13",
+    "cuda_toolkit": "/mnt/workspace/aspire-world-envs/cuda-toolkit13"
+  },
+  "entry_root": "/mnt/workspace/aspire-world-runs/streaming-dlc-pair-20261011/entry",
+  "runtime_group": {
+    "name": "aspire-bowl-r1",
+    "gid": 999
+  },
+  "model_service_manifest": "/mnt/workspace/aspire-world-deployment-20261010/qwen-model-service-manifest.json",
+  "model_service_manifest_sha256": "1a0982ba49a164e7a3756a9e49eb1d295893406c4d7d2d72520fc6cf637f128f",
+  "perception_descriptor": "/mnt/workspace/aspire-world-deployment-20261010/perception-service-manifest.json",
+  "perception_descriptor_sha256": "d46c60a25457d813a31223ac8a8c8e9a7faf584d27217e262027839535d63f04",
+  "flashinfer_seed_cache": "/mnt/workspace/aspire-world-envs/qwen38-flashinfer-workspace",
+  "expected_gpu_name": "NVIDIA L20Z",
+  "service_ready_timeout_seconds": 3600,
+  "handoff_wait_seconds": 14400,
+  "poll_seconds": 15,
+  "hash_workers": 8,
+  "heldout": true,
+  "ranks": {
+    "0": {
+      "A": {
+        "cell": "bowldrawer_sam2streaming_r1",
+        "case": "/mnt/workspace/aspire-world-deployment-20261010/dlc-pair/bowldrawer_sam2streaming_r1.case.json",
+        "case_sha256": "<sha256 of that case file, written by the outer coordinator>",
+        "control": "/mnt/workspace/aspire-world-runs/streaming-dlc-pair-20261011/bowldrawer_sam2streaming_r1",
+        "mode": "fresh",
+        "identity": {
+          "user": "aspire-bowldrawer-r1",
+          "uid": 30010,
+          "group": "aspire-bowldrawer-r1",
+          "gid": 30010,
+          "home": "/mnt/workspace/aspire-world-users/bowldrawer-r1"
+        }
+      },
+      "B": {
+        "cell": "bowl_sam2streaming_r1",
+        "case": "/mnt/workspace/aspire-world-deployment-20261010/bowl-sam2-streaming-r1.case.json",
+        "case_sha256": "<sha256 of the unchanged r1 case>",
+        "control": "/mnt/workspace/aspire-world-runs/streaming-bowl-20261010/bowl_sam2streaming_r1",
+        "mode": "migrate",
+        "identity": {
+          "user": "aspire-bowl-r1",
+          "uid": 999,
+          "group": "aspire-bowl-r1",
+          "gid": 999,
+          "home": "/mnt/workspace/aspire-world-users/bowl-r1"
+        },
+        "migration": {
+          "development_started_at": 1791627274.3236666,
+          "development_deadline": 1791677674.3236666
+        }
+      }
+    },
+    "1": {
+      "A": {
+        "cell": "drawer_sam2streaming_r1",
+        "case": "/mnt/workspace/aspire-world-deployment-20261010/dlc-pair/drawer_sam2streaming_r1.case.json",
+        "case_sha256": "<sha256 of that case file, written by the outer coordinator>",
+        "control": "/mnt/workspace/aspire-world-runs/streaming-dlc-pair-20261011/drawer_sam2streaming_r1",
+        "mode": "fresh",
+        "identity": {
+          "user": "aspire-drawer-r1",
+          "uid": 30011,
+          "group": "aspire-drawer-r1",
+          "gid": 30011,
+          "home": "/mnt/workspace/aspire-world-users/drawer-r1"
+        }
+      },
+      "B": {
+        "cell": "wine_sam2streaming_r1",
+        "case": "/mnt/workspace/aspire-world-deployment-20261010/dlc-pair/wine_sam2streaming_r1.case.json",
+        "case_sha256": "<sha256 of that case file, written by the outer coordinator>",
+        "control": "/mnt/workspace/aspire-world-runs/streaming-dlc-pair-20261011/wine_sam2streaming_r1",
+        "mode": "fresh",
+        "identity": {
+          "user": "aspire-wine-r1",
+          "uid": 30012,
+          "group": "aspire-wine-r1",
+          "gid": 30012,
+          "home": "/mnt/workspace/aspire-world-users/wine-r1"
+        }
+      }
+    }
+  }
+}

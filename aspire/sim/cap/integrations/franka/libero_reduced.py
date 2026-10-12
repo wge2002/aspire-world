@@ -379,6 +379,8 @@ class FrankaLiberoApiReduced(ApiBase):
             >>> move_to_joints(joints)
         """
         pos = np.asarray(position, dtype=np.float64).reshape(3)
+        requested_pos = pos.copy()
+        self._last_ik_report = None
         # Clamp to reachable workspace to avoid IK timeouts
         pos = np.clip(pos, [-0.1, -0.5, 0.005], [0.75, 0.5, 0.9])
         quat_wxyz = np.asarray(quaternion_wxyz, dtype=np.float64).reshape(4)
@@ -400,6 +402,14 @@ class FrankaLiberoApiReduced(ApiBase):
                 )
                 if label != "requested":
                     logger.info("IK solved with fallback orientation: %s", label)
+                self._last_ik_report = {
+                    "requested_position": requested_pos.tolist(),
+                    "effective_tcp_position": pos.tolist(),
+                    "effective_hand_position": off_pos.tolist(),
+                    "effective_quaternion_wxyz": quat.tolist(),
+                    "position_clipped": bool(not np.array_equal(pos, requested_pos)),
+                    "orientation_fallback": label != "requested", "orientation_choice": label,
+                    "position_reference": "world/TCP", "ik_link": "panda_hand"}
                 return extract_arm_joints(self.cfg)
             except Exception:
                 logger.warning("IK failed with orientation '%s', trying next fallback", label)
