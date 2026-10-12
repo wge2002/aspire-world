@@ -1,5 +1,12 @@
 # RS 项目交接：ASPIRE Streaming World（2026-10-12）
 
+补充总览：[Code as World 开发交接](CODE_AS_WORLD_HANDOFF_20261012.md)，包含
+对话中的方法演进、失败分析、明确约束和当前待办。
+2026-10-12 13:29（北京时间）复核：准备已结束，三个正式cell仍未启动。
+RS工程Git仓库HEAD仍为 `c94a487`，本轮发布59文件中有21个不同或缺失；
+v3实现位于验证副本与准备runtime，核对的22个关键文件与GitHub `d88ca05`一致。
+先保留工程改动并补同步；不要覆盖已冻结runtime。
+
 ## 接手入口与当前授权
 
 项目工程目录：`/root/github/aspire-world`；仿真工作目录：
@@ -80,8 +87,10 @@ SAM3 初始化/重定位，SAM2 streaming 跟踪，不能把 mask 中心当作�
 | 正式 RS 配置/冻结清单准备目录 | `/mnt/workspace/aspire-world-deployment-20261012-rs-articulation-v3` |
 | 正式 RS 新实验结果目录 | `/mnt/workspace/aspire-world-runs/rs-articulation-v3-20261012` |
 
-交接检查时后台 `prepare_rs_campaign.py` 仍可能在复制/冻结源码。
-这个操作只准备目录、用户、case 和 manifests，**不会运行任务**。
+2026-10-12 13:29复核时 `prepare_rs_campaign.py` 已结束；`prepared.json` 为
+`prepared`、`not_launched_yet=true`，`queue.json` 的三个cell均为 `pending`。
+`runtime-freeze.json` 已存在且哈希与三个case一致。这个操作只准备目录、
+用户、case和manifests，**不会运行任务**；三个cell均未出现开发账本或campaign状态。
 尚未实现/启动正式串行 supervisor；不得因为有 `queue.json` 就声称队列已运行。
 若准备目录已存在，不要再次直接运行 helper 的 fresh 初始化，也不要删除后重来。
 先检查 `prepared.json`、`queue.json`、正在运行的进程及已有 cell 账本。

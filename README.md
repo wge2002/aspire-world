@@ -1,15 +1,17 @@
 # ASPIRE World
 
-个人维护的 ASPIRE 仿真、Code World 与 Qwen 实验代码仓库：[wge2002/aspire-world](https://github.com/wge2002/aspire-world)。基于 [NVlabs/ASPIRE](https://github.com/NVlabs/ASPIRE)，保留上游归属、许可证及第三方声明。当前整理日期：2026-10-09。
+个人维护的 ASPIRE 仿真、Code World 与 Qwen 实验代码仓库：[wge2002/aspire-world](https://github.com/wge2002/aspire-world)。基于 [NVlabs/ASPIRE](https://github.com/NVlabs/ASPIRE)，保留上游归属、许可证及第三方声明。当前整理日期：2026-10-12，发布分支 `SZ-DEV`。
 
-此仓库保存源码、协议、配置和必要测试；实验日志、原始结果、轨迹、视频、模型权重、环境及缓存保存在仓库外。核心代码和协议与远端工程目录、本地工作目录同步；实验数据保持原位。
+此仓库保存源码、协议、配置和必要测试；实验日志、原始结果、轨迹、视频、模型权重、环境及缓存保存在仓库外。核心代码和协议按[同步范围](docs/SYNC_SCOPE.md)管理；当前各副本状态见[开发交接](docs/CODE_AS_WORLD_HANDOFF_20261012.md)，实验数据保持原位。
 
 ## 阅读入口
 
 | 内容 | 入口 |
 | --- | --- |
 | 仿真环境与依赖安装 | [Simulation README](aspire/sim/README.md) |
-| 最新实验：prediction-contract p1 | [最新实验索引](docs/LATEST_EXPERIMENTS.md) |
+| Code as World 开发与接手 | [开发交接](docs/CODE_AS_WORLD_HANDOFF_20261012.md) |
+| RS 部署与操作接手 | [RS 交接](docs/RS_HANDOFF_20261012.md) |
+| 最新方法与实验协议 | [最新实验索引](docs/LATEST_EXPERIMENTS.md) |
 | Qwen 部署、1M 配置与模型接口 | [Qwen 接口](docs/QWEN.md) |
 | Code World 执行实现 | [cap/world_model](aspire/sim/cap/world_model/) |
 | 三方对齐范围与身份 | [SYNC_SCOPE](docs/SYNC_SCOPE.md) |
