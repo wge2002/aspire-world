@@ -1,0 +1,14 @@
+{
+  "source": "existing public dev51 agentview of nonprivileged first smoke, not hidden ground truth",
+  "source_remote": "/mnt/home/gewang/experiments/code-world-runtime-p2-20261011/bowl_p2_r1/outputs/libero_fix_loop/libero_goal_swap/put_the_bowl_on_the_plate/development/smoke/seed_51/attempt_1",
+  "source_sha256": "76030d065bb24a30c14b754fb4c56c550ef30c6e374c10a358f4f925b755ce2c",
+  "dimensions": [
+    512,
+    800,
+    3
+  ],
+  "solver_input": false,
+  "purpose": "isolated real service health before any cell claim, not mechanism or task gate",
+  "trials_added": 0,
+  "heldout_input": false
+}

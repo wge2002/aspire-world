@@ -671,14 +671,15 @@ def _read_json(path: Path):
 PREDICTION_QUERIES = frozenset({"prediction_checks", "prediction_summary"})
 
 
-def prediction_use(report: dict, trace=()) -> dict:
+def prediction_use(report: dict, trace=(), query_names=None) -> dict:
     """The same classification, restricted to the reserved prediction queries.
 
     Only sites whose queried name is a literal reserved name are counted; a site
     with a dynamic name is not attributed to either side. Advisory like the rest.
     """
-    sites = [site for site in report["sites"] if site.get("name") in PREDICTION_QUERIES]
-    rows = [row for row in trace if row.get("name") in PREDICTION_QUERIES]
+    names = PREDICTION_QUERIES if query_names is None else query_names
+    sites = [site for site in report["sites"] if site.get("name") in names]
+    rows = [row for row in trace if row.get("name") in names]
     counts = {status: sum(1 for s in sites if s["classification"] == status)
               for status in (SUPPORTED, LOGGING_ONLY, INCONCLUSIVE)}
     if report["status"] == IDENTITY_MISMATCH:
@@ -713,6 +714,14 @@ def audit_trial(directory: Path | str) -> dict:
     if config.get("prediction_contract") == "p1":
         # Only under p1: a contract-off audit stays byte-identical.
         report["prediction_use"] = prediction_use(report, trace)
+    elif config.get("prediction_contract") in ("p2-runtime", "p3-search"):
+        from aspire.sim.cap.world_model.runtime_mechanism_audit import audit_events, PREDICTION_QUERIES as names
+        report["prediction_use"] = prediction_use(report, trace, query_names=names)
+        report["runtime_mechanism"] = audit_events(directory / "judgment_world/events.jsonl",
+                                                 report["prediction_use"])
+        if report["status"] == IDENTITY_MISMATCH:
+            report["runtime_mechanism"].update(status=INCONCLUSIVE,
+                                             reason="executed policy identity is not corroborated")
     return report
 
 
@@ -749,6 +758,8 @@ def trial_feedback(directory: Path | str, *, write: bool = True) -> dict:
     }
     if "prediction_use" in report:
         feedback["prediction_use"] = report["prediction_use"]
+    if "runtime_mechanism" in report:
+        feedback["runtime_mechanism"] = report["runtime_mechanism"]
     return feedback
 
 
@@ -757,7 +768,7 @@ def selected_pair_report(directories) -> dict:
     trials = [trial_feedback(directory, write=False) for directory in directories]
     statuses = [trial.get("status") for trial in trials]
     status = next((s for s in AGGREGATE_ORDER if s in statuses), "unavailable")
-    return {
+    report = {
         "revision": REVISION, "status": status,
         "summary": SUMMARY.get(status, "no mechanism audit could be computed"),
         "trials": trials, "trials_audited": len(trials),
@@ -766,3 +777,12 @@ def selected_pair_report(directories) -> dict:
                           "status is reported",
         "limits": list(LIMITS),
     }
+    runtime = [t["runtime_mechanism"] for t in trials if "runtime_mechanism" in t]
+    if runtime:
+        from aspire.sim.cap.world_model.runtime_mechanism_audit import LIMITS as runtime_limits
+        statuses = [t["status"] for t in runtime]
+        status = next((s for s in ("action_evidence", "inconclusive", "logging_only", "no_query")
+                       if s in statuses), "inconclusive")
+        report["runtime_mechanism"] = {"status": status, "trials_audited": len(runtime),
+                                       "causal_claim": False, "limits": runtime_limits}
+    return report

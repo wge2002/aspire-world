@@ -103,3 +103,9 @@ core.*
 
 # macOS resource sidecars
 ._*
+
+# Required public development-scene input for SAM3 startup health
+!/aspire/sim/scripts/common/node_layout/reference/sam3-public-dev51-agentview.jpg
+
+# Local document backups
+*.bak-*

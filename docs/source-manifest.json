@@ -1,5 +1,5 @@
 {
-  "snapshot_date": "2026-10-09",
+  "snapshot_date": "2026-10-16",
   "source_upstream": "https://github.com/NVlabs/ASPIRE",
   "source_base_commit": "7ba73d3bcac8f6b6d4a7d67ed4040988f768d282",
   "includes_uncommitted_working_tree_changes": true,
@@ -16,8 +16,8 @@
     },
     {
       "path": "CC_USAGE.md",
-      "size": 4395,
-      "sha256": "4ff2a610b177fd4b8a1bad4c215827011142d3490baa8e4b5fbeffeae17cbaff"
+      "size": 7019,
+      "sha256": "262b73c0a19ba6f78c18afb01af8d337d8df7cad2be4c3822f932d8a9adb9f7d"
     },
     {
       "path": "CLAUDE.md",
@@ -272,8 +272,8 @@
     },
     {
       "path": "aspire/sim/.claude/libero/code-world/INSTRUCTIONS.md",
-      "size": 9555,
-      "sha256": "9301fc16ad50a56c6f6aec0a3dc98a77226d2cf1e3cafdf479f1de661fce1ad7"
+      "size": 9950,
+      "sha256": "4646813a7e4796e283e9f10a492c1a69b1f2b7454d99f423d4368145ed56814d"
     },
     {
       "path": "aspire/sim/.claude/libero/code-world/SKILL.md",
@@ -1711,6 +1711,11 @@
       "sha256": "8d10094ad320f7d3cb07f5778db82a63a9bad323dada2312ea5197794833ad11"
     },
     {
+      "path": "aspire/sim/cap/world_model/RUNTIME_INTERFACE.md",
+      "size": 13379,
+      "sha256": "a13d28e447462b3f6b711400601b3c4552c7b1fdaa3e99a6c21b19ec11d1b168"
+    },
+    {
       "path": "aspire/sim/cap/world_model/__init__.py",
       "size": 348,
       "sha256": "0f314f1889b4e29b01661d7874d9a6db98cb88f04022835cec06d168aaac0ede"
@@ -1732,8 +1737,8 @@
     },
     {
       "path": "aspire/sim/cap/world_model/executable_world.py",
-      "size": 29084,
-      "sha256": "082b98739b22577cdcc37bb1a29a3787b3483a2bc5f72a1222141c5170a6e37d"
+      "size": 34193,
+      "sha256": "afb53046e0fa2675fd205d0ebca410bfb7fa33c15e6da10cdf5d083f845af888"
     },
     {
       "path": "aspire/sim/cap/world_model/fix_loop_scene_broker.py",
@@ -1772,8 +1777,8 @@
     },
     {
       "path": "aspire/sim/cap/world_model/prediction_contract.py",
-      "size": 11399,
-      "sha256": "debdd8244528c5e9f78d4950ebdf81dd8945c16b9a1c7ac8bda3dfec758ed9c6"
+      "size": 11778,
+      "sha256": "4e551f246dfeea9a27a02654a703680ad73eeef736a23cff306f9cded94bfb26"
     },
     {
       "path": "aspire/sim/cap/world_model/program.py",
@@ -1801,9 +1806,29 @@
       "sha256": "3a50b12f603a4961c467ff25941ef9aaffa487d10bb05f45ec5bcd364e6a1d49"
     },
     {
+      "path": "aspire/sim/cap/world_model/runtime_mechanism_audit.py",
+      "size": 4813,
+      "sha256": "ac60f448c619a4c567352d73d867b6441c3584bfe8aa381f7a9257ae1f5955a0"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/runtime_predictions.py",
+      "size": 18496,
+      "sha256": "64f68842f5ecb6e9ab1a25beeb1975774e0230315a20d28417fecbab48838834"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/runtime_state.py",
+      "size": 8681,
+      "sha256": "01c034fe0cf80fab5e77556670ef40619b53f9871203bb70b6490c11aa2b9ea2"
+    },
+    {
       "path": "aspire/sim/cap/world_model/scene_broker.py",
       "size": 18774,
       "sha256": "19a141968cd8e4cca967934627e7845c3718a40df6f675aae64cac8d873d8074"
+    },
+    {
+      "path": "aspire/sim/cap/world_model/search_control.py",
+      "size": 29687,
+      "sha256": "440a433c0215facf78218111387e2c1e3994a3f477410733843b2eb16cc6bb81"
     },
     {
       "path": "aspire/sim/cap/world_model/shadow_condition_broker.py",
@@ -1822,8 +1847,8 @@
     },
     {
       "path": "aspire/sim/cap/world_model/world_use_audit.py",
-      "size": 36802,
-      "sha256": "52bc8dea6340c06eb621c42ec6bf7b8a6648801cdfc171ad1440beda43957882"
+      "size": 38228,
+      "sha256": "ef65115daf14334a26c29f3ceb5b24fdfacf7de66c4c948b39aaa22beb797ed6"
     },
     {
       "path": "aspire/sim/docs/adding-environments.md",
@@ -1839,6 +1864,46 @@
       "path": "aspire/sim/docs/configuration.md",
       "size": 4083,
       "sha256": "8b4e34f8ffd4203f6cd1ccd68c35d892f2452ded277335a8f0189f6af9a0304d"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/DESIGN.md",
+      "size": 6326,
+      "sha256": "c4bec2ef5092351207573118d79bd4074155a8ec7b7d23b98caa3d17581c95ab"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/smoke/collect_smoke_results.py",
+      "size": 5482,
+      "sha256": "7a8eed3fe02ffb052e370d23e99a7b425e975607729f0eccfbf24f126681b7ed"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/smoke/dlc-sampled-entry.sh",
+      "size": 1603,
+      "sha256": "1a32b7e44f1d33a48f8e3720e285b653facc6c7a8f3b3338dfa73b491a786c99"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/smoke/gpu_sampler.py",
+      "size": 914,
+      "sha256": "b2a436abd2c54868e323f6dabe72b5d840c22a047a7dd8688faeab5c84b9d615"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/smoke/prepare-smoke-20261016.py",
+      "size": 3019,
+      "sha256": "fff3ee873c9811031c7593b0b02f4fdee856b3d4ea5c184bde66cba007147c94"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/smoke/prepare-smoke.py",
+      "size": 7607,
+      "sha256": "6d7fd37e71e51a87bbb666cf66046af90d1540d4b7bb73f449249e9bbe3abb9d"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/smoke/run-smoke-20261016.sh",
+      "size": 1334,
+      "sha256": "43132fb585dc6b32a82d78a8e9329dd594b479487f5fd7231fccb573be542da6"
+    },
+    {
+      "path": "aspire/sim/docs/engineering/node-layout-20261015/smoke/wait_for_gpus.py",
+      "size": 1726,
+      "sha256": "9b1519c07d2e26ae85f95685a05017baca87a36e5e8d6a5574db8bfc583fcc23"
     },
     {
       "path": "aspire/sim/docs/experiments/claude-code-local-models.md",
@@ -2357,8 +2422,8 @@
     },
     {
       "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/PLAN.md",
-      "size": 4092,
-      "sha256": "f1d39895e32f01faa846ec466f46d93ebca7bf440338df693561beefc62c56e4"
+      "size": 4670,
+      "sha256": "be825bc91739d7f942b847947541331728f0c502edae7f7c8d7f9f34aa211e4b"
     },
     {
       "path": "aspire/sim/docs/experiments/code-world-prediction-base-20261008/make-preflights.py",
@@ -3791,6 +3856,461 @@
       "sha256": "9f2db337b9f88369f3aaf0b5320a2d30afa075443d055344dd5b30418300b1cd"
     },
     {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/NATIVE_WORLD_INTERFACE.md",
+      "size": 15223,
+      "sha256": "77c00a1c111709539fec3ccc6a210eea9070ed4152fe1f9160bdb82a2c4c2ad6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/PLAN.md",
+      "size": 7289,
+      "sha256": "5d31cd5e7dfbfb3af22b6e116441c825ffbb77e9e6ee72b245798c84512ded30"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/continuation_driver.py",
+      "size": 38227,
+      "sha256": "10dcf0dde03bc747fb89cc6e0cea251d5deb2231f4d7ed485a6c3d0e7133cc20"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/continuation_driver_successor_r1.py",
+      "size": 39504,
+      "sha256": "a147780d92c8406b6daea59da054bbabca2bef06ab629de42bbe222348a82529"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/continue-initial-to-repair-once-r2.py",
+      "size": 7336,
+      "sha256": "693119244005bc35ca6967c41b0944612e9cd8635c93219b602f67583ae41421"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/continue-initial-to-repair-once.py",
+      "size": 7324,
+      "sha256": "ea933dea98b0c3c0a04d1047c1f27797c7775fd3664da2b02df871f764a1ec14"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/dlc-single-node-entry-r9.sh",
+      "size": 1268,
+      "sha256": "bc836ce5fda7715d72e924732d7b03b3c68b31d809db8b98e9c33745907c791d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/dlc-supervisor-add-node3.py",
+      "size": 42441,
+      "sha256": "a0fffa54b0cd519dc76b98e6cffb9182cf14a4d37bb12964dddef1226d56c41a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/dlc-supervisor-r5.py",
+      "size": 38795,
+      "sha256": "0e9e3fd16ca11ee63147ee9d86f00b2b6a64456f4882b03022a9c15193c636ea"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/dlc-supervisor-r6.py",
+      "size": 38893,
+      "sha256": "1d737a6de3787b83dab11c44ecbd06912f3921ed248bb532a707d06a85e5bac0"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/dlc-supervisor-r7.py",
+      "size": 40473,
+      "sha256": "5bdb698c6c55fc3cee8bece2d043a2354c8a5dd5e3a7d6d92cee15c1270acd1b"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/dlc-supervisor-r8.py",
+      "size": 41419,
+      "sha256": "b7aedcab29db6d0826c07ea279d7f75f1bfcc724971315d68b3691e8d740681a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/dlc-supervisor-r9.py",
+      "size": 42434,
+      "sha256": "a1bbd5dde2dcd5375985f9734ca61c9db30555ef797936c7fa82168c4d94700d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/prepare-runtime-study.py",
+      "size": 40450,
+      "sha256": "d3a659c4e73c1c752f15d7510a7eac9c609561801ecc486d52a0f98e594e7f07"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/probe-sam3-real-public-image.py",
+      "size": 3718,
+      "sha256": "b5a3a8f39dbadd9b8d3149f675653312f943a08e3359032440fac5ca63eaeab2"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/recover-native-gate-with-diagnosis-r2.py",
+      "size": 22845,
+      "sha256": "299058ca709838a09fe831ae278688160d2a995000075d0e772b8e52e894e7c8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/recover-native-gate-with-diagnosis.py",
+      "size": 22028,
+      "sha256": "e282b2fbc0dcce2b3a87facfb0cacd4ece6e412233acb1961b9f56c68eb0fe72"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/recover-native-gate.py",
+      "size": 19215,
+      "sha256": "8d7cc10482d9e94af8ec08aa3ae154c2ffa5367a84451995d66c04a0ffddc4be"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/recover_successor_r1.py",
+      "size": 11097,
+      "sha256": "8e3464b9668afa5de00b167a80d4c5438e5bf4e0b977d5528d5fca2245cf7705"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/recovery_guard-r2.py",
+      "size": 7675,
+      "sha256": "3447c4660d5855903ee109ee2ca297be78a2ff3e29f3329554519b7077b2779e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/recovery_guard.py",
+      "size": 3995,
+      "sha256": "c4d844b246a5ac86b8b7163a4131c1c3d1b5eabef5221df8d5f83a1a7315d965"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/refresh-prelaunch-r3.py",
+      "size": 6640,
+      "sha256": "b9bf78dfc9c7dba8122917c59c8646777b2b33b6440b4828574069e03a82470f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/refresh-prelaunch.py",
+      "size": 2900,
+      "sha256": "c132227ec7ed5cd82d0dcc66e7968e354c7f161720979a8ed4bfbc44a0bee438"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/repair-dsw-headroom.py",
+      "size": 6648,
+      "sha256": "ada31ff670e0a4e3d12d0ca97c364e91d66fdfb5678b40461ccb4bd80d26df7e"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/sam3_service_health.py",
+      "size": 6515,
+      "sha256": "2d9ebaeeff30fe36b19c10a550432ad4fee80a46b63277df339acfcc25c002d7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/schedule_add_node3.py",
+      "size": 7456,
+      "sha256": "41866d9957084fafa2b0e67d4d7e0c422786352886846c6f0a24ac222f572d7a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/schedule_r9.py",
+      "size": 3506,
+      "sha256": "8b10f159b3086cae9b8ebf0b85b22a30dd60356017470c2bfa6489112c89ce4f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/stage-add-node3.py",
+      "size": 3132,
+      "sha256": "783bdef242c84e0a4696f1dfe747d5a44822863a53f23b23fb48c16bf5c1a949"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/stage-deployment-r5.py",
+      "size": 1664,
+      "sha256": "5e60464576116e9dfee7d91bd1221e062270f343fc32327055e9a55819c308e4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/stage-deployment-r6.py",
+      "size": 1775,
+      "sha256": "422f09f5b939e3c2d9a96253859ee21c1fa016f8bf22869e1e4e5b6f9a278b35"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/stage-deployment-r7.py",
+      "size": 3229,
+      "sha256": "8169192ce8b7dc1bc045e27d61b51b653378dd8cbfbb28ae2b30ee2938547f32"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/stage-deployment-r8.py",
+      "size": 3994,
+      "sha256": "3661d7f610a3b1c5d850407f328ccf963e58ea3ecfec40f0d3f91c8ffd9705cd"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/stage-deployment-r9.py",
+      "size": 3457,
+      "sha256": "e93d32d0d5bd4247b13dc96c816234b067077070cc07116dbd1049b8c76340f4"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/startup_gate.py",
+      "size": 13942,
+      "sha256": "d77d2234d976bc628a95f413806429bc2f1c471e34c6fd6ff9b45e4431097bc8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/startup_gate_successor_r1.py",
+      "size": 14865,
+      "sha256": "81fbc4aac4757860705c3814829e45235cf8acfb52d36d412865accd5b3c80cb"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/submit-add-node3.py",
+      "size": 2084,
+      "sha256": "3db0bc23b7aa30934a92f3d52e45cc46d55edfc0ecea361e165d74f1453abce7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/submit-runtime-study-r7.py",
+      "size": 3727,
+      "sha256": "da38d31fda22b8d210dc180712819b49c5cba5d95f7eb3c1c7cb0fa2cfa6485f"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/submit-runtime-study-r8.py",
+      "size": 4476,
+      "sha256": "fcda17d02037c4626804b41929313e75fee81c30ba21637a755581ee107d7474"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/submit-runtime-study-r9.py",
+      "size": 8037,
+      "sha256": "8e05b73f0c2eb399221be963cab22e0ea3b3f90efc06f9a558ae8d87a34431a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/submit-runtime-study.py",
+      "size": 3724,
+      "sha256": "f0fe460b32f30aaedf3e0aa1841b2c01f311bf779336222e55e97421c8bcbd59"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/successor_guard_r1.py",
+      "size": 5393,
+      "sha256": "7ca137c1e6ad578c880dcf455d5deadba53470476cb2b31411b14d92c6613c62"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/successor_lineage_r1.py",
+      "size": 6559,
+      "sha256": "a0619caa9f0f3730f86396faf070556433de136fea55561fef9fb3c0edf68841"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/successor_settle_r1.py",
+      "size": 6522,
+      "sha256": "78d9a41e79c597597761ad87647dd15d35a6c1d4e7494208ef04d59b269d9d3a"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/canonical_assignment.py",
+      "size": 4069,
+      "sha256": "62e194357669d29668d51401e4e30e4e07b00c7c5b41f76c35a1ea6022370cdc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/cell_read_guard.py",
+      "size": 6726,
+      "sha256": "54fa6cfeedd3c868b8974d0d0f76e436fc313d4df3c252036fdb8cfac3c5a380"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/dlc-queue-entry.sh",
+      "size": 1037,
+      "sha256": "53298d3bf4eb2ebdf4b217c7ca0de3b783acdf9de1177dc799c353726318d7ff"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/dlc-supervisor.py",
+      "size": 38304,
+      "sha256": "cac1c5c32de7677c04ff168de576396aafd4f0939dee6c6493dc67b19daea026"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/foundation_import.py",
+      "size": 3615,
+      "sha256": "caad8d5d8fc7d2e6c427b75e56722a7780085cb8c56bc67c817fad6178f0c911"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/full_deadlines.py",
+      "size": 3507,
+      "sha256": "a3e6b88c576fa48f84a992640df610a5a3d5b967adabb9eb38531d6ce899f190"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/heldout_stop_on_infra.py",
+      "size": 3566,
+      "sha256": "6d822bf02abb695b40241fe6c5b140d3c5b47c1541430b53872c0fe2ceb6a6d8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/infra_guard.py",
+      "size": 4492,
+      "sha256": "accc409efd3271b228ec02bc953e9478b514cb6f752f4132a73a851402e84869"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/lineage.py",
+      "size": 3861,
+      "sha256": "5991b779ef9b7205279b19b199f67ec0ec444392d54b28a22eb9bc5a1b0461cb"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/native_cc_stream.py",
+      "size": 13946,
+      "sha256": "5d7eea15d181410940c89dbe11e2a48e6dc57eb7a9aa5ae51fa0e73624b5c50d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/qwen-native-compat-r2.py",
+      "size": 15551,
+      "sha256": "8e98d140e9e0acddb83723219278578a733240481fa042f86e0fe0098d435d40"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/run_two_task_cell.py",
+      "size": 37443,
+      "sha256": "00de7918e6e4b1663aef851029ffd917897eb3c9f3b848ed7e6ccf9553b0c777"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/runtime_limits.py",
+      "size": 1416,
+      "sha256": "412a1e415e16f7cb613c3c08fcfa7fca0e619347b6473fd0c2e0caf716fde616"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/support/two_task_scope.py",
+      "size": 15568,
+      "sha256": "2df0ead1132c471dc0bb3dc01f402c78d43b8eaaf5b0e3edbbd1fc12264ca0e3"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/verify-native-gate.py",
+      "size": 414,
+      "sha256": "9e4f9cfa50fcbbff1528aaf5633aaeeb438f6d48e22987b32f2ca25aac23eb52"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/verify-staging-successor-r8.py",
+      "size": 1365,
+      "sha256": "1af6bd139e09ccc442472cc1834c69a154d0e66f486692cef7cc5a3391f0bab9"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/verify-staging-with-continuation.py",
+      "size": 1352,
+      "sha256": "4eec7dd19f365544979cc7526add4f9e218bfddeede9c174bd712fda008925d6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/PLAN.md",
+      "size": 5365,
+      "sha256": "98ad8c81fb4e9fd6ca90ae0b72fef5b75bb5234673ca0411e129d0bcf8a6a900"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/prepare-search-study.py",
+      "size": 34343,
+      "sha256": "23fe74fb1c08bec64ade1d6a67a381a064986c5c33cfe03cd4c1ca9e2f9fc229"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/submit-search-study.py",
+      "size": 10874,
+      "sha256": "b081bf0700946eab784ce9881b665aabdeff1548289087fba8bea3afc2cbb694"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/canonical_assignment.py",
+      "size": 4068,
+      "sha256": "56af28d25b1f9300fa057f9f66c0b930894677f903cfa8cda9ac7610a8dc119c"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/cell_read_guard.py",
+      "size": 6726,
+      "sha256": "54fa6cfeedd3c868b8974d0d0f76e436fc313d4df3c252036fdb8cfac3c5a380"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/dlc-single-node-entry.sh",
+      "size": 1655,
+      "sha256": "60a6a99351e2373a4940180d6d26d5a8c26ee15ed8aa6e2f95f5e0944a76b830"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/dlc-supervisor.py",
+      "size": 41329,
+      "sha256": "bc7143c906890b5a7ba82b3dc6bb88008e139016c7c62930dfd8295e0e7615fc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/foundation_import.py",
+      "size": 3615,
+      "sha256": "caad8d5d8fc7d2e6c427b75e56722a7780085cb8c56bc67c817fad6178f0c911"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/full_deadlines.py",
+      "size": 3507,
+      "sha256": "a3e6b88c576fa48f84a992640df610a5a3d5b967adabb9eb38531d6ce899f190"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/heldout_stop_on_infra.py",
+      "size": 3566,
+      "sha256": "6d822bf02abb695b40241fe6c5b140d3c5b47c1541430b53872c0fe2ceb6a6d8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/infra_guard.py",
+      "size": 4492,
+      "sha256": "accc409efd3271b228ec02bc953e9478b514cb6f752f4132a73a851402e84869"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/legacy_stager.py",
+      "size": 35766,
+      "sha256": "fce36b8e2b38627ac746882fcbe04857e0c733c8638a78b230cb0754be759cfc"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/lineage.py",
+      "size": 3861,
+      "sha256": "5991b779ef9b7205279b19b199f67ec0ec444392d54b28a22eb9bc5a1b0461cb"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/native_cc_stream.py",
+      "size": 13946,
+      "sha256": "5d7eea15d181410940c89dbe11e2a48e6dc57eb7a9aa5ae51fa0e73624b5c50d"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/native_lineage_r2.py",
+      "size": 22368,
+      "sha256": "4750856dfc13e94c447a8db03f84c05ba0108d73b0bd8caf9d9e3de355bb96c6"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/output_ownership.py",
+      "size": 5889,
+      "sha256": "2a51d709b557ec8f9f062956c10a5dc59f38e7fa226b46318781d30d959e3952"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/pilot_assignment_guard.py",
+      "size": 10858,
+      "sha256": "4979df028d66029eb6a06df6d38ad555fa1f2a1eeced96fde7def223e18245a8"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/pristine_a_render.py",
+      "size": 4587,
+      "sha256": "6453db8bb72386c96e4a93ba45dbe1f9b67f859635bdac4c815ee1749aa77054"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/qwen-native-compat-r2.py",
+      "size": 15551,
+      "sha256": "8e98d140e9e0acddb83723219278578a733240481fa042f86e0fe0098d435d40"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/run_two_task_cell.py",
+      "size": 37473,
+      "sha256": "8655603c5d3f62ad5ebbcf01226eeae3dc14ebe271b2cda74ea4695a5807b707"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/runtime_limits.py",
+      "size": 1416,
+      "sha256": "412a1e415e16f7cb613c3c08fcfa7fca0e619347b6473fd0c2e0caf716fde616"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/sam3_service_health.py",
+      "size": 6515,
+      "sha256": "2d9ebaeeff30fe36b19c10a550432ad4fee80a46b63277df339acfcc25c002d7"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/schedule.py",
+      "size": 3300,
+      "sha256": "84ccaf8ca3ed375ef4462d4bb4ef71d4568cad4d0ebf9ecde8a14743ed131fce"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/two_task_render.py",
+      "size": 2095,
+      "sha256": "07e6470546b9167ba6156854563262ea9cdcaf9aa32846de82ece374bec569ef"
+    },
+    {
+      "path": "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/two_task_scope.py",
+      "size": 16145,
+      "sha256": "893b6e2e913eafb3f462a94208fdcd28acae563b7d42ea5dc2a08dd2f0edd73f"
+    },
+    {
       "path": "aspire/sim/docs/experiments/model-fix-loop-worker.md",
       "size": 6095,
       "sha256": "4326a10aee0a5c49975d9064e776494d2365769342296470edfb4335f1a63d69"
@@ -4001,6 +4521,41 @@
       "sha256": "158d96e79f850c8075929b1b9dfe021caf6ddd90bfdfb5da1ab22b29f79620d2"
     },
     {
+      "path": "aspire/sim/scripts/common/node_layout/reference/model-server.json",
+      "size": 2748,
+      "sha256": "ce0da0e04ed04635b96b6ee940ee61065421e238bdb78d748333fea2d9604147"
+    },
+    {
+      "path": "aspire/sim/scripts/common/node_layout/reference/sam3-public-dev51-agentview.jpg",
+      "size": 38444,
+      "sha256": "76030d065bb24a30c14b754fb4c56c550ef30c6e374c10a358f4f925b755ce2c"
+    },
+    {
+      "path": "aspire/sim/scripts/common/node_layout/reference/sam3-public-image-provenance.json",
+      "size": 601,
+      "sha256": "af49f4a28ce1c3e3f5adcb57fe65de49088a7d821d9d70b9c7a20e19d0866610"
+    },
+    {
+      "path": "aspire/sim/scripts/common/node_layout/sam3_service_health.py",
+      "size": 6515,
+      "sha256": "2d9ebaeeff30fe36b19c10a550432ad4fee80a46b63277df339acfcc25c002d7"
+    },
+    {
+      "path": "aspire/sim/scripts/common/node_layout/unit-entry.sh",
+      "size": 2369,
+      "sha256": "69618258dab36bb7aedc634607f32581e8c13597293e24adea1a39b462118c41"
+    },
+    {
+      "path": "aspire/sim/scripts/common/node_layout/unit_layout.py",
+      "size": 15886,
+      "sha256": "35c0cf88bd87d333a9b2c55dd1084d33597e0419dbcacca427c91b39f4fb4d9d"
+    },
+    {
+      "path": "aspire/sim/scripts/common/node_layout/unit_supervisor.py",
+      "size": 44988,
+      "sha256": "b6e2099eca9c47d5297bf79b7d851902bbaa4625a5650a8c03019cd62deafa07"
+    },
+    {
       "path": "aspire/sim/scripts/common/plot_subagent_token_trace.py",
       "size": 7571,
       "sha256": "cb414a68e2c63d0cdda42d27a77765a2ad6171e30ea93125c1d85738671e1f1b"
@@ -4157,8 +4712,8 @@
     },
     {
       "path": "aspire/sim/scripts/libero/executable_world_profile.py",
-      "size": 33850,
-      "sha256": "3204f7ac8e2acecb1250c03aa12934c42f769039c584fcfbe2b03613fcbd7aeb"
+      "size": 44080,
+      "sha256": "7e0345c1914c697f2b47f74df8ac6d3b42849feb470a96d1d5c2b8b230321a7c"
     },
     {
       "path": "aspire/sim/scripts/libero/fix_loop_state.py",
@@ -4237,23 +4792,23 @@
     },
     {
       "path": "aspire/sim/scripts/libero/native_world_campaign.py",
-      "size": 48398,
-      "sha256": "3d713e8c156713419a03c1242754571aff1d69245f8aaeae743d5b6e45098dc8"
+      "size": 48558,
+      "sha256": "96138d647a361924a51bea634c19060091c53bd11626c34d7733164d1e46f8fc"
     },
     {
       "path": "aspire/sim/scripts/libero/native_world_fixloop_state.py",
-      "size": 42488,
-      "sha256": "b3bb95d4e5141745157ea5bf1b38a1d5ca7c4eaff26ef3617367494c9cb3098c"
+      "size": 45043,
+      "sha256": "fa504d8a33c1944aadb57a0b81736dd9066c60577726219b62bbeddc73170724"
     },
     {
       "path": "aspire/sim/scripts/libero/native_world_heldout.py",
-      "size": 11144,
-      "sha256": "3b5801949620789a4657fc6626f12ea5b3dae6fb15b8de931575996353334557"
+      "size": 11196,
+      "sha256": "5be43e38d36e751ec3d6c03aa07ad5026235000405e6392c0565ff31ff91db1e"
     },
     {
       "path": "aspire/sim/scripts/libero/native_world_protocol.py",
-      "size": 57794,
-      "sha256": "6e62f79a2b79ea6bdcea79133603e9427da5a242e2dc36de271be92bbcecf86f"
+      "size": 64495,
+      "sha256": "b758adf1e3bd77bce9d1a23888c14f351e5a66f1303915cb7d888c6c9e73b504"
     },
     {
       "path": "aspire/sim/scripts/libero/paired_bowl_supervisor.py",
@@ -4376,6 +4931,21 @@
       "sha256": "db64e5ec5777c14a210fc531f4f991d05b6754fe7770245f28d26728a828e6d3"
     },
     {
+      "path": "aspire/sim/scripts/libero/runtime/native_world_protocol.py",
+      "size": 4726,
+      "sha256": "d9df59bb86a7736b9b500b8b7cfb5c41e1b2c248050cd0c0087cc68b5ced46a4"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/runtime/replay_trial.py",
+      "size": 1281,
+      "sha256": "e045636dfebcede9d797a84dcb58f1a093142fdaf39ff2577f023a5514371912"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/runtime_world_fixture.py",
+      "size": 1964,
+      "sha256": "137129f40bb9c51e75c18236ce46a830e8479147989a8940e4d59dc5a4fd43ec"
+    },
+    {
       "path": "aspire/sim/scripts/libero/scene_bowl_supervisor.py",
       "size": 10684,
       "sha256": "355253c211effbb8a55d5b87294f6c71c05dc40eeb26bc05de06de8e1505793f"
@@ -4389,6 +4959,11 @@
       "path": "aspire/sim/scripts/libero/scene_world_smoke.py",
       "size": 22712,
       "sha256": "9378f90dd32c9e8e46920070cdcea58af12d1e387d1292e46c9072e6018e378b"
+    },
+    {
+      "path": "aspire/sim/scripts/libero/search_control_retro.py",
+      "size": 12106,
+      "sha256": "3f3466218410c41d774117dc108411a794c6974f19be3504684f2029ce321c0a"
     },
     {
       "path": "aspire/sim/scripts/libero/simple_world_profile.py",
@@ -4571,9 +5146,29 @@
       "sha256": "2b5027b8ad3e15ef71d774b153a47d09f383549106a2b89a49ab883912827c30"
     },
     {
+      "path": "aspire/sim/tests/runtime_world_fixture_data.py",
+      "size": 7186,
+      "sha256": "6910970fb3fa8abd69955a797a87f0e34b479a90b768698202ced2836907627e"
+    },
+    {
       "path": "aspire/sim/tests/test_abc_conditions.py",
       "size": 24428,
       "sha256": "1672b8d2ddae23360c341935f6895c2efcf63b2c05a712eeb2961fe463aefed6"
+    },
+    {
+      "path": "aspire/sim/tests/test_add_node3_schedule.py",
+      "size": 8683,
+      "sha256": "929b8141d37836fae5b244fd83e92519127b6abb3c3e665013ed93c08d39647a"
+    },
+    {
+      "path": "aspire/sim/tests/test_approved_worker_successor.py",
+      "size": 12176,
+      "sha256": "fd0d25b47452e2762300ddf2af0b12403e9fece641ef5d0d88dd9276a1518b87"
+    },
+    {
+      "path": "aspire/sim/tests/test_blind_feedback.py",
+      "size": 6623,
+      "sha256": "121aa9553bcbf576f9714bb0ccb5b8e07fa96819f5008e56eebfd041c86dd082"
     },
     {
       "path": "aspire/sim/tests/test_closed_loop_r2_image_launch.py",
@@ -4594,6 +5189,11 @@
       "path": "aspire/sim/tests/test_dep_compat.py",
       "size": 2480,
       "sha256": "3a38d29529fac0da2b553202bf6e421066f5f984abb08d7b5961e65f93529b75"
+    },
+    {
+      "path": "aspire/sim/tests/test_development_diagnosis_delivery.py",
+      "size": 3595,
+      "sha256": "5d33a89679047a6f86c38f5d345ee940903b7aa2352541bae8dd7acc02c31420"
     },
     {
       "path": "aspire/sim/tests/test_development_gate.py",
@@ -4629,6 +5229,11 @@
       "path": "aspire/sim/tests/test_gen_progress.py",
       "size": 3737,
       "sha256": "5b90edf78d60bbf16c5611fcbb51a528863d1db100166fc2005b3b9a619de63d"
+    },
+    {
+      "path": "aspire/sim/tests/test_initial_to_repair_once.py",
+      "size": 4422,
+      "sha256": "549a3c06f6208d5ce4a88fa458374871a20101b4887800fbf809a12d50eaa477"
     },
     {
       "path": "aspire/sim/tests/test_libero.py",
@@ -4701,6 +5306,11 @@
       "sha256": "ffdef843ac1dfafd4e1ab60f3f7c58dfd02ed98a2cde7961509a2e5ac155261f"
     },
     {
+      "path": "aspire/sim/tests/test_node_layout.py",
+      "size": 31227,
+      "sha256": "a8f488271998a24395b00c3245708bbe95b6f44f97ee41a8fd013143368454ee"
+    },
+    {
       "path": "aspire/sim/tests/test_openrouter_server.py",
       "size": 659,
       "sha256": "fa44fbef17917a60d6cedab0d2e3e02d84fd079625801498238f9f6131952665"
@@ -4751,6 +5361,11 @@
       "sha256": "7a090961ff8399d947302733880c809f2d67c21d90ba58a7dd165c74d387edf3"
     },
     {
+      "path": "aspire/sim/tests/test_recovery_stage_message_boundary.py",
+      "size": 5377,
+      "sha256": "8e1c2fcc9b558a15a9b75bb7b02dfe7a4995b853a110ebc6f864b0d2faeba767"
+    },
+    {
       "path": "aspire/sim/tests/test_reference_relational_world.py",
       "size": 38989,
       "sha256": "0146a44fcfe7a519b8729258589c205572bd14cbb78ee4578a321725ebda8378"
@@ -4761,14 +5376,49 @@
       "sha256": "67630fa6294e56e6b2c7d2c30b80f57faa8a3027f4e45c64eabc1ca0eb2e59fd"
     },
     {
+      "path": "aspire/sim/tests/test_runtime_study_support.py",
+      "size": 20965,
+      "sha256": "8f093f3903fea33f4dbaa2b8b6e31ffb3dbfadc1fd99793d153d2090f6c8ac83"
+    },
+    {
+      "path": "aspire/sim/tests/test_runtime_world.py",
+      "size": 27142,
+      "sha256": "b26a7762167cbb8c4e56a600390ebb996e4c81eed7e3086b8aa25c3c872bf5fb"
+    },
+    {
+      "path": "aspire/sim/tests/test_sam3_startup_health.py",
+      "size": 7107,
+      "sha256": "f2795aa1097373be29c5c3ea9e991693dfd39f651b2ded1724a61bc2eeeadf79"
+    },
+    {
+      "path": "aspire/sim/tests/test_search_control.py",
+      "size": 37721,
+      "sha256": "eda50bff079c8c03562f9203bf2826c67a8241a98ff784d663215e786ef14dac"
+    },
+    {
       "path": "aspire/sim/tests/test_simple_world.py",
       "size": 8629,
       "sha256": "85c4c1d0e6a219db7d30b78a14a2f58ea14f9f7fcc6887195c5c8244882cc54e"
     },
     {
+      "path": "aspire/sim/tests/test_single_node_schedule_r9.py",
+      "size": 8277,
+      "sha256": "1c62a3e2e8e4c02d7ef5ee39fc2e8e3dca377d4ae052cd299846c4833039cca4"
+    },
+    {
+      "path": "aspire/sim/tests/test_startup_gate_recovery.py",
+      "size": 24821,
+      "sha256": "cecf8f73891f50f2e8f39898f11baedc07dbe8860f47685966e59faefb711b46"
+    },
+    {
       "path": "aspire/sim/tests/test_submit_dlc_once.py",
       "size": 2373,
       "sha256": "075f1c7267754c24c603cc1640ff6464cb8d996032af43c34172753241567370"
+    },
+    {
+      "path": "aspire/sim/tests/test_successor_dlc_integration.py",
+      "size": 2665,
+      "sha256": "60f4c891044c4206a2ca64ae6679cdae66197166e4a415772241dc257c8c2007"
     },
     {
       "path": "aspire/sim/tests/test_vllm_image_source.py",
@@ -4817,8 +5467,8 @@
     },
     {
       "path": "deploy/qwen/model-server.example.json",
-      "size": 1904,
-      "sha256": "09ecceff6507255f5f3a2a7b54e9bc7e8331f58c4cc020385c8d0579dc4219a4"
+      "size": 1953,
+      "sha256": "8d9bac5356ec3638e41e2188e6927554f68945b65f2f12af8e8f837860b6b397"
     }
   ],
   "submodules": [
@@ -4890,46 +5540,461 @@
         "aspire/sim/tests/test_foundation_r2_repairs.py"
       ],
       "scope": "Foundation R2 source, tests, and core protocols only; no runtime artifacts."
+    },
+    {
+      "date": "2026-10-16",
+      "previous_personal_commit": "c94a4876106c12c3a89fc5d884d316c0a4109490",
+      "scope": "Qwen unit node layout, p2/p3 source, protocols and required fixtures; excludes raw runtime outputs",
+      "validation": {
+        "cpu": {
+          "suites": 10,
+          "passed": 298,
+          "skipped": 1,
+          "subtests_passed": 12
+        },
+        "smoke": "2026-10-16 \u7684 DLC \u4f5c\u4e1a dlcrv0c97s12ol8y \u5b8c\u6210 8 \u5361\u3001\u4e24\u4e2a unit\u30014 \u4e2a cell \u7684\u771f\u5b9e smoke\u3002\u9010\u4e2a\u6838\u5bf9 queue-result \u4e0e\u8d26\u672c\uff1a\u6bcf\u4e2a cell \u6070\u597d\u4e00\u6b21 charged seed-51\uff0c\u7ec8\u6001 native_smoke_complete\uff0csupervisor_smoke_stop \u751f\u6548\uff0cafter_stop \u4e3a\u7a7a\uff0c\u6240\u5c5e\u8fdb\u7a0b\u6811\u6e05\u7406\u901a\u8fc7\uff1b\u4e24\u4e2a unit \u5747 stopped\uff0cnode_complete\u3002\u4e24 unit \u7684 native compatibility \u4e0e SAM3 \u5b9e\u9645\u63a8\u7406\u5065\u5eb7\u68c0\u67e5\u901a\u8fc7\uff0c\u8fd0\u884c\u4f7f\u7528\u975e\u7279\u6743 API\u3002"
+      }
     }
   ],
   "common_documents": [
     {
       "path": "docs/LATEST_EXPERIMENTS.md",
-      "size": 3643,
-      "sha256": "6126081fa5a1365b30c482136adf77423ca9d0e4e9aa87af365d074f5421e2f1",
-      "mode": 420
-    },
-    {
-      "path": "docs/REPOSITORY_SCOPE.md",
-      "size": 2258,
-      "sha256": "90b1d2052ceb66b6e34553cf5892e3bd2079c10b17751cc1ef60111f8364ff2a",
+      "size": 8507,
+      "sha256": "48959179bceeb5c4bd3595068eced28381d244aba78a246474d2aef000f18e28",
       "mode": 420
     },
     {
       "path": "docs/QWEN.md",
-      "size": 3352,
-      "sha256": "6187f6b70e6d664dac74a59d30ba21450ca4341783b14b4b16285084ccb89f5c",
+      "size": 6532,
+      "sha256": "9952d371c56d0f558c716004121327914c57dc801e09cace828057cfd17717fe",
+      "mode": 420
+    },
+    {
+      "path": "docs/REPOSITORY_SCOPE.md",
+      "size": 2431,
+      "sha256": "6a690c5d1b1bffc56014cde099b6b4efa3317d4af4916334154f510203aa504c",
       "mode": 420
     },
     {
       "path": "docs/SYNC_SCOPE.md",
-      "size": 2659,
-      "sha256": "301b059617bd9787c2661d9d2fb43a047d1b5a4762aa1b44f5bec08c77746458",
+      "size": 3105,
+      "sha256": "20f9e64a87dec16d706603524924b53284e73d33cfcecd86c0c89bb26e7afabb",
       "mode": 420
     }
   ],
   "synchronization": {
-    "date": "2026-10-09",
+    "date": "2026-10-16",
     "remote_host": "rbs-debug",
     "remote_root": "/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b",
     "local_root": "/Users/wge/git/ASPIRE",
     "personal_root": "/Users/wge/git/ASPIRE-personal",
     "github": "git@github.com:wge2002/aspire-world.git",
-    "source_scope_sha256": "3539ceaad64af33fe4e018d43912a2aeb67b8a304121ded395c44b9cb9fb70da",
+    "source_scope_sha256": "11d9fc1f5382139f977e2aeb8b7387dc93fb2103c99d40bde8391f98b33e0b45",
     "excluded": "logs, raw results, media, weights, credentials, caches, environments, frozen runtimes",
     "root_readme_mapping": "source README.md -> personal README.upstream.md; personal README.md is navigation",
     "remote_sources_retained": [
+      ".gitmodules",
+      "AGENTS.md",
+      "CLAUDE.md",
+      "CONTRIBUTING.md",
+      "LICENSE",
+      "LICENSES/BSD-3-Clause-ALOHA.txt",
+      "LICENSES/MIT-CaP-X.txt",
+      "LICENSES/MIT-Hydra.txt",
+      "LICENSES/MIT-PyRoKi.txt",
+      "LICENSES/MIT-RoboCasa.txt",
+      "LICENSES/MIT-Robosuite.txt",
+      "LICENSES/MIT-i2rt-YAM.txt",
+      "LICENSES/MIT-i2rt.txt",
+      "LICENSES/NVIDIA-cuRobo-v0.7.8.txt",
+      "LICENSES/README.md",
+      "LICENSES/THIRD_PARTY_LICENSES.md",
+      "LICENSES/THIRD_PARTY_NOTICES.md",
+      "LICENSES/evidence/OSRB_COMPLIANCE_REPORT.md",
+      "LICENSES/evidence/SOURCE_MODIFICATION_EVIDENCE.tsv",
+      "LICENSES/evidence/SOURCE_PROVENANCE.md",
+      "LICENSES/evidence/SOURCE_PROVENANCE.tsv",
+      "LICENSES/evidence/SUBMODULE_AUDIT.md",
+      "LICENSES/evidence/SUBMODULE_AUDIT.tsv",
+      "NOTICE",
+      "README.md",
+      "SECURITY.md",
+      "aspire/__init__.py",
+      "aspire/sim/.claude/README.md",
+      "aspire/sim/.claude/behavior/CLAUDE.md",
+      "aspire/sim/.claude/behavior/api-reference.md",
+      "aspire/sim/.claude/behavior/fix-loop/INSTRUCTIONS.md",
+      "aspire/sim/.claude/behavior/fix-loop/SKILL.md",
+      "aspire/sim/.claude/behavior/fix-loop/campaign-state-template.md",
+      "aspire/sim/.claude/behavior/fix-loop/clean-task-slate.md",
+      "aspire/sim/.claude/behavior/fix-loop/main-agent-prompt.md",
+      "aspire/sim/.claude/behavior/fix-loop/stage1-skill-acquisition-prompt.md",
+      "aspire/sim/.claude/behavior/fix-loop/stage2-evaluation-seed-prompt.md",
+      "aspire/sim/.claude/behavior/run-baseline.md",
+      "aspire/sim/.claude/behavior/skills/README.md",
+      "aspire/sim/.claude/behavior/skills/grasping.md",
+      "aspire/sim/.claude/behavior/skills/interactive-policy.md",
+      "aspire/sim/.claude/behavior/skills/navigation.md",
+      "aspire/sim/.claude/behavior/skills/perception-and-search.md",
+      "aspire/sim/.claude/behavior/skills/r1pro-api.md",
+      "aspire/sim/.claude/behavior/skills/radio-table-tasks.md",
+      "aspire/sim/.claude/behavior/skills/search.md",
+      "aspire/sim/.claude/behavior/skills/system-pipeline.md",
+      "aspire/sim/.claude/behavior/skills/time-budget.md",
+      "aspire/sim/.claude/libero/CLAUDE.md",
+      "aspire/sim/.claude/libero/analysis/README.md",
+      "aspire/sim/.claude/libero/analysis/token-calculate.md",
+      "aspire/sim/.claude/libero/api-reference.md",
+      "aspire/sim/.claude/libero/code-world/INSTRUCTIONS.md",
+      "aspire/sim/.claude/libero/code-world/SKILL.md",
+      "aspire/sim/.claude/libero/code-world/main-agent-prompt.md",
+      "aspire/sim/.claude/libero/evosearch/INSTRUCTIONS.md",
+      "aspire/sim/.claude/libero/evosearch/SKILL.md",
+      "aspire/sim/.claude/libero/evosearch/clean-task-slate.md",
+      "aspire/sim/.claude/libero/evosearch/main-agent-prompt.md",
+      "aspire/sim/.claude/libero/evosearch/skills/README.md",
+      "aspire/sim/.claude/libero/evosearch/skills/evosearch-iteration.md",
+      "aspire/sim/.claude/libero/evosearch/skills/motion-efficiency.md",
+      "aspire/sim/.claude/libero/evosearch/skills/push-contact-tasks.md",
+      "aspire/sim/.claude/libero/evosearch/skills/wrist-rotation-blocking.md",
+      "aspire/sim/.claude/libero/evosearch/subagent-prompt.md",
+      "aspire/sim/.claude/libero/fix-loop/INSTRUCTIONS.md",
+      "aspire/sim/.claude/libero/fix-loop/QUICKSTART.md",
+      "aspire/sim/.claude/libero/fix-loop/SKILL.md",
+      "aspire/sim/.claude/libero/fix-loop/clean-task-slate.md",
+      "aspire/sim/.claude/libero/fix-loop/main-agent-prompt.md",
+      "aspire/sim/.claude/libero/fix-loop/skills/task-exploration.md",
+      "aspire/sim/.claude/libero/fix-loop/subagent-prompt.md",
+      "aspire/sim/.claude/libero/inference-time-scaling/INSTRUCTIONS.md",
+      "aspire/sim/.claude/libero/inference-time-scaling/SKILL.md",
+      "aspire/sim/.claude/libero/inference-time-scaling/clean-task-slate.md",
+      "aspire/sim/.claude/libero/inference-time-scaling/main-agent-prompt.md",
+      "aspire/sim/.claude/libero/inference-time-scaling/skills/README.md",
+      "aspire/sim/.claude/libero/inference-time-scaling/subagent-prompt.md",
+      "aspire/sim/.claude/libero/inference-time-scaling/token-scaling-coordinator.md",
+      "aspire/sim/.claude/libero/legacy/libero-90-pro-pipeline.md",
+      "aspire/sim/.claude/libero/legacy/libero-90-pro-subagent-prompt.md",
+      "aspire/sim/.claude/libero/legacy/libero-long-pro-pipeline.md",
+      "aspire/sim/.claude/libero/legacy/libero-long-pro-subagent-prompt.md",
+      "aspire/sim/.claude/libero/legacy/zeroshot-capx-coordinator.md",
+      "aspire/sim/.claude/libero/legacy/zeroshot-capx-subagent-prompt.md",
+      "aspire/sim/.claude/libero/library-size-scaling/INSTRUCTIONS.md",
+      "aspire/sim/.claude/libero/library-size-scaling/SKILL.md",
+      "aspire/sim/.claude/libero/library-size-scaling/clean-task-slate.md",
+      "aspire/sim/.claude/libero/library-size-scaling/legacy-seed-running-subagent-prompt.md",
+      "aspire/sim/.claude/libero/library-size-scaling/main-agent-prompt.md",
+      "aspire/sim/.claude/libero/library-size-scaling/skills/README.md",
+      "aspire/sim/.claude/libero/library-size-scaling/subagent-prompt.md",
+      "aspire/sim/.claude/libero/run-baseline.md",
+      "aspire/sim/.claude/libero/skills/README.md",
+      "aspire/sim/.claude/libero/skills/grasp.md",
+      "aspire/sim/.claude/libero/skills/localize.md",
+      "aspire/sim/.claude/libero/skills/manipulation.md",
+      "aspire/sim/.claude/libero/skills/transport.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/INSTRUCTIONS.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/SKILL.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/clean-task-slate.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/commit-convention.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/libero-90-heldout-eval.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/main-agent-prompt.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/skills/README.md",
+      "aspire/sim/.claude/libero/zeroshot-transfer/subagent-prompt.md",
+      "aspire/sim/.claude/memory/MEMORY.md",
+      "aspire/sim/.claude/robosuite/CLAUDE.md",
+      "aspire/sim/.claude/robosuite/api-reference.md",
+      "aspire/sim/.claude/robosuite/evosearch/INSTRUCTIONS.md",
+      "aspire/sim/.claude/robosuite/evosearch/SKILL.md",
+      "aspire/sim/.claude/robosuite/evosearch/main-agent-prompt.md",
+      "aspire/sim/.claude/robosuite/evosearch/subagent-prompt.md",
+      "aspire/sim/.claude/robosuite/fix-loop/INSTRUCTIONS.md",
+      "aspire/sim/.claude/robosuite/fix-loop/SKILL.md",
+      "aspire/sim/.claude/robosuite/fix-loop/clean-task-slate.md",
+      "aspire/sim/.claude/robosuite/fix-loop/main-agent-prompt.md",
+      "aspire/sim/.claude/robosuite/fix-loop/skills/grasp.md",
+      "aspire/sim/.claude/robosuite/fix-loop/skills/localize.md",
+      "aspire/sim/.claude/robosuite/fix-loop/skills/manipulation.md",
+      "aspire/sim/.claude/robosuite/fix-loop/skills/transport.md",
+      "aspire/sim/.claude/robosuite/fix-loop/subagent-prompt.md",
+      "aspire/sim/.claude/robosuite/run-baseline.md",
+      "aspire/sim/.claude/robosuite/training-law/INSTRUCTIONS.md",
+      "aspire/sim/.claude/robosuite/training-law/SKILL.md",
+      "aspire/sim/.claude/robosuite/training-law/clean-task-slate.md",
+      "aspire/sim/.claude/robosuite/training-law/main-agent-prompt.md",
+      "aspire/sim/.claude/robosuite/training-law/skills/grasp.md",
+      "aspire/sim/.claude/robosuite/training-law/skills/localize.md",
+      "aspire/sim/.claude/robosuite/training-law/skills/manipulation.md",
+      "aspire/sim/.claude/robosuite/training-law/skills/transport.md",
+      "aspire/sim/.claude/robosuite/training-law/subagent-prompt.md",
+      "aspire/sim/.claude/robosuite/training-law/token-calculate.md",
+      "aspire/sim/CLAUDE.md",
+      "aspire/sim/README.md",
+      "aspire/sim/__init__.py",
+      "aspire/sim/cap/__init__.py",
+      "aspire/sim/cap/envs/__init__.py",
+      "aspire/sim/cap/envs/adapters/__init__.py",
+      "aspire/sim/cap/envs/adapters/libero_wrapper.py",
+      "aspire/sim/cap/envs/adapters/robosuite_wrapper.py",
+      "aspire/sim/cap/envs/assets/franka_pick_place/README.md",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/finger_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/finger_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_3.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/hand_4.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_10.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_11.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_3.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_4.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_5.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_7.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_8.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link0_9.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link1.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link2.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link3_3.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link4_3.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_collision_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_collision_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link5_collision_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_10.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_11.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_12.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_13.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_14.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_15.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_16.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_3.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_4.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_5.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_6.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_7.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_8.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link6_9.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7.stl",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_0.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_1.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_2.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_3.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_4.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_5.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_6.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/assets/link7_7.obj",
+      "aspire/sim/cap/envs/assets/franka_pick_place/panda_scene.xml",
+      "aspire/sim/cap/envs/base.py",
+      "aspire/sim/cap/envs/configs/instantiate.py",
+      "aspire/sim/cap/envs/configs/loader.py",
+      "aspire/sim/cap/envs/launch.py",
+      "aspire/sim/cap/envs/launch_b1k.py",
+      "aspire/sim/cap/envs/runner.py",
+      "aspire/sim/cap/envs/scripts/__init__.py",
+      "aspire/sim/cap/envs/scripts/run_libero_batch.py",
+      "aspire/sim/cap/envs/scripts/run_robosuite_batch.py",
+      "aspire/sim/cap/envs/simulators/__init__.py",
+      "aspire/sim/cap/envs/simulators/libero.py",
+      "aspire/sim/cap/envs/simulators/r1pro_b1k.py",
+      "aspire/sim/cap/envs/simulators/robosuite_base.py",
+      "aspire/sim/cap/envs/simulators/robosuite_cube_lift.py",
+      "aspire/sim/cap/envs/simulators/robosuite_cubes.py",
+      "aspire/sim/cap/envs/simulators/robosuite_cubes_restack.py",
+      "aspire/sim/cap/envs/simulators/robosuite_handover.py",
+      "aspire/sim/cap/envs/simulators/robosuite_nut_assembly.py",
+      "aspire/sim/cap/envs/simulators/robosuite_spill_wipe.py",
+      "aspire/sim/cap/envs/simulators/robosuite_two_arm_lift.py",
+      "aspire/sim/cap/envs/tasks/__init__.py",
+      "aspire/sim/cap/envs/tasks/base.py",
+      "aspire/sim/cap/envs/tasks/franka/__init__.py",
+      "aspire/sim/cap/envs/tasks/franka/franka_cube_restack.py",
+      "aspire/sim/cap/envs/tasks/franka/franka_libero_env.py",
+      "aspire/sim/cap/envs/tasks/franka/franka_lift.py",
+      "aspire/sim/cap/envs/tasks/franka/franka_nut_assembly.py",
+      "aspire/sim/cap/envs/tasks/franka/franka_pick_place.py",
+      "aspire/sim/cap/envs/tasks/franka/franka_spill_wipe.py",
+      "aspire/sim/cap/envs/tasks/franka/two_arm_handover.py",
+      "aspire/sim/cap/envs/tasks/franka/two_arm_lift.py",
+      "aspire/sim/cap/envs/tasks/r1pro/__init__.py",
+      "aspire/sim/cap/envs/tasks/r1pro/r1pro_behavior.py",
+      "aspire/sim/cap/envs/tasks/r1pro/r1pro_pickup_radio.py",
+      "aspire/sim/cap/envs/tasks/r1pro/r1pro_pickup_trash.py",
+      "aspire/sim/cap/envs/trial.py",
+      "aspire/sim/cap/integrations/__init__.py",
+      "aspire/sim/cap/integrations/base_api.py",
+      "aspire/sim/cap/integrations/franka/__init__.py",
+      "aspire/sim/cap/integrations/franka/common.py",
+      "aspire/sim/cap/integrations/franka/control.py",
+      "aspire/sim/cap/integrations/franka/control_privileged.py",
+      "aspire/sim/cap/integrations/franka/control_reduced.py",
+      "aspire/sim/cap/integrations/franka/control_reduced_exampleless.py",
+      "aspire/sim/cap/integrations/franka/control_reduced_skill_library.py",
+      "aspire/sim/cap/integrations/franka/handover.py",
+      "aspire/sim/cap/integrations/franka/handover_privileged.py",
+      "aspire/sim/cap/integrations/franka/handover_reduced.py",
+      "aspire/sim/cap/integrations/franka/handover_reduced_exampleless.py",
+      "aspire/sim/cap/integrations/franka/libero.py",
+      "aspire/sim/cap/integrations/franka/libero_privileged.py",
+      "aspire/sim/cap/integrations/franka/libero_reduced.py",
+      "aspire/sim/cap/integrations/franka/libero_reduced_skill_library.py",
+      "aspire/sim/cap/integrations/franka/nut_assembly_privileged.py",
+      "aspire/sim/cap/integrations/franka/nut_assembly_visual.py",
+      "aspire/sim/cap/integrations/franka/spill_wipe.py",
+      "aspire/sim/cap/integrations/franka/spill_wipe_privileged.py",
+      "aspire/sim/cap/integrations/franka/two_arm_lift.py",
+      "aspire/sim/cap/integrations/franka/two_arm_lift_privileged.py",
+      "aspire/sim/cap/integrations/libero/__init__.py",
+      "aspire/sim/cap/integrations/libero_trace_logger.py",
+      "aspire/sim/cap/integrations/motion/__init__.py",
+      "aspire/sim/cap/integrations/motion/curobo.py",
+      "aspire/sim/cap/integrations/motion/curobo_api.py",
+      "aspire/sim/cap/integrations/motion/pyroki.py",
+      "aspire/sim/cap/integrations/motion/pyroki_context.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/__init__.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_online_planning.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_vel_cost.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_base.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_collision.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_manipulability.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_multiple_targets.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_multiple_targets_vel_cost.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_solve_ik_with_rest_cost.py",
+      "aspire/sim/cap/integrations/motion/pyroki_snippets/_trajopt.py",
+      "aspire/sim/cap/integrations/r1pro/__init__.py",
+      "aspire/sim/cap/integrations/r1pro/control.py",
+      "aspire/sim/cap/integrations/r1pro/utils.py",
+      "aspire/sim/cap/integrations/robosuite/controllers/config/robots/panda_joint_ctrl.json",
+      "aspire/sim/cap/integrations/robosuite/controllers/config/robots/panda_joint_ctrl2.json",
+      "aspire/sim/cap/integrations/robosuite_trace_logger.py",
+      "aspire/sim/cap/integrations/trace_logger.py",
+      "aspire/sim/cap/integrations/vision/__init__.py",
+      "aspire/sim/cap/integrations/vision/graspnet.py",
+      "aspire/sim/cap/integrations/vision/molmo.py",
+      "aspire/sim/cap/integrations/vision/owlvit.py",
+      "aspire/sim/cap/integrations/vision/sam2.py",
+      "aspire/sim/cap/integrations/vision/sam3.py",
+      "aspire/sim/cap/llm/__init__.py",
+      "aspire/sim/cap/llm/client.py",
+      "aspire/sim/cap/serving/__init__.py",
+      "aspire/sim/cap/serving/assets/panda_spheres.json",
+      "aspire/sim/cap/serving/launch_contact_graspnet_server.py",
+      "aspire/sim/cap/serving/launch_curobo_server.py",
+      "aspire/sim/cap/serving/launch_owlvit_server.py",
+      "aspire/sim/cap/serving/launch_pyroki_server.py",
+      "aspire/sim/cap/serving/launch_sam2_server.py",
+      "aspire/sim/cap/serving/launch_sam3_server.py",
+      "aspire/sim/cap/serving/launch_servers.py",
+      "aspire/sim/cap/serving/launch_vllm_image_source.py",
+      "aspire/sim/cap/serving/openrouter_server.py",
+      "aspire/sim/cap/serving/vllm_server.py",
+      "aspire/sim/cap/skills/__init__.py",
+      "aspire/sim/cap/skills/claude_integration.py",
+      "aspire/sim/cap/skills/extractor.py",
+      "aspire/sim/cap/skills/library.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/__init__.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/__init__.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_online_planning.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_base.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_collision.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_manipulability.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_solve_ik_with_multiple_targets.py",
+      "aspire/sim/cap/third_party/pyroki_snippets/pyroki_snippets/_trajopt.py",
+      "aspire/sim/cap/utils/__init__.py",
+      "aspire/sim/cap/utils/camera_utils.py",
+      "aspire/sim/cap/utils/depth_utils.py",
+      "aspire/sim/cap/utils/eval_utils.py",
+      "aspire/sim/cap/utils/execution_logger.py",
+      "aspire/sim/cap/utils/graspnet_utils.py",
+      "aspire/sim/cap/utils/launch_utils.py",
+      "aspire/sim/cap/utils/msgpack_server_client_utils.py",
+      "aspire/sim/cap/utils/parallel_eval.py",
+      "aspire/sim/cap/utils/serve_utils.py",
+      "aspire/sim/cap/utils/video_utils.py",
+      "aspire/sim/cap/utils/visualization_utils.py",
+      "aspire/sim/cap/world_model/README.md",
+      "aspire/sim/cap/world_model/RUNTIME_INTERFACE.md",
+      "aspire/sim/cap/world_model/__init__.py",
+      "aspire/sim/cap/world_model/decision_revision.py",
+      "aspire/sim/cap/world_model/development_gate.py",
+      "aspire/sim/cap/world_model/evidence_state.py",
+      "aspire/sim/cap/world_model/executable_world.py",
+      "aspire/sim/cap/world_model/fix_loop_scene_broker.py",
+      "aspire/sim/cap/world_model/foundation_audit.py",
+      "aspire/sim/cap/world_model/judgment_world.py",
+      "aspire/sim/cap/world_model/libero_capture.py",
+      "aspire/sim/cap/world_model/live_broker.py",
+      "aspire/sim/cap/world_model/native_world_broker.py",
+      "aspire/sim/cap/world_model/ordinary_fix_loop_guard.py",
+      "aspire/sim/cap/world_model/prediction_contract.py",
+      "aspire/sim/cap/world_model/program.py",
+      "aspire/sim/cap/world_model/reference_relational_world.py",
+      "aspire/sim/cap/world_model/reference_scene_broker.py",
+      "aspire/sim/cap/world_model/relational_scene_broker.py",
+      "aspire/sim/cap/world_model/runtime.py",
+      "aspire/sim/cap/world_model/runtime_mechanism_audit.py",
+      "aspire/sim/cap/world_model/runtime_predictions.py",
+      "aspire/sim/cap/world_model/runtime_state.py",
+      "aspire/sim/cap/world_model/scene_broker.py",
+      "aspire/sim/cap/world_model/search_control.py",
       "aspire/sim/cap/world_model/shadow_condition_broker.py",
+      "aspire/sim/cap/world_model/simple_world.py",
+      "aspire/sim/cap/world_model/vlm_judge.py",
+      "aspire/sim/cap/world_model/world_use_audit.py",
+      "aspire/sim/docs/adding-environments.md",
+      "aspire/sim/docs/behavior-tasks.md",
+      "aspire/sim/docs/configuration.md",
+      "aspire/sim/docs/engineering/node-layout-20261015/DESIGN.md",
+      "aspire/sim/docs/engineering/node-layout-20261015/smoke/collect_smoke_results.py",
+      "aspire/sim/docs/engineering/node-layout-20261015/smoke/dlc-sampled-entry.sh",
+      "aspire/sim/docs/engineering/node-layout-20261015/smoke/gpu_sampler.py",
+      "aspire/sim/docs/engineering/node-layout-20261015/smoke/prepare-smoke-20261016.py",
+      "aspire/sim/docs/engineering/node-layout-20261015/smoke/prepare-smoke.py",
+      "aspire/sim/docs/engineering/node-layout-20261015/smoke/run-smoke-20261016.sh",
+      "aspire/sim/docs/engineering/node-layout-20261015/smoke/wait_for_gpus.py",
+      "aspire/sim/docs/experiments/claude-code-local-models.md",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/PROTOCOL.md",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/collect.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/engineering-base/scripts/libero/native_world_campaign.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/integrate.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-and-launch.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/prepare-r2.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/resume-bowl-eval.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/evaluate.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-c-opt-ablation-20260920/support/run_cell.py",
+      "aspire/sim/docs/experiments/code-world-closed-loop-repair-20261004/IMPLEMENTATION.md",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/make-preflights.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/prepare-gate-study.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-diagnostics.py",
       "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-oracle-r1.py",
       "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-oracle-r2.py",
       "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-bowl-selfeval-r1.py",
@@ -4960,9 +6025,589 @@
       "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-selfeval-r2.py",
       "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-vlmjudge-r1.py",
       "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-dsw-preflight-wine-vlmjudge-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-platform-preflights.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/run-supplementary-heldout.sh",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/submit-gate-study.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/dlc-queue-entry.sh",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/supplementary_heldout_run.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-gate-ablation-20261005/sync-to-remote.sh",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/IMPLEMENTATION.md",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/prepare-foundation.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/run-dsw-preflight-drawer-c.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/submit-foundation.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261003/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261005/MOTION_CONTRACT_REVIEW.md",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261005/NATIVE_EVENT_FIXTURE.json",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261005/NEXT_RUN_PLAN.md",
+      "aspire/sim/docs/experiments/code-world-pipeline-repair-20261007/cc_permission_events.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/make-preflights.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/prepare-prediction-study.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-diagnostics.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-off-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-off-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-p1-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowl-p1-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-off-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-off-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-p1-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-bowldrawer-p1-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-off-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-off-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-p1-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-drawer-p1-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-off-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-off-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-p1-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-stove-p1-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-off-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-off-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-p1-r1.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-dsw-preflight-wine-p1-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/run-platform-preflights.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/submit-prediction-study.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/dlc-queue-entry.sh",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/prepare-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-diagnostics-v2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-diagnostics.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-dsw-preflight-bowl-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-dsw-preflight-bowldrawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-dsw-preflight-drawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/run-platform-preflights.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/submit-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r1-20261004/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/prepare-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-diagnostics-v2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-dsw-preflight-bowl-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-dsw-preflight-bowldrawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-dsw-preflight-drawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/run-platform-preflights.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/submit-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r2-20261005/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/RUN_PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/prepare-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-diagnostics-v2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-dsw-preflight-bowl-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-dsw-preflight-bowldrawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-dsw-preflight-drawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/run-platform-preflights.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/submit-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/closeout.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-closed-loop-r3-20261007/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-entry.sh",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/prepare-pilot.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/qwen-native-compat.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/model-server.json",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_compat.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/reference/native_cc_runtime.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/run-dsw-preflight.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/pilot_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/support/run_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_local_vllm_provider.py",
+      "aspire/sim/docs/experiments/code-world-qwen-debug-20260922/test_pilot_helpers.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/ACCEPTANCE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/IMPLEMENTATION.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/prepare-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowl-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-bowldrawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/run-dsw-preflight-drawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/submit-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-20260930/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/IMPLEMENTATION.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/prepare-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowl-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-bowldrawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-dsw-preflight-drawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/run-preflights.sh",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/submit-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r2-20260930/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/IMPLEMENTATION.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/prepare-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/run-dsw-preflight-bowl-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/run-dsw-preflight-drawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/run-preflights.sh",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/submit-foundation.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-foundation-r3-20261002/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/prepare-full.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/replay-fixture-check.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/run-dsw-preflight.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/full_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/support/run_full_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_core_acceptance.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_driver.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_full_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/test_qwen_capacity_acceptance.py",
+      "aspire/sim/docs/experiments/code-world-qwen-full-20260924/wait-checkpoint.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/NATIVE_WORLD_INTERFACE.md",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/drawer-pair-dlc-entry.sh",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/make-c-r2-driver.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/prepare-two-task.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-bowldrawer-c-r2.sh",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/queue-drawers.sh",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/reference/expected-baseline-prompts.json",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/rescue-c-job-marker.sh",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-a.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-dsw-preflight-bowldrawer-c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/run-import-bowldrawer-a-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-a-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/stage-bowldrawer-c-r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-c-resume2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor-two-task.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/recovery_deadlines2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_c_r2_resume.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/run_two_task_cell_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_import_c.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_render_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/support/two_task_scope_r2.py",
+      "aspire/sim/docs/experiments/code-world-qwen-two-task-20260926/tests/test_lineage_default.py",
+      "aspire/sim/docs/experiments/code-world-rerun-20260919/baseline-contract.json",
+      "aspire/sim/docs/experiments/code-world-runtime-p2-20261011/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/PLAN.md",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/prepare-search-study.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/submit-search-study.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/canonical_assignment.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/cell_read_guard.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/dlc-single-node-entry.sh",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/dlc-supervisor.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/foundation_import.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/full_deadlines.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/heldout_stop_on_infra.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/infra_guard.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/legacy_stager.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/lineage.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/native_cc_stream.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/native_lineage_r2.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/output_ownership.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/pilot_assignment_guard.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/pristine_a_render.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/qwen-native-compat-r2.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/run_two_task_cell.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/runtime_limits.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/sam3_service_health.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/schedule.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/two_task_render.py",
+      "aspire/sim/docs/experiments/code-world-search-control-p3-20261013/support/two_task_scope.py",
+      "aspire/sim/docs/experiments/model-fix-loop-worker.md",
+      "aspire/sim/env_configs/libero/code_world/capture.example.json",
+      "aspire/sim/env_configs/libero/franka_libero_baseline_debug.yaml",
+      "aspire/sim/env_configs/libero/franka_libero_baseline_image_diff_debug.yaml",
+      "aspire/sim/env_configs/libero/franka_libero_libero10_traced.yaml",
+      "aspire/sim/env_configs/libero/franka_libero_traced.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio_aspire.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio_aspire_traced.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_radio_oracle.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash_aspire.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash_aspire_traced.yaml",
+      "aspire/sim/env_configs/r1pro/r1pro_pick_up_trash_oracle.yaml",
+      "aspire/sim/env_configs/robosuite/cube_lifting_multimodel_aspire_traced.yaml",
+      "aspire/sim/env_configs/robosuite/cube_restack_multimodel_aspire_traced.yaml",
+      "aspire/sim/env_configs/robosuite/cube_stack_multimodel_aspire_traced.yaml",
+      "aspire/sim/env_configs/robosuite/nut_assembly_multimodel_aspire_traced.yaml",
+      "aspire/sim/env_configs/robosuite/spill_wipe_multimodel_aspire_traced.yaml",
+      "aspire/sim/env_configs/robosuite/two_arm_handover_multimodel_aspire_traced.yaml",
+      "aspire/sim/env_configs/robosuite/two_arm_lift_multimodel_aspire_traced.yaml",
+      "aspire/sim/patches/b1k/README.md",
+      "aspire/sim/patches/contact_graspnet_pytorch-compat.patch",
+      "aspire/sim/pyproject.toml",
+      "aspire/sim/scripts/README.md",
+      "aspire/sim/scripts/behavior/replay_trial_b1k.py",
+      "aspire/sim/scripts/behavior/setup_behavior.sh",
+      "aspire/sim/scripts/behavior/verify_behavior.py",
+      "aspire/sim/scripts/common/analyze_trial.py",
+      "aspire/sim/scripts/common/apply_contact_graspnet_patch.sh",
+      "aspire/sim/scripts/common/chunk_tokens.py",
+      "aspire/sim/scripts/common/claude_with_local_model.sh",
+      "aspire/sim/scripts/common/native_cc_compat.py",
+      "aspire/sim/scripts/common/native_cc_dlc_entry.sh",
       "aspire/sim/scripts/common/native_cc_freeze.py",
+      "aspire/sim/scripts/common/native_cc_group.py",
+      "aspire/sim/scripts/common/native_cc_guard.py",
+      "aspire/sim/scripts/common/native_cc_permissions.py",
+      "aspire/sim/scripts/common/native_cc_runtime.py",
+      "aspire/sim/scripts/common/native_cc_skill_probe.py",
+      "aspire/sim/scripts/common/native_cc_stream.py",
+      "aspire/sim/scripts/common/native_cc_trial_process.py",
+      "aspire/sim/scripts/common/node_layout/reference/model-server.json",
+      "aspire/sim/scripts/common/node_layout/reference/sam3-public-dev51-agentview.jpg",
+      "aspire/sim/scripts/common/node_layout/reference/sam3-public-image-provenance.json",
+      "aspire/sim/scripts/common/node_layout/sam3_service_health.py",
+      "aspire/sim/scripts/common/node_layout/unit-entry.sh",
+      "aspire/sim/scripts/common/node_layout/unit_layout.py",
+      "aspire/sim/scripts/common/node_layout/unit_supervisor.py",
+      "aspire/sim/scripts/common/plot_subagent_token_trace.py",
+      "aspire/sim/scripts/common/plot_token_usage.py",
+      "aspire/sim/scripts/common/scan_progress.py",
+      "aspire/sim/scripts/common/serve_deepseek_v4_flash_0731.sh",
+      "aspire/sim/scripts/common/serve_deepseek_v4_flash_vision_exp.sh",
+      "aspire/sim/scripts/common/serve_qwen3_8_flash_next.sh",
+      "aspire/sim/scripts/common/skill_library_compilation/README.md",
+      "aspire/sim/scripts/common/skill_library_compilation/compile_skill_library.py",
+      "aspire/sim/scripts/common/skill_library_compilation/eval_dir_to_code.py",
+      "aspire/sim/scripts/common/skill_library_compilation/parse_outputs.py",
+      "aspire/sim/scripts/common/skill_library_compilation/summarize_analysis.py",
+      "aspire/sim/scripts/common/skill_library_compilation/trial_folder_rename.py",
+      "aspire/sim/scripts/common/smoke_deepseek_v4_flash_0731.py",
+      "aspire/sim/scripts/common/smoke_deepseek_v4_flash_vision_exp.py",
+      "aspire/sim/scripts/common/smoke_qwen3_8_flash_next.py",
+      "aspire/sim/scripts/common/start_perception_servers.sh",
+      "aspire/sim/scripts/common/submit_dlc_once.py",
+      "aspire/sim/scripts/libero/analyze_evosearch_traces.py",
+      "aspire/sim/scripts/libero/analyze_stage1_tokens.py",
+      "aspire/sim/scripts/libero/annotate_snapshot_tokens.py",
+      "aspire/sim/scripts/libero/audit_scene_bowl.py",
+      "aspire/sim/scripts/libero/audit_scene_world_smoke.py",
+      "aspire/sim/scripts/libero/code_world.py",
+      "aspire/sim/scripts/libero/deepseek_fix_loop_worker.py",
+      "aspire/sim/scripts/libero/eval_checkpoint_n5.sh",
+      "aspire/sim/scripts/libero/eval_checkpoint_n50.sh",
+      "aspire/sim/scripts/libero/eval_libero90_held_out.sh",
+      "aspire/sim/scripts/libero/eval_run_seeds.py",
+      "aspire/sim/scripts/libero/eval_setup_worktree.sh",
+      "aspire/sim/scripts/libero/eval_snapshot.sh",
+      "aspire/sim/scripts/libero/evosearch_eval.py",
+      "aspire/sim/scripts/libero/executable_world_profile.py",
+      "aspire/sim/scripts/libero/fix_loop_state.py",
+      "aspire/sim/scripts/libero/fix_loop_worker.py",
+      "aspire/sim/scripts/libero/gate_study_analysis.py",
+      "aspire/sim/scripts/libero/gen_progress.py",
+      "aspire/sim/scripts/libero/gen_progress_90.py",
+      "aspire/sim/scripts/libero/gen_progress_long.py",
+      "aspire/sim/scripts/libero/gen_progress_scaling.py",
+      "aspire/sim/scripts/libero/generate_ordering.py",
+      "aspire/sim/scripts/libero/generate_relational_world.py",
+      "aspire/sim/scripts/libero/make_libero_pro_master_table.py",
+      "aspire/sim/scripts/libero/make_snapshot_table.py",
+      "aspire/sim/scripts/libero/native_cc_campaign.py",
+      "aspire/sim/scripts/libero/native_cc_protocol.py",
+      "aspire/sim/scripts/libero/native_cc_recover_trial.py",
+      "aspire/sim/scripts/libero/native_cc_toolchain_probe.py",
+      "aspire/sim/scripts/libero/native_world_campaign.py",
+      "aspire/sim/scripts/libero/native_world_fixloop_state.py",
+      "aspire/sim/scripts/libero/native_world_heldout.py",
+      "aspire/sim/scripts/libero/native_world_protocol.py",
+      "aspire/sim/scripts/libero/paired_bowl_supervisor.py",
+      "aspire/sim/scripts/libero/plot_baseline_vs_fix.py",
+      "aspire/sim/scripts/libero/plot_baseline_vs_fix_v3_evosearch.py",
+      "aspire/sim/scripts/libero/plot_checkpoint_sr_pareto.py",
+      "aspire/sim/scripts/libero/plot_evosearch_progress.py",
+      "aspire/sim/scripts/libero/plot_libero90_all_task_sr.py",
+      "aspire/sim/scripts/libero/plot_libero90_seen_task_sr.py",
+      "aspire/sim/scripts/libero/plot_libero90_solved_fraction.py",
+      "aspire/sim/scripts/libero/plot_method_comparison_v5.py",
+      "aspire/sim/scripts/libero/plot_suite_summary.py",
+      "aspire/sim/scripts/libero/prediction_study_analysis.py",
+      "aspire/sim/scripts/libero/probe_scene_world_control.py",
+      "aspire/sim/scripts/libero/qwen_fix_loop_worker.py",
+      "aspire/sim/scripts/libero/record_skill_promotion.py",
+      "aspire/sim/scripts/libero/relational_scene_bowl_supervisor.py",
+      "aspire/sim/scripts/libero/render_scene_bowl.py",
+      "aspire/sim/scripts/libero/render_scene_world_diagnostic.py",
+      "aspire/sim/scripts/libero/render_scene_world_smoke.py",
+      "aspire/sim/scripts/libero/replay_trial.py",
+      "aspire/sim/scripts/libero/resume_eval_gpu.sh",
+      "aspire/sim/scripts/libero/run_fix_loop_validation.py",
+      "aspire/sim/scripts/libero/run_stage2_batch.sh",
+      "aspire/sim/scripts/libero/run_stage2_token_scaling.py",
+      "aspire/sim/scripts/libero/run_validation_comparison.py",
+      "aspire/sim/scripts/libero/runtime/native_world_protocol.py",
+      "aspire/sim/scripts/libero/runtime/replay_trial.py",
+      "aspire/sim/scripts/libero/runtime_world_fixture.py",
+      "aspire/sim/scripts/libero/scene_bowl_supervisor.py",
+      "aspire/sim/scripts/libero/scene_snapshot.py",
+      "aspire/sim/scripts/libero/scene_world_smoke.py",
+      "aspire/sim/scripts/libero/search_control_retro.py",
+      "aspire/sim/scripts/libero/simple_world_profile.py",
+      "aspire/sim/scripts/libero/world_fix_loop.py",
+      "aspire/sim/scripts/libero/world_fix_loop_model.py",
+      "aspire/sim/scripts/libero/world_fix_loop_state.py",
+      "aspire/sim/scripts/robosuite/gen_progress_robosuite.py",
+      "aspire/sim/scripts/robosuite/plot_tokens_vs_debug_sr.py",
+      "aspire/sim/scripts/robosuite/plot_tokens_vs_eval_sr.py",
+      "aspire/sim/scripts/robosuite/plot_tokens_vs_sr_v2.py",
+      "aspire/sim/scripts/robosuite/replay_trial_robosuite.py",
+      "aspire/sim/scripts/robosuite/run_baseline_robosuite.sh",
+      "aspire/sim/scripts/robosuite/run_debug_fix_code.sh",
+      "aspire/sim/scripts/robosuite/run_eval_fix_code.sh",
+      "aspire/sim/scripts/robosuite/run_eval_training_law.sh",
+      "aspire/sim/scripts/robosuite/run_iteration.sh",
+      "aspire/sim/tests/code_world_fake_api.py",
+      "aspire/sim/tests/fixtures/prediction_contract/off_audit_feedback.json",
+      "aspire/sim/tests/fixtures/prediction_contract/off_audit_report.json",
+      "aspire/sim/tests/fixtures/prediction_contract/off_prompt_sha256.json",
+      "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_events.jsonl",
+      "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_manifest.json",
+      "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_offline_result.json",
+      "aspire/sim/tests/fixtures/prediction_contract/off_rehearsal_public_tape.jsonl",
+      "aspire/sim/tests/fixtures/prediction_contract/off_session_events.jsonl",
+      "aspire/sim/tests/fixtures/prediction_contract/off_session_manifest.json",
+      "aspire/sim/tests/fixtures/prediction_contract/off_session_public_tape.jsonl",
+      "aspire/sim/tests/integrations/test_grasp_graspnet.py",
+      "aspire/sim/tests/integrations/test_libero_integration.py",
+      "aspire/sim/tests/integrations/test_molmo_integration.py",
+      "aspire/sim/tests/integrations/test_owlvit_integration.py",
+      "aspire/sim/tests/integrations/test_owlvit_visualization.py",
+      "aspire/sim/tests/integrations/test_pyroki_integration.py",
+      "aspire/sim/tests/integrations/test_ransac_visualization.py",
+      "aspire/sim/tests/integrations/test_sam2_integration.py",
+      "aspire/sim/tests/integrations/test_sam2_visualization.py",
+      "aspire/sim/tests/integrations/test_sam3_visualization.py",
+      "aspire/sim/tests/prediction_contract_fixture.py",
+      "aspire/sim/tests/runtime_world_fixture_data.py",
+      "aspire/sim/tests/test_abc_conditions.py",
+      "aspire/sim/tests/test_closed_loop_r2_image_launch.py",
+      "aspire/sim/tests/test_closed_loop_revision.py",
+      "aspire/sim/tests/test_code_world_cli.py",
+      "aspire/sim/tests/test_dep_compat.py",
+      "aspire/sim/tests/test_development_gate.py",
+      "aspire/sim/tests/test_environments.py",
+      "aspire/sim/tests/test_executable_world.py",
+      "aspire/sim/tests/test_foundation_r2_repairs.py",
+      "aspire/sim/tests/test_gate_study_queue.py",
+      "aspire/sim/tests/test_gate_study_support.py",
+      "aspire/sim/tests/test_gen_progress.py",
+      "aspire/sim/tests/test_libero.py",
+      "aspire/sim/tests/test_libero_fix_loop_pipeline.py",
+      "aspire/sim/tests/test_llm_client_deepseek_v4.py",
+      "aspire/sim/tests/test_llm_client_qwen3_8_flash_next.py",
+      "aspire/sim/tests/test_model_fix_loop_worker.py",
+      "aspire/sim/tests/test_native_cc_completion.py",
+      "aspire/sim/tests/test_native_cc_permissions.py",
+      "aspire/sim/tests/test_native_cc_protocol.py",
+      "aspire/sim/tests/test_native_cc_recover_trial.py",
+      "aspire/sim/tests/test_native_cc_runtime.py",
+      "aspire/sim/tests/test_native_cc_runtime_repair.py",
+      "aspire/sim/tests/test_native_cc_stream.py",
+      "aspire/sim/tests/test_native_world_broker.py",
+      "aspire/sim/tests/test_native_world_fixloop.py",
+      "aspire/sim/tests/test_node_layout.py",
+      "aspire/sim/tests/test_openrouter_server.py",
+      "aspire/sim/tests/test_ordinary_fix_loop.py",
+      "aspire/sim/tests/test_pipeline_driver_terminal.py",
+      "aspire/sim/tests/test_pipeline_repair_20261003.py",
+      "aspire/sim/tests/test_pipeline_repair_20261005.py",
+      "aspire/sim/tests/test_prediction_contract.py",
+      "aspire/sim/tests/test_prediction_study_support.py",
+      "aspire/sim/tests/test_qwen_full_repair.py",
+      "aspire/sim/tests/test_r3_closeout.py",
+      "aspire/sim/tests/test_record_skill_promotion.py",
+      "aspire/sim/tests/test_reference_relational_world.py",
+      "aspire/sim/tests/test_robosuite_setup.py",
+      "aspire/sim/tests/test_runtime_world.py",
+      "aspire/sim/tests/test_search_control.py",
+      "aspire/sim/tests/test_simple_world.py",
+      "aspire/sim/tests/test_submit_dlc_once.py",
+      "aspire/sim/tests/test_vllm_image_source.py",
+      "aspire/sim/tests/test_world_fix_loop.py",
+      "aspire/sim/tests/test_world_foundation.py",
+      "aspire/sim/tests/test_world_model_opt_in.py",
+      "aspire/sim/tests/test_world_model_runtime.py",
       "aspire/sim/tests/test_world_use_audit.py",
-      "aspire/sim/tests/test_world_use_revision_compat.py"
+      "aspire/sim/tests/test_world_use_revision_compat.py",
+      "aspire/sim/uv.lock",
+      "deploy/qwen/client.env.example",
+      "deploy/qwen/model-server.example.json"
     ]
   }
 }

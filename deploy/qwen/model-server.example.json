@@ -18,7 +18,7 @@
     "--moe-backend",
     "triton",
     "--gpu-memory-utilization",
-    "0.95",
+    "0.82",
     "--max-model-len",
     "1000000",
     "--max-num-seqs",
@@ -30,7 +30,6 @@
     "--tool-call-parser",
     "qwen3_xml",
     "--enable-auto-tool-choice",
-    "--enforce-eager",
     "--limit-mm-per-prompt",
     "{\"image\": 600, \"video\": 0}",
     "--default-chat-template-kwargs",
@@ -38,12 +37,13 @@
     "--override-generation-config",
     "{\"temperature\":1.0,\"top_p\":0.95,\"top_k\":20}",
     "--hf-overrides",
-    "{\"text_config\": {\"rope_parameters\": {\"mrope_interleaved\": true, \"mrope_section\": [11, 11, 10], \"rope_type\": \"yarn\", \"rope_theta\": 10000000, \"partial_rotary_factor\": 0.25, \"factor\": 4.0, \"original_max_position_embeddings\": 262144}}}"
+    "{\"text_config\": {\"rope_parameters\": {\"mrope_interleaved\": true, \"mrope_section\": [11, 11, 10], \"rope_type\": \"yarn\", \"rope_theta\": 10000000, \"partial_rotary_factor\": 0.25, \"factor\": 4.0, \"original_max_position_embeddings\": 262144}}}",
+    "--compilation-config",
+    "{\"mode\": 0, \"cudagraph_mode\": \"FULL_DECODE_ONLY\", \"cudagraph_capture_sizes\": [1, 2, 4]}"
   ],
   "env": {
     "CUDA_VISIBLE_DEVICES": "0,1,2,3",
     "LD_LIBRARY_PATH": "/opt/cuda-compat/lib",
-    "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True",
     "VLLM_ALLREDUCE_USE_FLASHINFER": "0",
     "CUDA_HOME": "/opt/cuda",
     "CUDA_PATH": "/opt/cuda",

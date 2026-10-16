@@ -1,0 +1,12 @@
+# Reviewed engineering design and source only; no runtime records.
+*
+!*/
+!/.gitignore
+!/node-layout-20261015/DESIGN.md
+!/node-layout-20261015/smoke/collect_smoke_results.py
+!/node-layout-20261015/smoke/dlc-sampled-entry.sh
+!/node-layout-20261015/smoke/gpu_sampler.py
+!/node-layout-20261015/smoke/prepare-smoke-20261016.py
+!/node-layout-20261015/smoke/prepare-smoke.py
+!/node-layout-20261015/smoke/run-smoke-20261016.sh
+!/node-layout-20261015/smoke/wait_for_gpus.py

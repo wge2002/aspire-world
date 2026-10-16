@@ -336,10 +336,12 @@ def worker_prompt(case: dict, repo: Path) -> str:
         "**Do NOT run held-out seeds 1–50. Do NOT run `run_fix_loop_validation.py` or "
         f"`replay_trial.py` directly.** Every simulator call goes through "
         f"`{PROTOCOL}`, which records it and refuses held-out seeds.")
+    # The cell's own unit services (node layout 2026-10-15); 8114-8116 is unit 0.
+    ports = " ".join(str(p) for p in case.get("service_ports", (8114, 8115, 8116)))
     text = text.replace(
         "for p in 8114 8115 8116; do echo \"port $p: "
         "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://127.0.0.1:$p/health)\"; done",
-        "for p in 8114 8115 8116; do echo \"port $p: "
+        f"for p in {ports}; do echo \"port $p: "
         "$(curl -s -o /dev/null -w '%{http_code}' --max-time 3 http://127.0.0.1:$p/health)\"; done"
         "\n  (already running for this campaign — check only, never restart)")
     return _rewrite_commands(text, case, task_dir)

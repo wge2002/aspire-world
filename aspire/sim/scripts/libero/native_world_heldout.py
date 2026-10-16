@@ -162,8 +162,8 @@ def main() -> int:
                 **({"closed_loop_revision": case["closed_loop_revision"]}
                    if case.get("closed_loop_revision") else {}),
                 # Same rule: a p1 sweep cannot resume over a contract-off one.
-                **({"prediction_contract": "p1"}
-                   if case.get("prediction_contract") == "p1" else {}),
+                **({"prediction_contract": case["prediction_contract"]}
+                   if case.get("prediction_contract") in ("p1", "p2-runtime", "p3-search") else {}),
                 "bundle": bundle, "bundle_sha256": bundle_identity(bundle),
                 "config_sha256": code_hash((repo / case["env_config"]).read_text()),
                 "max_steps": case["max_steps"], "trial_timeout": case["trial_timeout"]}

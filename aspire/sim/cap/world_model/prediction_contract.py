@@ -21,7 +21,13 @@ import numpy as np
 from .evidence_state import EvidenceState
 
 REVISION = "p1"
-CONTRACTS = (None, "off", REVISION)
+RUNTIME_REVISION = "p2-runtime"
+#: p2-runtime plus search control: the world also exposes progress() and the
+#: policy declares PRIMITIVE_CLASS (cap/world_model/search_control.py).
+SEARCH_REVISION = "p3-search"
+#: Contracts that run the p2 runtime ledger and state template.
+RUNTIME_FAMILY = (RUNTIME_REVISION, SEARCH_REVISION)
+CONTRACTS = (None, "off", REVISION, RUNTIME_REVISION, SEARCH_REVISION)
 RESERVED = frozenset({"prediction_checks", "prediction_summary"})
 DEFAULT_TOLERANCE = 1e-6
 STATUSES = ("match", "mismatch", "unknown", "unresolved", "unsupported", "malformed")
@@ -33,7 +39,7 @@ def contract(value):
     """The active contract, or None when off. Unknown values are refused."""
     if value not in CONTRACTS:
         raise ValueError(f"unknown prediction_contract {value!r}; expected one of {CONTRACTS}")
-    return REVISION if value == REVISION else None
+    return value if value in (REVISION, *RUNTIME_FAMILY) else None
 
 
 class Malformed(ValueError):

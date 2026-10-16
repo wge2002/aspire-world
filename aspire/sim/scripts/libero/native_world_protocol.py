@@ -66,6 +66,11 @@ TRIAL_PHASES = ("smoke", "initial", "repair")
 #: A sealed trial's public directory carries the sandbox exit code and nothing else.
 SEALED_TRIAL_RE_TEMPLATE = r"trial_{seed:02d}_sandboxrc_(\d+)_sealed"
 _world_use_module = None
+#: Prediction contracts that run the p2 runtime template. p3-search adds the
+#: search-control hooks below; every other contract never reaches them.
+RUNTIME_CONTRACTS = ("p2-runtime", "p3-search")
+SEARCH_CONTRACT = "p3-search"
+SEARCH_REPORT = "search_control_report.json"
 
 
 def gate_module():
@@ -103,10 +108,10 @@ def load_world_use():
 
 def world_use(case: dict):
     """The opt-in use-feedback reader, or None for every unflagged case."""
-    if not case.get("world_use_revision"):
+    if not case.get("world_use_revision") and case.get("prediction_contract") not in RUNTIME_CONTRACTS:
         return None
     module = load_world_use()
-    return module if module.enabled(case) else None
+    return module if module.enabled(case) or case.get("prediction_contract") in RUNTIME_CONTRACTS else None
 
 
 def in_process_world(case: dict) -> bool:
@@ -171,9 +176,9 @@ def identity(case: dict, repo: Path) -> dict:
            if case.get("closed_loop_revision") else {}),
         **({"development_gate": case["development_gate"]}
            if case.get("development_gate") else {}),
-        # "off" is the absent contract, so only p1 adds a key.
+        # "off" is the absent contract; active revisions add a pinned key.
         **({"prediction_contract": case["prediction_contract"]}
-           if case.get("prediction_contract") == "p1" else {}),
+           if case.get("prediction_contract") in ("p1", *RUNTIME_CONTRACTS) else {}),
         "world_interface": case["condition"] in WORLD_CONDITIONS,
         "strategy_md": case["condition"] in {"A", "B"},
         "config_sha256": code_hash((repo / case["env_config"]).read_text()),
@@ -259,6 +264,17 @@ def collect_bundle(case: dict, task_dir: Path, phase: str, code: Path | None,
             world_path = authored_path(task_dir, world, "--world-program")
             world_source = world_path.read_text()
             problems = module_errors(world_source)
+            if case.get("prediction_contract") in RUNTIME_CONTRACTS:
+                import ast
+                declarations = [n for n in ast.parse(world_source).body
+                                if isinstance(n, ast.Assign) and any(
+                                    isinstance(t, ast.Name) and t.id == "STATE_TEMPLATE_REVISION"
+                                    for t in n.targets)]
+                if not declarations or not isinstance(declarations[-1].value, ast.Constant) or declarations[-1].value.value != "p2-runtime":
+                    problems.append(f'{case["prediction_contract"]} world must declare STATE_TEMPLATE_REVISION = "p2-runtime"')
+            if case.get("prediction_contract") == SEARCH_CONTRACT:
+                from aspire.sim.cap.world_model.search_control import contract_errors
+                problems += contract_errors(source, world_source)
             if case.get("foundation_revision") == "r1":
                 # A version declaration is an interface check, not a syntactic
                 # judgment about whether a dynamic Python policy uses the world.
@@ -349,10 +365,10 @@ def write_world_config(case: dict, directory: Path, sources: dict) -> Path:
             # held-out replays run the same online semantics. Absent otherwise.
             config["closed_loop"] = True
             config["closed_loop_revision"] = case["closed_loop_revision"]
-        if case.get("prediction_contract") == "p1":
+        if case.get("prediction_contract") in ("p1", *RUNTIME_CONTRACTS):
             # Read back by run_executable_world, so development and held-out
             # replays score predictions identically. Absent when off.
-            config["prediction_contract"] = "p1"
+            config["prediction_contract"] = case["prediction_contract"]
         path.write_text(json.dumps(config, indent=2) + "\n")
         return path
     if is_judgment(case):
@@ -537,21 +553,102 @@ def result_root(case: dict, directory: Path, phase: str, seed: int) -> Path:
     return directory / "results"
 
 
+def search_control(case: dict, state: NativeWorldState) -> dict | None:
+    """p3-search: write the search-control report and return its solver summary.
+
+    None for every other contract, so nothing below is ever constructed for them.
+    """
+    if case.get("prediction_contract") != SEARCH_CONTRACT:
+        return None
+    from aspire.sim.cap.world_model.search_control import control_report
+    remaining = {"per_seed": {str(s): state.retries_remaining(s) for s in state.seeds}}
+    remaining["total"] = sum(remaining["per_seed"].values())
+    remaining["banked_from_deferred_initial"] = state.data.get("search_control", {}).get("banked_attempts", 0)
+    report = control_report(state.data, state.task_dir, remaining=remaining)
+    path = state.task_dir / SEARCH_REPORT
+    temporary = path.with_suffix(".tmp")
+    temporary.write_text(json.dumps(report, indent=2) + "\n")
+    temporary.replace(path)
+    return {**report["summary"], "report": str(path),
+            "informative_fraction": report["informative"]["fraction"]}
+
+
+def search_gate(case: dict, state: NativeWorldState, phase: str, seed: int,
+                sources: dict, replicate: str | None) -> dict | None:
+    """Before a charged p3-search repair: report, then refuse a saturated class.
+
+    A refusal is recorded as a rejected revision and spends no attempt. An
+    explicit `--replicate <reason>` admits it and the reason travels with the row.
+    """
+    if case.get("prediction_contract") != SEARCH_CONTRACT or phase != "repair":
+        return None
+    from aspire.sim.cap.world_model.search_control import primitive_class
+    summary = search_control(case, state)
+    declared = primitive_class(sources["policy"])
+    summary["candidate_class"] = declared
+    if declared in summary["saturated_classes"]:
+        if not (replicate or "").strip():
+            reason = (f"PRIMITIVE_CLASS {declared!r} is saturated (see {summary['report']}); declare a "
+                      "different contact strategy, or pass --replicate <reason> to re-run it deliberately. "
+                      "'Physically infeasible' is not an accepted root cause while untried classes remain")
+            state.reject(phase, seed, reason, sources)
+            raise ProtocolError(reason)
+        summary["replicate"] = replicate.strip()
+    return summary
+
+
+def search_early_stop(case: dict, state: NativeWorldState, record: dict) -> None:
+    """After a p3-search initial trial: defer the rest of the batch once it says nothing new."""
+    if case.get("prediction_contract") != SEARCH_CONTRACT or record["phase"] != "initial":
+        return
+    from aspire.sim.cap.world_model.search_control import charged_attempts, initial_early_stop
+    if state.deferred_seeds():
+        return
+    stop = initial_early_stop(charged_attempts(state.data, state.task_dir), 3,
+                              seeds=state.seeds, retry_limit=state.RETRY_LIMIT)
+    record["search_control"] = {"early_stop": stop}
+    if stop["triggered"]:
+        state.defer_initial(stop, state.initial_bundle())
+    state.save()
+
+
+def search_after_trial(case: dict, state: NativeWorldState, record: dict, directory: Path) -> None:
+    """After a p3-search graded trial: the report that governs the NEXT repair.
+
+    The trial result is what the solver reads from `trial` stdout, so the
+    refreshed summary (`search_control_next`) and this trial's own judged
+    gripper/object prediction levels reach its context before it writes the
+    next bundle, not one trial late. An unobserved trial (no progress() value
+    or no decided object-level prediction) carries a hint that it is not
+    saturation evidence.
+    """
+    if case.get("prediction_contract") != SEARCH_CONTRACT or record["phase"] not in TRIAL_PHASES:
+        return
+    from aspire.sim.cap.world_model.search_control import prediction_levels, read_events, trial_observation
+    record["search_prediction_levels"] = prediction_levels(read_events(directory))
+    record["search_control_next"] = {**search_control(case, state),
+                                     "this_trial": trial_observation(directory)}
+    if not record["search_control_next"]["this_trial"]["observed"]:
+        record["search_control_next"]["hint"] = record["search_control_next"]["this_trial"]["hint"]
+    state.save()
+
+
 def run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed: int,
               code: Path | None, world: Path | None, inventory: Path | None,
-              stdin_code: Path | None) -> dict:
+              stdin_code: Path | None, *, replicate: str | None = None) -> dict:
     with (state.task_dir / ".trial.lock").open("a") as lock:
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
             raise ProtocolError("another trial is running; await its result") from exc
         state.data = json.loads(state.path.read_text())  # No stale ledger under the lock.
-        return _run_trial(case, repo, state, phase, seed, code, world, inventory, stdin_code)
+        return _run_trial(case, repo, state, phase, seed, code, world, inventory, stdin_code,
+                          replicate=replicate)
 
 
 def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed: int,
                code: Path | None, world: Path | None, inventory: Path | None,
-               stdin_code: Path | None) -> dict:
+               stdin_code: Path | None, *, replicate: str | None = None) -> dict:
     verify_runtime(case, repo)
     if 1 <= seed <= 50:
         raise ProtocolError("seeds 1–50 are held out; the outer coordinator evaluates them")
@@ -581,6 +678,8 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
     # is non-mutating, so a ProtocolError/TerminalBlocker here spends no retry.
     digest = bundle_identity(bundle)
     state.validate_admission(phase, seed, digest)
+    # p3-search only, and before the (expensive) offline screening.
+    search = search_gate(case, state, phase, seed, sources, replicate)
     # Baseline initial exception: the exact previously-executed initial bundle
     # may run as a REAL retry-spending grading trial even if offline screening
     # reproduces an authored program_error, because the simulator already ran it
@@ -638,6 +737,9 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
                 state.reject(phase, seed, reason, sources)
                 raise ProtocolError(reason)
     record = state.begin_trial(phase, seed, bundle, sources)
+    if search is not None:
+        record["search_control"] = search
+        state.save()
     if _run_as_baseline_initial and screening is not None:
         # Mark the row explicitly so reviewers know the real trial ran despite
         # the authored error that the screening reproduced.
@@ -782,6 +884,8 @@ def _run_trial(case: dict, repo: Path, state: NativeWorldState, phase: str, seed
         record["sealed"] = {"outcome": "sealed", "ledger": str(module.sealed_ledger(case)),
                             "self_eval_verdict": sealed_row.get("self_eval_verdict")}
         state.save()
+    search_early_stop(case, state, record)
+    search_after_trial(case, state, record, directory)
     if case.get("closed_loop_revision") and phase in TRIAL_PHASES:
         # Online decisions the policy made, reported apart from the framework's
         # final shadow judgment. Never raises and never touches the retry count.
@@ -896,6 +1000,9 @@ def check(case: dict, repo: Path, state: NativeWorldState) -> dict:
         status["foundation_calibration"] = aggregate(state.data["trials"])
     if gate_status:
         status["development_gate"] = gate_status
+    search = search_control(case, state)
+    if search is not None:
+        status["search_control"] = search
     if case.get("closed_loop_revision"):
         from aspire.sim.cap.world_model.decision_revision import aggregate as closed_loop_aggregate
         status["closed_loop"] = closed_loop_aggregate(state.data["trials"])
@@ -1002,6 +1109,8 @@ def main() -> int:
     trial.add_argument("--code", type=Path)
     trial.add_argument("--world-program", type=Path)
     trial.add_argument("--inventory", type=Path)
+    trial.add_argument("--replicate", metavar="REASON",
+                       help="p3-search only: deliberately re-run a saturated PRIMITIVE_CLASS")
     alias = sub.add_parser("alias-smoke")
     alias.add_argument("--seed", type=int, required=True)
     select = sub.add_parser("select")
@@ -1015,8 +1124,11 @@ def main() -> int:
         case, repo, task_dir = load_case(Path(args.case))
         state = NativeWorldState(task_dir, identity(case, repo), resume=args.action != "init")
         if args.action == "trial":
+            if args.replicate and case.get("prediction_contract") != SEARCH_CONTRACT:
+                raise ProtocolError("--replicate exists only under the p3-search contract")
             result = run_trial(case, repo, state, args.phase, args.seed, args.code,
-                               args.world_program, args.inventory, args.code)
+                               args.world_program, args.inventory, args.code,
+                               replicate=args.replicate)
         elif args.action == "alias-smoke":
             result = state.alias_smoke_as_initial(args.seed)
         elif args.action == "select":
@@ -1032,6 +1144,9 @@ def main() -> int:
             result = check(case, repo, state)
         else:
             result = state.progress()
+            search = search_control(case, state)
+            if search is not None:
+                result["search_control"] = search
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return int((args.action == "check" and not result["ready"])
                    or (args.action == "trial" and result["status"] != "complete"))

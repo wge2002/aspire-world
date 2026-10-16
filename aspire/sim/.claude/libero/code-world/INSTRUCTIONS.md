@@ -54,14 +54,20 @@ Record:
 
 - Repository commit, local changes, isolated checkout, and frozen policy source.
 - Host, driver/runtime, currently free GPUs, explicit worker/device ownership,
-  and required ports. If using DLC, request only 4, 8, or a multiple of 8 total
-  GPUs (N workers x 8) and follow `rbs-debug:/mnt/home/gewang/DSW_DLC_WORKFLOW.md` for mapping.
+  and required ports. Model-serving runs use the unit layout of 2026-10-15
+  ([DESIGN](../../../docs/engineering/node-layout-20261015/DESIGN.md),
+  `scripts/common/node_layout/`): every 4 GPUs form one unit (Qwen TP4 with
+  the CUDA-graph config + SAM3 + GraspNet + PyRoKi on CPU + two cell slots,
+  perception and simulators on the unit's own cards); unit u serves the model
+  on 8121+10u and SAM3/GraspNet/PyRoKi on 8114/8115/8116+10u. If using DLC,
+  request 4 GPUs (one unit) or 8 (two units) per worker and follow
+  `rbs-debug:/mnt/home/gewang/DSW_DLC_WORKFLOW.md`.
 - Existing environments, allowed perception tools, available weights, and
   credential readiness without printing secrets. Generated code must not
   receive provider keys or physical-robot access.
 - The exact experimental open-weights model, endpoint, harness, generation and
   revision budgets. `Qwen/Qwen3.8-Flash-Next-FP8` is a proposal, not an implicit
-  selection; its historically used port 8121 is not proof of a live endpoint.
+  selection; a unit's port (8121 for unit 0) is not proof of a live endpoint.
 - The scope selected from the table below, calibration/diagnostic use, number
   of captures, observer cells, retries, model calls, and fresh output root.
 - Estimated runtime and a measured-throughput update after the first capture.

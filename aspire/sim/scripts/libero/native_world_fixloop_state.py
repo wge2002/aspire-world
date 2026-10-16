@@ -35,6 +35,11 @@ BUNDLE_KEYS = {"policy", "world", "inventory"}
 # `outcome()`'s graded set and `final_coverage()` all exclude the diagnostic
 # phase, so an inspection session can never stand in for a development trial.
 RESOLVED_STATUSES = frozenset({"complete", "world_program_error", "diagnostic_program_error"})
+# p3-search only: an initial seed deferred by signature early stop. Nothing ran
+# and no attempt was spent; the row is neither evidence nor infrastructure
+# trouble. Ledgers of every other contract never contain it.
+DEFERRED_STATUS = "deferred_initial"
+NOT_INFRASTRUCTURE = RESOLVED_STATUSES | {DEFERRED_STATUS}
 # Code-world profiles whose selected bundle is policy + world with no inventory,
 # and which select only bundles that actually executed in development. The legacy
 # adapter profile (identity carries no `profile` key) is unaffected.
@@ -241,6 +246,35 @@ class NativeWorldState:
         """
         return any(r["status"] in RESOLVED_STATUSES for r in self.records("initial", seed))
 
+    def deferred_seeds(self) -> list[int]:
+        """Initial seeds deferred by p3-search early stop; empty for every other ledger."""
+        return [r["seed"] for r in self.data["trials"] if r["status"] == DEFERRED_STATUS]
+
+    def defer_initial(self, stop: dict, digest: str) -> list[dict]:
+        """Record the deferred initial seeds of a triggered early stop. Spends nothing.
+
+        Each deferred seed keeps its own unspent attempts, now usable only by
+        repair; `banked_attempts` counts them. Idempotent per seed.
+        """
+        done = set(self.deferred_seeds())
+        rows = []
+        for seed in stop["deferred_seeds"]:
+            if seed in done:
+                continue
+            row = {"phase": "initial", "seed": seed, "attempt": 0, "status": DEFERRED_STATUS,
+                   "directory": None, "spends_retry": False, "executed": False,
+                   "bundle_sha256": digest, "banked_attempts": stop["banked"][seed],
+                   "reason": (f"signature early stop: {stop['k']} identical failing initial "
+                              f"signatures by attempt {stop['trigger_attempt']}"),
+                   "trigger_attempt": stop["trigger_attempt"], "signature": stop["signature"]}
+            self.data["trials"].append(row)
+            rows.append(row)
+        control = self.data.setdefault("search_control", {})
+        control.update(early_stop=stop, banked_attempts=sum(
+            r.get("banked_attempts", 0) for r in self.data["trials"] if r["status"] == DEFERRED_STATUS))
+        self.save()
+        return rows
+
     def has_graded_evidence(self, seed: int) -> bool:
         """Did any execution on this seed actually grade the candidate?
 
@@ -362,6 +396,9 @@ class NativeWorldState:
                 raise ProtocolError("capture the scene snapshot before grading the initial program")
             if self.has_initial_evidence(seed):
                 raise ProtocolError(f"initial seed {seed} already has a completed result")
+            if seed in self.deferred_seeds():
+                raise ProtocolError(f"initial seed {seed} was deferred by signature early stop; "
+                                    "its banked attempts are for repair")
             frozen = self.initial_bundle()
             if frozen is not None and frozen != digest:
                 raise ProtocolError("one initial program: the initial bundle is frozen for the whole batch")
@@ -371,7 +408,8 @@ class NativeWorldState:
             # budget: the old `retries_remaining(s) > 0` term let the batch be
             # "finished" by spending a seed's attempts on diagnostic sessions,
             # which grade nothing. Inspection is still never gated this way.
-            pending = [s for s in self.seeds if not self.has_initial_evidence(s)]
+            deferred = self.deferred_seeds()
+            pending = [s for s in self.seeds if not self.has_initial_evidence(s) and s not in deferred]
             runnable = [s for s in pending if self.retries_remaining(s) > 0]
             if runnable:
                 raise ProtocolError(f"run the initial program on seeds {runnable} before repairs")
@@ -513,7 +551,7 @@ class NativeWorldState:
             "world_program_errors": [r["directory"] for r in self.records(seed=seed)
                                      if r["status"] == "world_program_error"],
             "infrastructure_errors": [r["directory"] for r in self.records(seed=seed)
-                                      if r["status"] not in RESOLVED_STATUSES],
+                                      if r["status"] not in NOT_INFRASTRUCTURE],
             "diagnostic_program_errors": [r["directory"] for r in self.records(seed=seed)
                                           if r["status"] == "diagnostic_program_error"],
         }
@@ -556,6 +594,7 @@ class NativeWorldState:
     def progress(self) -> dict:
         seeds = [self.outcome(s) for s in self.seeds]
         candidates = self.candidates()
+        deferred = self.deferred_seeds()
         return {
             "retry_limit": self.RETRY_LIMIT,
             "retry_phases": list(RETRY_PHASES),
@@ -565,7 +604,12 @@ class NativeWorldState:
             "retries_used_per_seed": {str(s["seed"]): s["retries_used"] for s in seeds},
             "retries_remaining_per_seed": {str(s["seed"]): s["retries_remaining"] for s in seeds},
             "seeds_needing_initial": [s["seed"] for s in seeds
-                                      if not s["has_initial_evidence"] and s["retries_remaining"] > 0],
+                                      if not s["has_initial_evidence"] and s["retries_remaining"] > 0
+                                      and s["seed"] not in deferred],
+            # Present only after a p3-search early stop, so other ledgers are unchanged.
+            **({"seeds_deferred_initial": deferred,
+                "banked_attempts": self.data.get("search_control", {}).get("banked_attempts", 0)}
+               if deferred else {}),
             "seeds_exhausted_without_initial": [s["seed"] for s in seeds
                                                 if not s["has_initial_evidence"] and not s["retries_remaining"]],
             # The subset with no graded observation whatsoever: every attempt was
@@ -583,7 +627,7 @@ class NativeWorldState:
             "world_program_errors": [r["directory"] for r in self.data["trials"]
                                      if r["status"] == "world_program_error"],
             "infrastructure_errors": [r["directory"] for r in self.data["trials"]
-                                      if r["status"] not in RESOLVED_STATUSES],
+                                      if r["status"] not in NOT_INFRASTRUCTURE],
             "diagnostic_program_errors": [r["directory"] for r in self.data["trials"]
                                           if r["status"] == "diagnostic_program_error"],
             # Graded development executions: what any completeness claim rests on.

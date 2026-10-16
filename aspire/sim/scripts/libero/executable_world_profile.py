@@ -24,11 +24,13 @@ C_LINEAGES = ("repair", "fresh")
 OFFLINE_TIMEOUT_SECONDS = 600
 # An offline report the candidate itself produced. Anything else -- no report, a
 # watchdog kill, a nonzero exit with no report -- is the infrastructure's problem.
-AUTHORED_STATUSES = frozenset({"complete", "unsupported", "program_error"})
+AUTHORED_STATUSES = frozenset({"complete", "unsupported", "program_error", "unsupported_contract"})
 # What the screening actually established about the candidate, as opposed to how
 # the offline process terminated. `unknown` is never evidence of success.
 CONCLUSIONS = {"complete": "supported_pass", "unsupported": "unknown",
-               "program_error": "authored_error"}
+               "program_error": "authored_error",
+               # p3-search only: the candidate lacks progress() or PRIMITIVE_CLASS.
+               "unsupported_contract": "authored_error"}
 
 
 def enabled(case):
@@ -84,6 +86,8 @@ def lineage(case):
 
 def interface_doc(case):
     """This cell's staged interface document, or the original pinned path."""
+    if case.get("prediction_contract") in RUNTIME_CONTRACTS:
+        return RUNTIME_INTERFACE
     return case.get("world_interface_doc") or INTERFACE
 
 
@@ -119,16 +123,18 @@ def validate(case):
     if case.get("prediction_contract") not in PREDICTION_CONTRACTS:
         raise ValueError(f"unknown prediction_contract {case.get('prediction_contract')!r}")
     if prediction_contract(case) and not enabled(case):
-        raise ValueError("prediction_contract p1 requires the r1 executable world (condition C)")
+        raise ValueError(f"prediction_contract {case['prediction_contract']} requires the r1 executable world (condition C)")
 
 
 #: Absent and "off" are the same contract-off cell.
-PREDICTION_CONTRACTS = (None, "off", "p1")
+PREDICTION_CONTRACTS = (None, "off", "p1", "p2-runtime", "p3-search")
+#: Contracts that run the p2 runtime template; p3-search adds search control.
+RUNTIME_CONTRACTS = ("p2-runtime", "p3-search")
 
 
 def prediction_contract(case):
-    """True only for a cell that explicitly opted into prediction contract p1."""
-    return case.get("prediction_contract") == "p1"
+    """True only for a cell that explicitly opted into a supported contract."""
+    return case.get("prediction_contract") in ("p1", *RUNTIME_CONTRACTS)
 
 
 #: The authorized continuation from one pinned prior-C bundle. Byte-exact as it
@@ -286,6 +292,78 @@ pointless: nothing grades prediction accuracy, and the cell is judged only by
 held-out task success.
 """
 
+RUNTIME_INTERFACE = "cap/world_model/RUNTIME_INTERFACE.md"
+
+RUNTIME_CONTRACT = """
+### Runtime world p2: observed template and prediction-driven policy decisions
+
+Read `cap/world_model/RUNTIME_INTERFACE.md` in full. This
+opt-in section replaces the p1 fact-name contract. Declare
+`STATE_TEMPLATE_REVISION = "p2-runtime"` in your world module. `WorldState()`
+is one authoritative observed store. A public perception adapter in observe()
+or update() fills it; the policy reads facts through `world.query("state",
+entity=..., fact=..., frame=..., unit=...)`. Raw public arrays can be processed
+by the adapter; do not keep a second authoritative scene state in the policy.
+The framework provides no inventory, task geometry, predicate or dynamics.
+
+Register stable entity identities using `state.entity(id, label=..., evidence_ids=...,
+source={"api": ..., "method": ...}, uncertainty={"status": "estimated"})`.
+Write facts with `state.set_fact(entity, fact, value, frame=..., unit=...,
+evidence_ids=..., source=..., uncertainty=..., kind="fact"|"geometry"|"relation",
+related_entities=[...])`. Association, missing detections, predicates, dynamics
+and tolerances are your responsibility. Unknown measurements invalidate the
+observed slot. Coordinates require a documented frame and unit. Predictions
+never become observed values, grasp evidence, progress evidence or success.
+
+Before each public call your `predict(call)` either raises Unsupported for
+unmodelled semantics (including math helpers), or returns a nonempty list:
+
+    {"predictions": [{"entity": entity_id, "fact": fact_name,
+                      "frame": frame_name, "unit": unit_name,
+                      "kind": "geometry", "expected": modelled_value,
+                      "tolerance": authored_bound,
+                      "target": {"kind": "next_observation"},
+                      "valid_for_calls": authored_horizon}]}
+
+The horizon counts public API call IDs from the source call; choose it to cover
+your perception pipeline. `same_call` targets the actual get_observation return
+of the source call. `checkpoint` with a name targets the fresh observation at
+`world.checkpoint(name)`. By default ANY intervening motor command supersedes
+the old pending prediction even when that command's predict is Unsupported.
+Only an explicitly modelled multi-action checkpoint may declare
+`intervening_motion: "retain"`; it still expires at its declared horizon.
+Facts match entity, frame, unit, kind, relation identities and exact target
+observation; missing or inadmissible measurements produce unknown, never a
+manufactured mismatch. Finish derived perception/update before asking feedback.
+
+At a meaningful decision checkpoint, use the runtime world as an interface:
+read the relevant observed state and `world.query("prediction_feedback",
+entity=..., fact=..., source_call=...)` (filters optional). The result contains
+only the latest source window per entity/fact with match/mismatch/unknown,
+pending, superseded or expired. Write your OWN branch which consumes these
+answers to continue, reobserve or revise the next action. A mismatch can mean
+bad dynamics, association or action execution; diagnose it with public evidence.
+Unknown is not success. Neither a final print nor an unused query establishes
+use. Do not query mechanically before every motor call, chase query counts,
+or add a fixed recovery sequence to satisfy this interface.
+
+After selecting the branch, call `world.record_decision(branch, feedback=feedback,
+facts=[fact_answer], reason=...)` with the exact current query answers, then
+execute the public call your branch selected. This records dataflow and the next
+actual call; it does not execute, approve, substitute or route any action.
+Declarations and static dependencies are not causal proof. The runtime reports
+no_query/logging_only/inconclusive/action_evidence beside task outcomes. Read
+the per-trial `runtime_mechanism` feedback and repair missing state/prediction/
+decision dataflow, rather than printing a history summary at episode end.
+
+The older instruction that keeps done() observational concerns the GOAL SELF
+EVALUATOR. It does not prohibit p2 prediction residuals and grounded low-level
+state from driving ordinary policy decisions. This profile does not by itself
+enable goal-driven termination/recovery from done(). Keep the original initial
+generation, dev seeds 51–65 and three total attempts per seed, tested-bundle
+selection, frozen heldout 1–50, native tools, model and budgets unchanged.
+"""
+
 #: Replaces the foundation goal instruction in a sealed cell: there is no
 #: evaluator label, so there is no calibration feedback to read.
 SEALED_GOAL = {
@@ -338,6 +416,81 @@ generated programs may read `env.handle.task_language` and nothing else from
 `env`; `APIS`, `__self__`, `task_completed`, `compute_reward`, `check_success`
 and other `handle` attributes are refused at admission, and the diagnostic REPL
 offers no `step()` helper.
+"""
+
+#: Appended to the runtime section only in a p3-search cell; p2-runtime renders unchanged.
+SEARCH_CONTRACT = """
+### Search control p3: hypothesis-testing development
+
+This cell adds search control to the runtime world above. Every charged trial
+should test a hypothesis your ledger has not already refuted. A candidate
+missing any declaration below is refused before any attempt is spent (offline
+status `unsupported_contract`; nothing is charged):
+  - the world module defines `progress()`, returning a float in [0, 1]: its own
+    estimate of how far the TARGET object of the task has moved toward the goal,
+    from OBSERVED facts only (a sibling of done(); never from commands or
+    predictions). It is identity-aware: only the object the instruction names
+    counts. Moving a different object (for example the wrong drawer or a
+    neighbouring knob), or a jittering pose estimate of a target that did not
+    move, is NOT progress. It returns None when the target has not been
+    observed since the last manipulation. It is recorded at the end of every
+    trial;
+  - the policy declares, at module level, `PRIMITIVE_CLASS = "<contact strategy>"`,
+    a short stable name for HOW the gripper makes the object move (for example
+    "top_grasp_pull", "hook_behind_handle_drag", "side_push_sweep",
+    "pinch_rotate_lever"). The class is the contact strategy. Changing class
+    means changing the contact geometry or the grasp mode (where and how the
+    gripper touches the object, and in which direction it applies force).
+    Re-tuning offsets, heights, angles, speeds or step counts keeps the class;
+    renaming the class without changing the strategy also keeps it, and bundles
+    are audited for that (the report lists every bundle digest per class and the
+    policies that differ only in their PRIMITIVE_CLASS line);
+  - every trial commits at least one gripper-level AND at least one
+    object-level prediction, judged on the recorded rehearsal: gripper-level
+    entities are measured only from get_observation's robot state; object-level
+    entities are measured from perception. Do this for every manipulation
+    primitive (approach, contact, move): predict where the gripper will be AND
+    what the object will do. The gripper row says whether the arm arrived; the
+    object row says whether the object responded. Without both, "arm did not
+    arrive" (tune parameters) cannot be told apart from "arm arrived, object did
+    not respond" (change class).
+
+Re-observe the target. After every manipulation primitive, and once more
+before the trial ends, perceive the TARGET object again (move the gripper out
+of the way first if it occludes the target), so that its object-level
+predictions are judged (match/mismatch) and progress() reflects the state you
+observed. If the target has not been observed since the last manipulation,
+progress() returns None. Reason: a trial that re-checks only the gripper shows
+"the arm arrived" with no evidence about the object, which the saturation rule
+would otherwise read as "the arm arrived and the object did not move". A trial
+whose progress() is None, or that judged no object-level prediction, is
+recorded as unobserved: it still spends its attempt, but it is not evidence for
+saturation, and its `search_control_next` says so ("target not re-observed").
+
+Initial batch: a trial's signature is its prediction-status counts per
+entity/fact, rounded object-level residuals and its outcome. After 3 identical
+failing signatures the remaining initial seeds are deferred (`deferred_initial`,
+no attempt spent) and their attempts are banked for repair: repeating an
+experiment whose result is already known is not information.
+
+Repair: before every charged repair the protocol writes
+`search_control_report.json` in the task directory, and every trial result
+carries `search_control` (the report as it stood when that trial was admitted)
+and `search_control_next` (the report after it, which governs your next
+repair); `status` prints the same. Read it before writing the next bundle.
+Saturation: a class is saturated after >= 5 bundles and >= 8 observed graded
+attempts of that class leave its best observed progress() below 0.3, with no
+pass, while its judged gripper-level predictions match >= 80% (the arm went
+where it was told; the object did not respond). A repair whose PRIMITIVE_CLASS is saturated is refused
+without spending an attempt: change the contact strategy. To deliberately
+re-run a saturated class (for example to confirm a borderline result on a new
+seed), pass `--replicate "<reason>"` to `trial`; the reason is recorded with the
+attempt and counts against the same budget.
+
+"Physically infeasible" is not an accepted BLOCKED root cause in this cell
+while any contact strategy remains untried: benchmark tasks are feasible by
+construction. A BLOCKED note names the classes tried, their best progress, and
+the next untried class you would test.
 """
 
 
@@ -406,7 +559,11 @@ Everything else below retains the original native failure-by-failure Fix Loop,
         text = text.replace(CLOSED_LOOP_ANCHOR, contract.lstrip("\n") + "\n" + CLOSED_LOOP_ANCHOR)
     if prediction_contract(case):
         assert text.count(CLOSED_LOOP_ANCHOR) == 1
-        text = text.replace(CLOSED_LOOP_ANCHOR, PREDICTION_CONTRACT.lstrip("\n") + "\n" + CLOSED_LOOP_ANCHOR)
+        contract = (RUNTIME_CONTRACT if case.get("prediction_contract") in RUNTIME_CONTRACTS
+                    else PREDICTION_CONTRACT)
+        if case.get("prediction_contract") == "p3-search":
+            contract += SEARCH_CONTRACT
+        text = text.replace(CLOSED_LOOP_ANCHOR, contract.lstrip("\n") + "\n" + CLOSED_LOOP_ANCHOR)
     return text
 
 
@@ -438,7 +595,7 @@ def run_mode(case, repo, env, folder, sources, mode, tape, timeout):
     if closed_loop(case):
         command.append("--closed-loop")
     if prediction_contract(case):
-        command.extend(["--prediction-contract", "p1"])
+        command.extend(["--prediction-contract", case["prediction_contract"]])
     def blocked(reason, **extra):
         return {"mode": mode, "status": "infrastructure_error", "retryable": True,
                 "reason": reason, "conclusion": "unknown", "output": str(output), **extra}
@@ -487,7 +644,7 @@ def screening_status(reports):
     candidate would succeed. `conclusions` carries that, and an `unknown` from an
     unsupported prediction or replay divergence stays unknown.
     """
-    if any(r["status"] == "program_error" for r in reports):
+    if any(r["status"] in ("program_error", "unsupported_contract") for r in reports):
         return "rejected"
     if any(r["status"] == "infrastructure_error" for r in reports):
         return "blocked"
@@ -516,8 +673,8 @@ def checks(case, repo, state, sources, env, *, timeout=None):
         # closed-loop screening can never reuse an observational one.
         identity["closed_loop_revision"] = case["closed_loop_revision"]
     if prediction_contract(case):
-        # Same rule: a p1 screening never reuses a contract-off cache entry.
-        identity["prediction_contract"] = "p1"
+        # A prediction revision never reuses another revision's cache entry.
+        identity["prediction_contract"] = case["prediction_contract"]
     root = state.task_dir / "attempts/offline"
     root.mkdir(parents=True, exist_ok=True)
     key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
@@ -574,7 +731,7 @@ def main():
     p.add_argument("--tape", type=Path)
     p.add_argument("--task-language", default="")
     p.add_argument("--closed-loop", action="store_true")
-    p.add_argument("--prediction-contract", choices=("off", "p1"))
+    p.add_argument("--prediction-contract", choices=("off", "p1", "p2-runtime", "p3-search"))
     a = p.parse_args()
     repo = Path(__file__).resolve().parents[2]
     sys.path.insert(0, str(repo.parents[1]))

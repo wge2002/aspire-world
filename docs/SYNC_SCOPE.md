@@ -1,22 +1,27 @@
 # 核心源码与 Markdown 对齐
 
-对齐日期：2026-10-09。范围：963 个源码/协议输入文件，以及此目录下的共同导航文档。逐文件 SHA256 与发布路径见 [source-manifest.json](source-manifest.json)。
+更新日期：2026-10-16。本轮发布 Qwen unit 节点启动层、p3 search-control、p2 runtime world、配套核心文档和配置。源码范围为 1093 个文件；逐文件 SHA256 与 README 映射见 [source-manifest.json](source-manifest.json)。
 
 | 位置 | 路径 / 分支 |
 | --- | --- |
 | 远端开发源码 | `rbs-debug:/mnt/home/gewang/code/ASPIRE-world-revision-20260910-01a0894b` |
 | 本地开发源码 | `/Users/wge/git/ASPIRE` |
-| 本地 Git 发布副本 | `/Users/wge/git/ASPIRE-personal` |
+| 本地个人发布副本 | `/Users/wge/git/ASPIRE-personal` |
 | GitHub | [wge2002/aspire-world](https://github.com/wge2002/aspire-world)，`main` |
 
-`AGENTS.md`、`CC_USAGE.md`、`CLAUDE.md` 和选定的仿真代码/文档按内容对齐。源仓库根 `README.md` 在个人仓库发布为 `README.upstream.md`；个人根 `README.md` 是该 GitHub 仓库的导航入口。除这一显式映射外，源码保持相同相对路径。个人 `.gitignore` 和 Git 元数据不反向覆盖开发仓库。
+源仓库根 `README.md` 在个人仓库发布为 `README.upstream.md`；个人根 README 为导航入口。个人 `.gitignore` 和 Git 历史独立。当前源码包含远端已完成四槽位 smoke 的工程改动，保留本地较新的 CC 协作说明及历史协议记录；范围内额外源码不会通过整目录覆盖被删除。
 
-源码集合摘要（按 path → SHA256 的排序 JSON 计算）：`3539ceaad64af33fe4e018d43912a2aeb67b8a304121ded395c44b9cb9fb70da`。
+源码集合摘要（按 path → SHA256 的排序 JSON）：`11d9fc1f5382139f977e2aeb8b7387dc93fb2103c99d40bde8391f98b33e0b45`。
 
-本轮合并保留本地较新的部署说明、GPU 规则、协议和 Robosuite 环境修复；补入远端的 native runtime 冻结文件清单及不依赖旧结果的相关测试。补齐必要的小型回归 fixture，并将两个旧测试适配已有冻结清单和最后一次 graded attempt 保留规则；p1 golden 对比消除 framework caller 的机器路径差异，保留策略调用、函数和业务事件精确比对。未更改运行协议。双方独有的在范围内源码保留，不用整目录覆盖，不删除任何额外文件。覆盖前保存源码备份；写入前再次比较原哈希，防止覆盖审阅期间发生的新修改。
+## 本轮验证
 
-远端 `/mnt/home/gewang/code/ASPIRE` 是旧基础与环境目录，不属于本次开发源码写入目标。已冻结的 `ASPIRE-code-world-*` cells、实验输出、模型、权重、日志和原始结果不参与同步。当前源码和协议在同步时一致，不代表过去每个运行目录被改成最新版，也不代表实验完成。
+- 独立发布副本的 10 组 CPU 回归：298 passed、1 skipped、12 subtests passed。跳过项依赖仓库外的历史 p2 ledgers，不为运行它而收录实验结果。
+- 上述回归包含节点布局与 supervisor 强制停止的 40 项测试；另检查历史 smoke 准备/采样/收集脚本的语法。
+- 2026-10-16 的 DLC 作业 dlcrv0c97s12ol8y 完成 8 卡、两个 unit、4 个 cell 的真实 smoke。逐个核对 queue-result 与账本：每个 cell 恰好一次 charged seed-51，终态 native_smoke_complete，supervisor_smoke_stop 生效，after_stop 为空，所属进程树清理通过；两个 unit 均 stopped，node_complete。两 unit 的 native compatibility 与 SAM3 实际推理健康检查通过，运行使用非特权 API。
+- 验收验证启动、绑定、服务、停止边界与清理，不代表策略任务成功率：四次首次 bowl trial 的 reward 都为 0，其中一个 sandbox_rc 为 1。此次未运行完整开发/50-seed held-out 实验。
+- GraspNet 两 unit 均收到实际请求且没有 OOM，但缺少逐卡显存采样，util 0.82 的峰值余量仍未定量验证；DLC pod 已退出，未留存任务结束后的 compute-apps 快照。
+- Python AST、Shell 语法、导航链接、凭据模式和暂存文件范围均在发布前检查。工程广泛回归中的历史失败另有原始记录；本页不宣称整个仓库全量测试零失败。
 
-验证：在远端隔离临时源码副本执行 20 组 CPU 回归，419 tests、14 subtests 全部通过（41.63 秒；5 条第三方 deprecation warnings）。覆盖 prediction contract、world/foundation、development gate、native fix loop、队列、终态和冻结完整性。所有收录 Python 做 AST 解析、Shell 做语法检查；本轮没有启动新模型服务或机器人实验。
+覆盖前备份并检查旧哈希，避免覆盖并发修改。远端旧基础环境 `/mnt/home/gewang/code/ASPIRE`、所有冻结运行副本和现有实验输出保持原样。历史研究源码中的旧布局保留为原轮次记录；新运行入口见 [LATEST_EXPERIMENTS](LATEST_EXPERIMENTS.md)。
 
-来源清单保留上游基准 commit；新研究的可复现身份还需结合其固定 case/runtime manifests 和外部环境。发布仓库不收录这些原始运行产物。
+日志、原始结果、对话、权重、缓存和实验媒体不入 Git。仅按精确路径收录必要的合成回归 fixture 与 SAM3 健康检查输入图。真实 smoke 的原始证据保留在计算存储；本轮发布不会启动新的实验或 DLC 作业。

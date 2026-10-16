@@ -138,11 +138,15 @@ class ExecutableSession(WorldSession):
         # Opt-in only. With this False the session is byte-for-byte the r1
         # behaviour every previously staged study renders.
         self.closed_loop = bool(closed_loop)
-        # Prediction contract p1, also opt-in: None (absent or "off") constructs
+        # Prediction contracts are opt-in: None (absent or "off") constructs
         # no ledger, so no event, manifest key or query interception exists.
         self.prediction_contract = contract
-        self.predictions = (predictions.PredictionLedger(self.emit, lambda: self.last_observation)
-                            if contract else None)
+        if contract in predictions.RUNTIME_FAMILY:
+            from .runtime_predictions import RuntimePredictionLedger
+            self.predictions = RuntimePredictionLedger(self.emit, lambda: self.last_observation)
+        else:
+            self.predictions = (predictions.PredictionLedger(self.emit, lambda: self.last_observation)
+                                if contract else None)
         self.prediction_checks = self.predictions.checks if contract else []
         self.final_judgment_active = False
         self.observations = set()
@@ -167,14 +171,23 @@ class ExecutableSession(WorldSession):
             self.module.WorldState = lambda: EvidenceState(self.evidence_valid, self.binding)
         try:
             exec(compile(self.raw, str(self.source), "exec"), self.module.__dict__)
+            if self.prediction_contract in predictions.RUNTIME_FAMILY and getattr(
+                    self.module, "STATE_TEMPLATE_REVISION", None) != predictions.RUNTIME_REVISION:
+                raise TypeError(f'{self.prediction_contract} world must declare STATE_TEMPLATE_REVISION = "p2-runtime"')
             if not all(callable(getattr(self.module, n, None)) for n in REQUIRED):
                 raise TypeError("executable world requires " + ", ".join(REQUIRED))
+            if (self.prediction_contract == predictions.SEARCH_REVISION
+                    and not callable(getattr(self.module, "progress", None))):
+                raise TypeError("p3-search world must define progress() -> float in [0, 1] or None")
             self.original_done = self.module.done
             self.module.done = self.done
             self.module.evidence_id = lambda: self.last_observation
             self.module.self_eval_enabled = self.features["self_eval"]
             self.module.update = self.wrap_update(self.module.update)
             self.module.query = self.wrap_query(self.module.query)
+            if self.prediction_contract in predictions.RUNTIME_FAMILY:
+                self.module.checkpoint = self.predictions.checkpoint
+                self.module.record_decision = self.predictions.decision
             self.emit("world_loaded", source_sha256=self.sha256, arm=self.arm,
                       binding=self.binding, features=self.features, snapshot=self.snapshot())
             return self
@@ -211,8 +224,12 @@ class ExecutableSession(WorldSession):
 
     def wrap_query(self, fn):
         def query(name, **kwargs):
-            if self.predictions is not None and name in predictions.RESERVED:
-                # Reserved under p1 only; the author's query never sees these names.
+            reserved = predictions.RESERVED
+            if self.prediction_contract in predictions.RUNTIME_FAMILY:
+                from .runtime_predictions import RESERVED
+                reserved = RESERVED
+            if self.predictions is not None and name in reserved:
+                # Reserved only in the active opt-in contract.
                 value = finite_json(self.predictions.answer(name, copy.deepcopy(kwargs)))
             else:
                 value = finite_json(fn(name, **copy.deepcopy(kwargs)))
@@ -282,6 +299,8 @@ class ExecutableSession(WorldSession):
     def invoke(self, name, fn, args, kwargs):
         index = self.api_calls
         call = {"id": index, "function": name, "args": copy.deepcopy(args), "kwargs": copy.deepcopy(kwargs)}
+        if self.prediction_contract in predictions.RUNTIME_FAMILY:
+            self.predictions.begin_call(call, motion=name in MOTION)
         # Commands and predictions precede the response, and cannot be promoted
         # to measurement IDs. Prediction is never supplied the future response.
         declined = None
@@ -292,7 +311,8 @@ class ExecutableSession(WorldSession):
             declined = str(exc)
         self.emit("prediction", api_call=index, function=name, prediction=summarize(prediction))
         if self.predictions is not None:
-            # Committed before the call runs, so it can only be resolved by a later observation.
+            # Committed before execution. The active contract determines the
+            # observation window (p2 can include a same-call sensing response).
             self.predictions.record(index, prediction, declined)
         encoded_call = self.store.encode(call, save=True)
         result, error, unsupported = None, None, False
@@ -317,6 +337,8 @@ class ExecutableSession(WorldSession):
         if name in SENSING and error is None:
             self.last_observation = index
             self.observations.add(index)
+            if self.prediction_contract in predictions.RUNTIME_FAMILY:
+                self.predictions.begin_observation(index)
         event = {"id": index, "kind": "measurement" if name in SENSING else "command_receipt" if name in MOTION else "derived_public_result",
                  "binding": self.binding, "call": call,
                  "result": copy.deepcopy(result), "error": error,
@@ -368,8 +390,27 @@ class ExecutableSession(WorldSession):
                 self.fault("final_self_evaluation", exc)
         if self.predictions is not None:
             self.predictions.finalize()
+        if self.prediction_contract == predictions.SEARCH_REVISION:
+            self.record_progress()
         self.result = result
         self.emit("complete", result=result, snapshot=self.snapshot())
+
+    def record_progress(self):
+        """p3-search: the world's own end-of-episode goal progress, never a grade.
+
+        None is a legal return: the target was not observed since the last
+        manipulation. It is recorded as unobserved, not as 0 and not as a fault.
+        """
+        from .search_control import check_progress
+        try:
+            value = finite_json(self.module.progress())
+            self.progress = None if value is None else check_progress(value)
+            self.progress_status = "unobserved" if value is None else "observed"
+        except Exception as exc:
+            self.progress, self.progress_status = None, "error"
+            self.fault("progress", exc)
+        self.emit("search_progress", progress=self.progress, progress_status=self.progress_status)
+        return self.progress
 
     def close(self, status):
         for api, original in reversed(self.restores):
@@ -383,10 +424,17 @@ class ExecutableSession(WorldSession):
                     "updates": self.updates, "queries": self.queries,
                     "features": self.features, "self_evaluations": self.self_evaluations,
                     "closed_loop": self.closed_loop, "errors": self.errors, "result": self.result}
+        if self.prediction_contract == predictions.SEARCH_REVISION:
+            manifest["search_progress"] = getattr(self, "progress", None)
+            manifest["search_progress_status"] = getattr(self, "progress_status", None)
         if self.predictions is not None:
             # Idempotent; covers an interrupted episode that never reached complete().
             self.predictions.finalize()
             manifest["prediction_checks"] = self.predictions.manifest()
+            if self.prediction_contract in predictions.RUNTIME_FAMILY:
+                from .runtime_mechanism_audit import audit_events
+                self.stream.flush()
+                manifest["runtime_mechanism"] = audit_events(self.output / "events.jsonl")
         (self.output / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
         self.tape.close()
         self.stream.close()
@@ -458,6 +506,16 @@ def run_offline(policy, world, output, *, arm="full", mode="rehearsal", tape=Non
     report = {"mode": mode, "arm": arm, "policy_sha256": hashlib.sha256(policy.read_bytes()).hexdigest(),
               "world_sha256": hashlib.sha256(world.read_bytes()).hexdigest(),
               "tape": str(tape) if tape else None, "status": "running"}
+    if contract == predictions.SEARCH_REVISION:
+        # Refused as a contract verdict before anything executes, not as a
+        # runtime crash: the candidate is missing what p3-search requires.
+        from .search_control import contract_errors
+        problems = contract_errors(policy.read_text(), world.read_text())
+        if problems:
+            output.mkdir(parents=True, exist_ok=True)
+            report.update(status="unsupported_contract", stage="contract", api_calls=0,
+                          reason="; ".join(problems), prediction_contract=contract)
+            return write_offline_report(report, output, started)
     replay = ReplayBinding(tape) if mode == "replay" and tape else None
     prefix = ReplayBinding(tape) if mode == "rehearsal" and tape else None
     if prefix is not None:
@@ -519,6 +577,28 @@ def run_offline(policy, world, output, *, arm="full", mode="rehearsal", tape=Non
                 # not evidence about the real scene.
                 session.predictions.finalize()
                 report["prediction_checks"] = session.predictions.manifest()
+                if contract in predictions.RUNTIME_FAMILY:
+                    from .runtime_mechanism_audit import audit_events
+                    session.stream.flush()
+                    report["runtime_mechanism"] = audit_events(output / "events.jsonl", policy_path=policy)
+            if contract == predictions.SEARCH_REVISION:
+                report["search_progress"] = session.record_progress()
+                if mode == "rehearsal":
+                    # Per-trial p3 rule, judged on the recorded rehearsal tape:
+                    # >= 1 gripper-level and >= 1 object-level committed
+                    # prediction. Decided only for a rehearsal that ran to its
+                    # end; an unsupported/errored one has no verdict to give.
+                    from .search_control import level_contract_errors, prediction_levels
+                    session.stream.flush()
+                    events = [json.loads(line) for line in
+                              (output / "events.jsonl").read_text().splitlines() if line.strip()]
+                    levels = prediction_levels(events)
+                    decided = report["status"] == "complete"
+                    report["prediction_levels"] = {**levels, "decided": decided}
+                    problems = level_contract_errors(levels) if decided else []
+                    if problems:
+                        report.update(status="unsupported_contract", stage="prediction_levels",
+                                      reason="; ".join(problems), prediction_contract=contract)
     except WorldProgramError as exc:
         if loaded:
             raise

@@ -45,6 +45,14 @@ on the single solver turn. v1 sets `DEVELOPMENT = 14 * 3600` (TOTAL 74 520 s, DL
 max 1 242 min, estimate 12-20 h per cell) and keeps every other watchdog. Queue on
 8 x 8-GPU DLC jobs as before; each worker serves at most 3 of the 20 cells.
 
+Observed in v1 (2026-10-10): a second blocker class besides the watchdog. The solver
+wraps trials in `timeout 890`; a trial's wall clock (admission + offline screening +
+replay) can exceed that, the SIGTERM lands on a seed with no retries left, the ledger
+row becomes an unresolvable `infrastructure_error`, and the driver's infra monitor
+hard-stops the cell (bowl_p1_r1; same signature as the gate study's drawer_oracle_r2).
+To fix before v2: expose a safe per-trial bound to the solver, and do not hard-stop a
+cell on an infra row that `resolve_interrupted` can never clear.
+
 ## Metrics
 
 - Held-out success per arm and per task (environment-graded).

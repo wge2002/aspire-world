@@ -5,10 +5,10 @@
 ## 收录
 
 - 仿真框架、模型/感知接口、启动脚本、环境配置、依赖清单、agent 协议与测试。
-- 最新 prediction-contract、gate ablation、闭环和 pipeline 修复；保留已有 foundation 及必要历史支持源码。
+- 当前 4-cell unit 启动层、p3 search-control、p2 runtime world，以及 prediction-contract、gate ablation、闭环和 pipeline 修复；保留已有 foundation 及必要历史支持源码。
 - Qwen 部署配置、native CC 连接与图像接口；无密钥的路径示例。
 - 许可证、第三方固定 submodule 提交，以及必要的 Franka 静态网格。网格是仿真输入，不是模型权重。
-- 测试使用的小型合成 fixture；其中 4 个 prediction-contract JSONL 和 1 个 native event JSON 按精确路径收录，仅用于回归，不是机器人实验结果。
+- 测试使用的小型合成 fixture，以及启动层必需的一张 38 KiB SAM3 公开开发场景健康检查输入图及其来源说明；其中 4 个 prediction-contract JSONL 和 1 个 native event JSON 按精确路径收录，仅用于回归，不是机器人实验结果。
 
 ## 不收录
 
