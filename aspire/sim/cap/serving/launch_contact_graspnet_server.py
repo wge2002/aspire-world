@@ -8,6 +8,7 @@ import asyncio
 import base64
 import contextlib
 import functools
+import hashlib
 import io
 import logging
 import os
@@ -46,11 +47,65 @@ _DEVICE: str = "cuda"
 # Semaphore to serialize GPU access (prevents OOM from concurrent inference)
 _GPU_SEMAPHORE = asyncio.Semaphore(1)
 
+#: CC_TASK_14 M4(d): with this API revision (set in the service environment from the
+#: case's method switch) every request runs with randomness derived from its own
+#: content, so the same request returns the same grasps. Inference otherwise draws
+#: from process-global RNGs whose state depends on every earlier request: numpy's
+#: point-cloud subsampling (`contact_graspnet_pytorch/data.py` regularize_pc_point_count)
+#: and retry viewpoints (`graspnet_utils.sample_random_camera_viewpoint`), torch's
+#: farthest-point start (`pointnet2_utils.farthest_point_sample`) and the dropout
+#: layers (the vendor model is never put in eval mode; that is left unchanged).
+#: numpy: the vendor modules see a request-local RandomState through their own
+#: `np` name, never a global seed. torch: `fork_rng` restores the global state after.
+REQUEST_SEEDING_REVISION = "m4-r1"
+_REQUEST_SEEDING = os.environ.get("ASPIRE_API_REVISION") == REQUEST_SEEDING_REVISION
+_SEEDED_NUMPY_MODULES = ("contact_graspnet_pytorch.data", "aspire.sim.cap.utils.graspnet_utils")
+
+
+class _LocalRandomNumpy:
+    """numpy, except that `.random` is one request's own RandomState."""
+
+    def __init__(self, rng):
+        self.random = rng
+
+    def __getattr__(self, name):
+        return getattr(np, name)
+
+
+def _request_seed(req) -> int:
+    payload = req.model_dump_json() if hasattr(req, "model_dump_json") else req.json()
+    digest = hashlib.sha256((type(req).__name__ + "\n" + payload).encode()).digest()
+    return int.from_bytes(digest[:4], "little")
+
+
+@contextlib.contextmanager
+def _request_rng(seed: int):
+    proxy = _LocalRandomNumpy(np.random.RandomState(seed))
+    modules = [sys.modules[name] for name in _SEEDED_NUMPY_MODULES if name in sys.modules]
+    saved = [(module, module.np) for module in modules]
+    devices = [torch.cuda.current_device()] if torch.cuda.is_available() else []
+    with torch.random.fork_rng(devices=devices):
+        torch.manual_seed(seed)
+        for module in modules:
+            module.np = proxy
+        try:
+            yield
+        finally:
+            for module, original in saved:
+                module.np = original
+
+
+def _seeded(fn, req, *args, **kwargs):
+    with _request_rng(_request_seed(req)):
+        return fn(req, *args, **kwargs)
+
 
 async def _run_on_gpu(fn, *args, **kwargs):
     """Run a blocking GPU function without blocking the event loop."""
     async with _GPU_SEMAPHORE:
         loop = asyncio.get_event_loop()
+        if _REQUEST_SEEDING and args:
+            fn = functools.partial(_seeded, fn)
         return await loop.run_in_executor(None, functools.partial(fn, *args, **kwargs))
 
 
@@ -590,6 +645,8 @@ def main(
     )
     checkpoint_io.load("model.pt")
 
+    logger.info("GraspNet request seeding: %s", f"on ({REQUEST_SEEDING_REVISION}: seed from request "
+                "content, request-local RNGs)" if _REQUEST_SEEDING else "off (process-global RNGs)")
     logger.info(f"GraspNet Service initialized on {device}. Starting Uvicorn...")
     uvicorn.run(app, host=host, port=port)
 

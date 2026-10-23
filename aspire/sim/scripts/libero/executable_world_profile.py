@@ -124,6 +124,18 @@ def validate(case):
         raise ValueError(f"unknown prediction_contract {case.get('prediction_contract')!r}")
     if prediction_contract(case) and not enabled(case):
         raise ValueError(f"prediction_contract {case['prediction_contract']} requires the r1 executable world (condition C)")
+    if case.get("development_budget") is not None:
+        if case["development_budget"] != "aspire-v1":
+            raise ValueError(f"unknown development_budget {case['development_budget']!r}")
+        if case.get("prediction_contract") != "p3-search":
+            raise ValueError("the aspire-v1 development budget requires prediction_contract p3-search")
+    problems = parallel_errors(case)
+    if problems:
+        raise ValueError("; ".join(problems))
+    from method_switches import errors as method_errors
+    problems = method_errors(case)
+    if problems:
+        raise ValueError("; ".join(problems))
 
 
 #: Absent and "off" are the same contract-off cell.
@@ -467,11 +479,78 @@ whose progress() is None, or that judged no object-level prediction, is
 recorded as unobserved: it still spends its attempt, but it is not evidence for
 saturation, and its `search_control_next` says so ("target not re-observed").
 
+Say WHY progress() returned None. A bare None is ambiguous between "this trial
+did not look" and "the world cannot resolve the fact at all", and those need
+different repairs. Declare a module-level `progress_reason()` alongside
+`progress()` returning one of two strings:
+  - "unobserved"  — the target was simply not re-perceived since the last
+    manipulation. The channel is fine; look again.
+  - "unavailable" — the world CANNOT resolve the fact: the association is
+    lost, the target is no longer identified, or the entity it was bound to is
+    gone. The measurement channel itself is broken. Do not keep spending
+    attempts on a world in this state: repair the channel first.
+Without `progress_reason()` a None is recorded as "unobserved", which is what a
+world that predates this rule means. The report counts observed, unobserved and
+unavailable attempts separately, and a class whose attempts are all
+`unavailable` is named in `unavailable_classes` — that is a broken channel to
+repair, not "no evidence" to accumulate more of.
+RECOVERY: `unavailable` must be recoverable, not permanent silence. Re-observe
+the target with the ordinary perception API and re-bind the association to the
+entity id your world already uses (the same public association rule), then
+`progress()` returns a value again. A world that can never leave `unavailable`
+is a broken world, not a correct one: the identity that the task names must be
+re-established from fresh observation whenever it is lost.
+
 Initial batch: a trial's signature is its prediction-status counts per
 entity/fact, rounded object-level residuals and its outcome. After 3 identical
 failing signatures the remaining initial seeds are deferred (`deferred_initial`,
 no attempt spent) and their attempts are banked for repair: repeating an
-experiment whose result is already known is not information.
+experiment whose result is already known is not information. (The deferred
+seeds are covered later by the sweep, which is counted apart from these retries.)
+
+Coverage before freezing (p4). A candidate is only EVIDENCE once it has run on
+the WHOLE development set 51–65. Runs that passed under a DIFFERENT bundle do
+not count for the bytes you freeze: the protocol computes coverage from the
+selected bundle's own executed trials, and refuses `select` while any
+development seed is missing. Missing seeds are swept with the candidate's exact
+bytes (same policy/world digests) using `trial --phase sweep --seed N` with the
+same --code/--world-program files. A sweep run is COUNTED SEPARATELY: it spends
+none of the seed's three repair retries, so spending every repair retry never
+makes the gate impossible. Its own limits: only an already tested candidate can
+be swept (new bytes are tested by a charged repair) and each candidate runs each
+seed at most once. There is no limit on how many candidates you sweep; only the
+development deadline bounds it. Sweep only the candidate you intend to freeze —
+a partial sweep of anything else spends wall clock for nothing — and never
+select a candidate whose coverage is incomplete: the gate refuses it. If no
+candidate can ever satisfy the gate, or `check` still has errors that no
+admissible action can change, `check` reports `decision_type: terminal` with a
+structured `terminal_reasons` entry and the cell stops as BLOCKED — the gate is
+never lowered and never silently skipped.
+When NO bundle succeeded, the fewer-crashes tie-break compares only candidates
+that can still be frozen. Once your selection covers all of 51–65, a candidate
+that ran fewer seeds and so shows fewer crashes is not a better record, only a
+partial one; that finding is reported under `advisories` and does not block
+`ready`. If a FULLY covered candidate has fewer crashes, select it.
+Held-out stays sealed throughout; the sweep only spends seeds 51–65. `check`,
+`select` and the finalized result all carry `coverage_gate` with
+`required_seeds`, `covered_seeds`, `missing`, `sweep_runs_needed`, `sweepable`
+and `unsweepable`, all read from the ledger at that moment; `check` also lists
+`legal_actions` and `advisories`.
+Selection reasons are audited: any "N of M" pass count you write is recomputed
+from the ledger, and a claim the ledger cannot evidence is recorded as a warning
+and replaced by the ledger's own figures in the report.
+
+Triage the sweep by mode, then repair once (p4). After the sweep, its FAILURES
+are grouped by the same trial signature (identical signature digest = one mode)
+and written to `coverage_triage.json` in the task directory: `mode -> seeds ->
+the deciding signature fields (object-level residuals / world facts / outcome)
+-> what the failures in that group did`. Read it before writing the next
+bundle. Repair the MODE, not one seed: a mode is one defect, and a group of six
+seeds with the same signature is six chances to fix one thing, not six
+independent draws. Seeds that failed the same way are ONE problem; a mode of
+size one is still a mode. One repair round is allowed, and the repaired bundle
+must itself sweep the whole development set before it can be frozen; a second
+triage after it is recorded the same way.
 
 Repair: before every charged repair the protocol writes
 `search_control_report.json` in the task directory, and every trial result
@@ -494,12 +573,321 @@ the next untried class you would test.
 """
 
 
+#: CC_TASK_6 (p5): the ASPIRE v1.0 development budget, appended after the search
+#: contract only when the case sets `development_budget: "aspire-v1"`. Every
+#: other render is unchanged, and so is `SEARCH_CONTRACT`'s own text and digest.
+BUDGET_REVISION = "aspire-v1"
+BUDGET_CONTRACT = """
+### Development budget aspire-v1 (the ASPIRE v1.0 budget)
+
+This cell's development budget replaces the per-seed retry count. The ledger
+enforces it; `status` and `check` report it under `development_budget`
+(`phase`, `versions_used`, `versions_left`, `mode_versions`, `blocked_modes`,
+`freeze_conditions`, `next`).
+
+Phase A — until development seed 51 actually passes. Write the initial program
+and run it on seed 51 (`--phase smoke` first if you like, then `--phase
+initial --seed 51`); then iterate on seed 51 with `--phase repair --seed 51`
+and `--phase diagnostic --seed 51`. Attempts on seed 51 are NOT capped: keep
+going while your diagnostics make progress. Every other seed, every sweep,
+`select` and the freeze are refused until seed 51 passes. Phase A never ends
+early: before the first pass the cell stays pending, and only the development
+wall-clock deadline stops it.
+
+Phase B — after seed 51 has passed. The bundle that first passed it is v0. Run
+v0 on the other 14 development seeds with `--phase sweep` (no cost). Then
+triage its failures into failure modes (`coverage_triage.json` groups them by
+signature) and write at most 8 VERSIONS in total. A version is new policy/world
+bytes; every version runs on ALL 15 development seeds: its first run is
+
+  trial --phase repair --seed <N> --mode <mode> --mode-seeds <seeds> ...
+
+where <mode> is a short stable name of the failure mode it targets and <seeds>
+are that mode's failing seeds (comma separated, each must have failed under a
+fully swept version, <N> is one of them); the remaining seeds are `--phase
+sweep` runs of the same bytes, which spend nothing. The next version is refused
+until the current one has run every seed. Per-seed retries no longer apply.
+At most 3 versions may target the same mode. A mode still unfixed after 3
+versions is BLOCKED: write `attempts/mode_<mode>_BLOCKED.md` with `## Root
+Cause:`, `## Details:` and `## What Was Tried:`, and spend no more versions on
+it — move to the next mode. A renamed mode is the same mode.
+
+Probes do not count. `--phase probe --seed <N> --code <file>` runs an
+observation-only REPL session on any development seed: perception and
+computation only (get_observation, segmentation, point clouds, grasp planning,
+solve_ik, geometry helpers), no motor command, no step(), `env` limited to
+env.handle.task_language. It is not a version, grades nothing and spends
+nothing. A probe that names a motor command is refused before it runs; one
+that moves the robot anyway is recorded as a protocol violation.
+
+Freeze only when one of these holds for the version you select: it passes all
+15 development seeds; all 8 versions are used; or every development seed it
+still fails belongs to a blocked mode. Select, among the versions that ran all
+15 seeds, the one with the most passes, then fewer crashes (program_ok=false),
+then the simpler one. Remaining failures are reported honestly; 100% success
+is not required.
+"""
+#: The p3 search-contract sentences the budget supersedes, each replaced in the
+#: budget render only (anchor -> replacement; every anchor must occur once).
+BUDGET_SEARCH_EDITS = (
+    ("""After 3 identical
+failing signatures the remaining initial seeds are deferred (`deferred_initial`,
+no attempt spent) and their attempts are banked for repair: repeating an
+experiment whose result is already known is not information. (The deferred
+seeds are covered later by the sweep, which is counted apart from these retries.)
+""", """Under the development
+budget below the initial program runs only on seed 51 (phase A), so the
+initial early stop never applies; the other seeds are covered by sweeping the
+bundle that first passes seed 51.
+"""),
+    ("""A sweep run is COUNTED SEPARATELY: it spends
+none of the seed's three repair retries, so spending every repair retry never
+makes the gate impossible.""", """A sweep run is COUNTED SEPARATELY: it spends
+no version and no attempt, so the gate is always payable."""),
+    ("""(new bytes are tested by a charged repair)""", """(new bytes are a version: `--phase repair --mode`)"""),
+    ("""When NO bundle succeeded, the fewer-crashes tie-break compares only candidates
+that can still be frozen. Once your selection covers all of 51–65, a candidate
+that ran fewer seeds and so shows fewer crashes is not a better record, only a
+partial one; that finding is reported under `advisories` and does not block
+`ready`. If a FULLY covered candidate has fewer crashes, select it.
+""", """Selection follows the development budget below: among the versions that ran
+all of 51–65, the most passes, then fewer crashes, then the simpler one.
+"""),
+    ("""Sweep only the candidate you intend to freeze —
+a partial sweep of anything else spends wall clock for nothing — and never
+select a candidate whose coverage is incomplete: the gate refuses it.""", """Under the development budget below every version
+is swept in full before the next one is admitted, and you never select a
+candidate whose coverage is incomplete: the gate refuses it."""),
+    ("""Triage the sweep by mode, then repair once (p4).""", """Triage the sweep by mode, then repair the mode (p4)."""),
+    ("""One repair round is allowed, and the repaired bundle
+must itself sweep the whole development set before it can be frozen; a second
+triage after it is recorded the same way.""", """Each repair is a VERSION that declares the mode
+it targets (development budget below); every version must itself sweep the
+whole development set, and its triage is recorded the same way."""),
+)
+#: The p2 runtime-contract sentence the budget supersedes.
+BUDGET_RUNTIME_EDIT = ("""Keep the original initial
+generation, dev seeds 51–65 and three total attempts per seed, tested-bundle
+selection, frozen heldout 1–50, native tools, model and budgets unchanged.""", """Keep the original initial
+generation, dev seeds 51–65 under the aspire-v1 development budget below,
+tested-bundle selection, frozen heldout 1–50, native tools and model unchanged.""")
+
+
+def budgeted(case):
+    return case.get("development_budget") == BUDGET_REVISION
+
+
+def edited(text, edits):
+    for old, new in edits:
+        if text.count(old) != 1:
+            raise ValueError(f"budget edit anchor changed: {old[:60]!r}")
+        text = text.replace(old, new)
+    return text
+
+
+def budget_search_contract():
+    """SEARCH_CONTRACT as an aspire-v1 cell reads it, with the budget appended."""
+    return edited(SEARCH_CONTRACT, BUDGET_SEARCH_EDITS) + BUDGET_CONTRACT
+
+
+#: CC_TASK_7 (p6): replays one cell may run at once and the CPU threads each may
+#: use. `heldout_parallel` is the outer held-out sweep's (the solver never sees
+#: it); `sweep_parallel` offers the batch sweep and appends `BATCH_SWEEP_CONTRACT`
+#: to the search contract. Absent keys: serial, every render and run unchanged.
+MAX_PARALLEL = 8
+DEFAULT_TRIAL_THREADS = 2
+MAX_TRIAL_THREADS = 32
+PARALLEL_KEYS = ("heldout_parallel", "sweep_parallel")
+
+
+def parallel_errors(case):
+    problems = []
+    for key in PARALLEL_KEYS:
+        value = case.get(key, 1)
+        if type(value) is not int or not 1 <= value <= MAX_PARALLEL:
+            problems.append(f"{key} must be an integer 1..{MAX_PARALLEL}, not {value!r}")
+    threads = case.get("trial_threads", DEFAULT_TRIAL_THREADS)
+    if type(threads) is not int or not 1 <= threads <= MAX_TRIAL_THREADS:
+        problems.append(f"trial_threads must be an integer 1..{MAX_TRIAL_THREADS}, not {threads!r}")
+    if "sweep_parallel" in case and case.get("prediction_contract") != "p3-search":
+        problems.append("sweep_parallel batches the coverage sweep, which exists only under p3-search")
+    return problems
+
+
+BATCH_SWEEP_CONTRACT = """
+### Batch sweep
+
+Sweep a candidate's missing development seeds with ONE command instead of one
+`--phase sweep --seed N` call per seed:
+
+  trial --phase sweep --seeds all --code <policy> --world-program <world>
+
+(`--seeds 53,57` names seeds instead of `all`). It runs exactly the sweep trials
+the single-seed calls would run — same admission, same rows, same limits,
+nothing spent — up to {parallel} seeds at once, and prints every seed's record
+plus the candidate's coverage. It starts no further seed after an
+infrastructure error. Wait for it like any trial (it may take
+{slots} trial lengths); never wrap it in `timeout`.
+"""
+
+
+#: CC_TASK_14 (p6d) method switches (`scripts/libero/method_switches.py`). Each piece is
+#: rendered only when its switch is set; a case without `method_switches` renders the
+#: p6b text byte for byte. Task-independent: no task, object or answer is named.
+SUBGOAL_SKILL = "cap/world_model/skills/subgoal-verification.md"
+API_M4_SKILL = "cap/world_model/skills/api-revision-m4.md"
+#: The foundation goal sentence the verification contract replaces (anchor -> replacement).
+SUBGOAL_GOAL_EDIT = ("Keep self-evaluation observational in this study: do not add a new recovery or "
+                     "termination controller based on done().",
+                     "Verify every subgoal: after each subgoal the policy confirms it from fresh "
+                     "observations before going on, retries with a different approach when it is "
+                     "not confirmed, and stops issuing actions as soon as the whole instruction is "
+                     "confirmed (subgoal verification contract below).")
+SUBGOAL_CONTRACT = """
+### Subgoal verification contract
+
+Read `{skill}` before writing the initial program. Every program in this cell:
+  - splits the instruction into its subgoals (for example: object grasped and
+    lifted, object moved to a place, object released in or on a place, a part
+    opened or closed, a device switched on or off) and, after the action for
+    each subgoal, CONFIRMS it from fresh observations before starting the next
+    one. A motion or gripper command that returned without an error is not a
+    confirmation;
+  - when a subgoal is not confirmed, retries it with a DIFFERENT approach
+    (re-perceive, a different contact point, grasp, push direction or
+    approach), within a bounded number of retries, instead of continuing with
+    the rest of the task on an unconfirmed state;
+  - stops issuing actions as soon as every subgoal of the instruction is
+    confirmed: return from the program. Extra motion can undo the result, and
+    the episode has a fixed step budget after which every further action fails.
+Use generic observable evidence: before/after image comparison of the region
+you acted on, a change of colour, brightness or appearance there, displacement
+or height change of the object from segmentation plus depth, depth change at a
+place, gripper opening after closing (fully closed = nothing between the
+fingers), and the wrist camera view. Say in your findings which observation
+confirms each subgoal and what the program does when it does not hold.
+"""
+CALIBRATION_CONTRACT = """
+### World goal-judgment calibration
+
+After every development trial, the `trial` result carries
+`judgment_calibration`: this trial's world goal verdict against the simulator
+outcome, and for the world program it ran, the development seeds where the
+world judged the task done while the simulator says it failed (`false_accept`)
+or the reverse (`false_reject`). `status` and `check` print the same table for
+every world program. A false accept means your goal definition accepts a
+state that is not the goal: look at that trial's keyframes and the clauses of
+its final self-evaluation, and tighten the definition from what the
+observations showed. Only development seeds are ever reported.
+"""
+SCREENING_RECORD_ONLY = """
+### Screening and predictions are recorded, not gates
+
+In this cell the offline screening refuses a candidate only for an authored
+Python error (or a missing `progress()` / `PRIMITIVE_CLASS` declaration).
+Predictions, the prediction-level counts of the rehearsal, prediction matches
+or mismatches and a saturated PRIMITIVE_CLASS are recorded with the trial
+(`screening`, `search_control.would_refuse`) for your diagnosis; none of them
+refuses, blocks or charges a trial.
+"""
+SCREENING_RECORD_ONLY_EDITS = (
+    ("""  - every trial commits at least one gripper-level AND at least one
+    object-level prediction, judged on the recorded rehearsal:""",
+     """  - (recorded, not refused in this cell) every trial should commit at least
+    one gripper-level AND at least one object-level prediction, judged on the
+    recorded rehearsal:"""),
+    ("""A repair whose PRIMITIVE_CLASS is saturated is refused
+without spending an attempt: change the contact strategy.""",
+     """In this cell a saturated PRIMITIVE_CLASS is reported
+(`search_control.would_refuse`), not refused: treat it as strong evidence to
+change the contact strategy."""),
+)
+SWEEP_ONLY_EDITS = (
+    ("""where <mode> is a short stable name of the failure mode it targets and <seeds>
+are that mode's failing seeds (comma separated, each must have failed under a
+fully swept version, <N> is one of them); the remaining seeds are `--phase
+sweep` runs of the same bytes, which spend nothing.""",
+     """where <mode> is a short stable name of the failure mode it targets and <seeds>
+are that mode's failing seeds (comma separated, each must have failed under a
+fully swept version, <N> is one of them); then ALL 15 development seeds, <N>
+included, are `--phase sweep` runs of the same bytes, which spend nothing. A
+version's coverage and score come from its sweep runs only: the repair run that
+made <N> pass is your evidence, not part of the score (v0 likewise is swept on
+seed 51 too)."""),
+)
+RESWEEP_CONTRACT = """
+### Selection at the freeze
+
+When development ends (you reach a freeze condition, or the deadline), the
+outer coordinator runs every complete candidate within {margin} passes of the
+best one (at most {count}) once more on all 15 development seeds and freezes the
+one with the most passes over both runs, then fewer crashes. This costs you no
+version and needs no action from you; select by the rule above as usual.
+"""
+API_M4_CONTRACT = """
+### Policy API revision m4-r1
+
+Read `{skill}`. `solve_ik` prints a `[solve_ik]` line whenever it clipped your
+target to the workspace or used another orientation; `goto_pose(...,
+max_step=0.05)` performs a segmented move; `plan_grasp` and
+`subsample_point_cloud` return the same result for the same input.
+"""
+
+SUCCESS_RULE_CONTRACT = """
+### Success rule libero_latch
+
+A trial (development and held-out alike) counts as a success if the task was
+achieved at ANY simulator step within the step budget, the standard LIBERO
+rule, even if a later motion undid it. When the budget is used up every
+further action raises `executing action in terminated episode`; that ends the
+trial and is not a program error: it is scored by whether success was reached.
+"""
+
+
+def method_edits(case):
+    """Anchored replacements of the search/budget contract text the switches change."""
+    from method_switches import enabled
+    edits = ()
+    if enabled(case, "screening_gate") == "record_only":
+        edits += SCREENING_RECORD_ONLY_EDITS
+    if enabled(case, "version_score") == "sweep_only":
+        edits += SWEEP_ONLY_EDITS
+    return edits
+
+
+def method_contract(case):
+    """The sections the switches add, after the batch-sweep contract."""
+    from method_switches import enabled
+    text = ""
+    if enabled(case, "subgoal_verification"):
+        text += SUBGOAL_CONTRACT.format(skill=SUBGOAL_SKILL)
+    if enabled(case, "judgment_calibration"):
+        text += CALIBRATION_CONTRACT
+    if enabled(case, "screening_gate") == "record_only":
+        text += SCREENING_RECORD_ONLY
+    resweep = enabled(case, "prefreeze_resweep")
+    if resweep:
+        text += RESWEEP_CONTRACT.format(margin=resweep["margin"], count=resweep["max_candidates"])
+    if enabled(case, "api_revision") == "m4-r1":
+        text += API_M4_CONTRACT.format(skill=API_M4_SKILL)
+    if enabled(case, "success_rule") == "libero_latch":
+        text += SUCCESS_RULE_CONTRACT
+    return text
+
+
+def batch_sweep_contract(case):
+    parallel = case["sweep_parallel"]
+    return BATCH_SWEEP_CONTRACT.format(parallel=parallel,
+                                       slots=-(-(len(case["dev_seeds"]) - 1) // parallel))
+
 def section(case):
     validate(case)
     arm = case["c_arm"]
     goal_instruction = ('Define explicit goal clauses with current public evidence, using the foundation state contract. Read the per-trial development calibration feedback and correct false positives/negatives or unknown causes. Keep self-evaluation observational in this study: do not add a new recovery or termination controller based on done().' if case.get("foundation_revision") else 'Use world.done() to make a concrete stopping/checking/recovery decision. Define a task goal from model state and admissible fresh observations. Unknown is not success; obtain evidence or handle uncertainty. The evaluator records a separate final judgment.')
     if closed_loop(case):
         goal_instruction = CLOSED_LOOP_GOAL
+    if (case.get("method_switches") or {}).get("subgoal_verification") and case.get("foundation_revision"):
+        goal_instruction = edited(goal_instruction, (SUBGOAL_GOAL_EDIT,))
     if sealed(case):
         goal_instruction = SEALED_GOAL[development_gate(case)]
     text = f"""
@@ -562,7 +950,14 @@ Everything else below retains the original native failure-by-failure Fix Loop,
         contract = (RUNTIME_CONTRACT if case.get("prediction_contract") in RUNTIME_CONTRACTS
                     else PREDICTION_CONTRACT)
         if case.get("prediction_contract") == "p3-search":
-            contract += SEARCH_CONTRACT
+            if budgeted(case):
+                contract = edited(contract, (BUDGET_RUNTIME_EDIT,)) + budget_search_contract()
+            else:
+                contract += SEARCH_CONTRACT
+            if "sweep_parallel" in case:
+                contract += batch_sweep_contract(case)
+            if case.get("method_switches"):
+                contract = edited(contract, method_edits(case)) + method_contract(case)
         text = text.replace(CLOSED_LOOP_ANCHOR, contract.lstrip("\n") + "\n" + CLOSED_LOOP_ANCHOR)
     return text
 
@@ -642,9 +1037,12 @@ def screening_status(reports):
 
     `checked` says the supported part of the screening ran; it does NOT say the
     candidate would succeed. `conclusions` carries that, and an `unknown` from an
-    unsupported prediction or replay divergence stays unknown.
+    unsupported prediction or replay divergence stays unknown. A report marked
+    `recorded_only` (CC_TASK_14 screening_gate record_only: the rehearsal's
+    prediction-level rule) is kept for the record and rejects nothing.
     """
-    if any(r["status"] in ("program_error", "unsupported_contract") for r in reports):
+    if any(r["status"] in ("program_error", "unsupported_contract") and not r.get("recorded_only")
+           for r in reports):
         return "rejected"
     if any(r["status"] == "infrastructure_error" for r in reports):
         return "blocked"
@@ -675,6 +1073,9 @@ def checks(case, repo, state, sources, env, *, timeout=None):
     if prediction_contract(case):
         # A prediction revision never reuses another revision's cache entry.
         identity["prediction_contract"] = case["prediction_contract"]
+    record_only = (case.get("method_switches") or {}).get("screening_gate") == "record_only"
+    if record_only:
+        identity["screening_gate"] = "record_only"  # Never reuses a gated cache entry.
     root = state.task_dir / "attempts/offline"
     root.mkdir(parents=True, exist_ok=True)
     key = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
@@ -693,6 +1094,10 @@ def checks(case, repo, state, sources, env, *, timeout=None):
     folder.mkdir()
     reports = [run_mode(case, repo, env, folder, sources, mode, tape, timeout)
                for mode in (("rehearsal", "replay") if tape else ("rehearsal",))]
+    if record_only:
+        for report in reports:
+            if report.get("status") == "unsupported_contract" and report.get("stage") == "prediction_levels":
+                report["recorded_only"] = True  # CC_TASK_14 M3(c): a finding, not a refusal.
     status = screening_status(reports)
     result = {"identity": identity, "reports": reports, "status": status,
               "conclusions": [r["conclusion"] for r in reports],

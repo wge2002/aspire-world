@@ -20,6 +20,7 @@ import signal
 import sys
 import threading
 from collections.abc import Iterable
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -273,6 +274,52 @@ def _run_trial_batch(
 # Timeout wrapper
 # ---------------------------------------------------------------------------
 
+@contextmanager
+def _trial_timeout_checkpoints(env, timed_out):
+    """Recheck swallowed callback interrupts at task/simulator boundaries.
+
+    Isaac callbacks and the code executor can catch KeyboardInterrupt. Keep
+    the deadline latched until control reaches the runner, then restore every
+    method before saving artifacts (which may itself read observations).
+    """
+    installed = []
+
+    def check():
+        if timed_out.is_set():
+            raise KeyboardInterrupt
+
+    def wrap(original):
+        @functools.wraps(original)
+        def checked(*args, **kwargs):
+            check()
+            result = original(*args, **kwargs)
+            check()
+            return result
+        return checked
+
+    try:
+        targets = [(env, ("step",))]
+        low_level = getattr(env, "low_level_env", None)
+        if low_level is not None and low_level is not env:
+            targets.append((low_level, ("step", "get_observation")))
+        for target, names in targets:
+            for name in names:
+                original = getattr(target, name, None)
+                if not callable(original):
+                    continue
+                had_instance_value = name in vars(target)
+                instance_value = vars(target).get(name)
+                setattr(target, name, wrap(original))
+                installed.append((target, name, had_instance_value, instance_value))
+        yield check
+    finally:
+        for target, name, had_instance_value, instance_value in reversed(installed):
+            if had_instance_value:
+                setattr(target, name, instance_value)
+            else:
+                delattr(target, name)
+
+
 def _run_single_trial_with_timeout(
     env: CodeExecutionEnvBase,
     trial: int,
@@ -285,8 +332,9 @@ def _run_single_trial_with_timeout(
     """Run a single trial with a soft wall-clock timeout.
 
     When the deadline elapses, a watchdog thread raises KeyboardInterrupt in
-    the worker's main thread via _thread.interrupt_main(). The trial catches
-    it, saves a failure-marked artifact folder via _build_timeout_summary,
+    the worker's main thread via _thread.interrupt_main(). Scoped task and
+    simulator checkpoints also recheck the latched deadline if a callback
+    swallows that interrupt. The runner saves a failure-marked artifact folder,
     and returns a TrialSummary with success=False so the worker loop can
     proceed to the next trial. The worker process is never killed.
 
@@ -306,13 +354,32 @@ def _run_single_trial_with_timeout(
             timed_out.set()
             _thread.interrupt_main()
 
+    # OmniGibson installs a SIGINT handler that shuts down the simulator.
+    # Route only the watchdog's timeout through our failure-artifact path;
+    # preserve the existing handler for ordinary user/process interrupts.
+    previous_sigint = signal.getsignal(signal.SIGINT)
+
+    def _handle_sigint(signum, frame):
+        if timed_out.is_set():
+            raise KeyboardInterrupt
+        if callable(previous_sigint):
+            previous_sigint(signum, frame)
+        elif previous_sigint == signal.SIG_DFL:
+            signal.signal(signal.SIGINT, signal.SIG_DFL)
+            os.kill(os.getpid(), signum)
+        # SIG_IGN deliberately does nothing for a non-timeout interrupt.
+
     watchdog = threading.Thread(target=_watchdog, daemon=True)
-    watchdog.start()
     partial_artifacts: dict[str, Any] = {}
+    signal.signal(signal.SIGINT, _handle_sigint)
     try:
-        return _run_single_trial(
-            env, trial, args, config, multi_turn_prompt, partial_artifacts=partial_artifacts
-        )
+        with _trial_timeout_checkpoints(env, timed_out) as check_timeout:
+            watchdog.start()
+            result = _run_single_trial(
+                env, trial, args, config, multi_turn_prompt, partial_artifacts=partial_artifacts
+            )
+            check_timeout()
+            return result
     except KeyboardInterrupt:
         if not timed_out.is_set():
             raise
@@ -342,6 +409,7 @@ def _run_single_trial_with_timeout(
             )
     finally:
         cancel.set()
+        signal.signal(signal.SIGINT, previous_sigint)
 
 
 def _build_timeout_summary(

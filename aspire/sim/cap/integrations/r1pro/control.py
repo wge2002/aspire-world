@@ -8,6 +8,7 @@ import pathlib
 import time
 from typing import Any, Tuple
 import math
+import json
 import torch
 
 import numpy as np
@@ -39,6 +40,7 @@ import matplotlib.pyplot as plt
 import viser
 import numpy.typing as npt
 from aspire.sim.cap.integrations.r1pro.utils import *
+from aspire.sim.cap.integrations.r1pro.grasp_checks import mask_view_quality, eef_pose_error
 
 
 from aspire.sim.cap.integrations.motion import pyroki_snippets as pks
@@ -671,6 +673,10 @@ class R1ProControlApi(ApiBase):
         
 
         obj_mask = mask & binary_map_nan_is_zero
+        view_quality = mask_view_quality(mask)
+        print("[grasp view]", json.dumps(view_quality), flush=True)
+        if not view_quality["complete"]:
+            raise ValueError("Grasp target is empty or clipped at the image border; reacquire a complete view")
         camera_intrinsics = self.get_camera_intrinsics()
         T_world_cam = self.get_camera_pose()
         
@@ -727,7 +733,9 @@ class R1ProControlApi(ApiBase):
         pregrasp_pose = (pregrasp_pos.numpy(), grasp_quat.numpy())
         grasp_pose = (grasp_pos.numpy(), grasp_quat.numpy())
         
-        pregrasp_pose_topdown = (pregrasp_pos.numpy(), np.array([1.0, 0.0, 0.0, 0.0]))
+        # A fixed top-down orientation needs an approach from above, independent
+        # of the original GraspNet candidate's approach direction.
+        pregrasp_pose_topdown = (grasp_pos.numpy() + np.array([0.0, 0.0, 0.1]), np.array([1.0, 0.0, 0.0, 0.0]))
         grasp_pose_topdown = (grasp_pos.numpy(), np.array([1.0, 0.0, 0.0, 0.0]))
         
         pregrasp_pose_90 = (pregrasp_pos.numpy(), grasp_quat_90.numpy())
@@ -830,7 +838,30 @@ class R1ProControlApi(ApiBase):
         """
         return self._env.check_object_in_hand(arm=arm)
         
-    def grasp_object(self, pregrasp_pose: np.ndarray, grasp_pose: np.ndarray, object_name: str, arm=0) -> None:
+    def _move_grasp_stage(self, target_pose, stage, arm):
+        """Use the existing native EEF planner and verify the measured robot pose."""
+        started = time.monotonic()
+        target_pose = tuple(np.asarray(x, dtype=float) for x in target_pose)
+        if not np.isfinite(eef_pose_error(target_pose, target_pose)).all():
+            raise ValueError("Invalid grasp target pose")
+        print("[grasp stage start]", json.dumps({"stage": stage, "arm": arm,
+            "target_position": target_pose[0].tolist(),
+            "target_quat_xyzw": target_pose[1].tolist()}), flush=True)
+        reached = self.move_hand(target_pose, arm=arm)
+        actual_pose = self.get_current_eef_pose(arm=arm)
+        position_error, orientation_error = eef_pose_error(target_pose, actual_pose)
+        valid = bool(reached and position_error <= 0.03 and orientation_error <= np.deg2rad(10))
+        print("[grasp stage]", json.dumps({
+            "stage": stage, "arm": arm, "planner_reached": bool(reached),
+            "target_position": target_pose[0].tolist(), "target_quat_xyzw": target_pose[1].tolist(),
+            "actual_position": np.asarray(actual_pose[0]).tolist(),
+            "actual_quat_xyzw": np.asarray(actual_pose[1]).tolist(),
+            "position_error_m": position_error, "orientation_error_rad": orientation_error,
+            "accepted": valid, "seconds": time.monotonic() - started,
+        }), flush=True)
+        return valid
+
+    def grasp_object(self, pregrasp_pose: np.ndarray, grasp_pose: np.ndarray, object_name: str, arm=0) -> bool:
         """
         Grasp an object in the environment.
         Args:
@@ -839,7 +870,8 @@ class R1ProControlApi(ApiBase):
             object_name: Name of the object to grasp.
             arm: Arm to grasp the object for. 0: left arm, 1: right arm.
         Returns:
-            None.
+            success: Whether an object is held after lifting. The task evaluator
+                independently checks the target identity and required lift.
         """
         if pregrasp_pose is None or grasp_pose is None:
             print("Pregrasp or grasp pose not found, grasp failed")
@@ -847,28 +879,20 @@ class R1ProControlApi(ApiBase):
         
         self.open_gripper(arm=arm)
         
-        joints = self.solve_ik(grasp_pose[0]+np.array([0.0, 0.0, -0.02]), grasp_pose[1][[3,0,1,2]], arm=arm, offset_translation=np.array([0.0, 0.0, -0.02]))
-        success = self.move_to_joint_positions(joints, max_steps=200, settle_steps=5)
-        self._env._settle_robot()
-        current_eef_pose = self.get_current_eef_pose(arm=arm)[0]
-        if np.linalg.norm(current_eef_pose - grasp_pose[0]) > 0.03:
-            diff = current_eef_pose - grasp_pose[0]
-            diff[-1] = 0.08
-            new_grasp_pose = grasp_pose[0] - diff
-            joints = self.solve_ik(new_grasp_pose, grasp_pose[1][[3,0,1,2]], arm=arm, offset_translation=np.array([0.0, 0.0,0.0]))
-            success = self.move_to_joint_positions(joints, max_steps=200, settle_steps=5)
-            self._env._settle_robot()
-      
-                
+        # These poses use the simulator's EEF frame. The existing move_hand
+        # primitive plans for that link directly, without empirical gripper-link
+        # offsets or a second motion after a failed first motion.
+        if not self._move_grasp_stage(pregrasp_pose, "pregrasp", arm):
+            return False
+        if not self._move_grasp_stage(grasp_pose, "grasp", arm):
+            return False
         print("closing gripper")
         self.close_gripper(arm=arm)
-       
         print("lifting arm")
-        self._env._settle_robot()
         self.lift_arm(arm=arm)
-        print("resetting torso")
-        self.reset_torso()
-        # self.write_video(f"grasp_{arm}_0_0_0_02")
+        held = bool(self.check_object_in_hand(arm=arm))
+        print("[grasp result]", json.dumps({"arm": arm, "object_in_hand": held}), flush=True)
+        return held
 
     def execute_motion_plan(self, target_joint_positions, num_steps=20) -> None:
         """
@@ -1244,14 +1268,18 @@ class R1ProControlApi(ApiBase):
         return None
     
     
-    def detect_object_sam3(self, object_name: str) -> None:
+    def detect_object_sam3(self, object_name: str, require_full_view: bool = False) -> bool:
         """
         Detect an object in the environment.
         Args:
             object_name: Name of the object to detect.
+            require_full_view: Require a non-clipped mask centered within the
+                middle 80 percent of the image before grasp planning.
         Returns:
             success: Whether the object was detected.
         """
+        # Keep only this observation's accepted mask for search direction.
+        self._last_target_view_quality = None
         obs = self._env.get_observation()
         rgb, depth = obs_get_rgb_depth(obs)
         rgb = rgb.cpu().numpy()[...,:3]    
@@ -1268,50 +1296,53 @@ class R1ProControlApi(ApiBase):
             return False
         scores = [result["score"] for result in results]
         if np.max(scores) > self.sam3_score_threshold:
-            # find the object
+            quality = mask_view_quality(results[np.argmax(scores)]["mask"])
+            self._last_target_view_quality = quality
+            if require_full_view:
+                print("[target view]", json.dumps(quality), flush=True)
+                return quality["complete"] and quality["centered"]
             return True
         return False
     
-    def find_object_torso_rotate(self, object_name: str) -> None:
+    def find_object_torso_rotate(self, object_name: str, require_full_view: bool = False) -> bool:
         """
         If failed to find the object with base rotation, rotate the torso to move cameras up and down until the object is found in the current field of view. Rotate the torso to move cameras up and down until the object is found in the current field of view.
         Args:
             object_name: Name of the object to find.
+            require_full_view: Continue searching past clipped or edge-centered detections.
         Returns:
             success: Whether the object was found.
         """
-        # torso 2 positive is going front
-        # torso 1 positive is going front
-        # to move back and look down, we need to move torso 1 back and torso 2 forward
-        # torso_joint_limit = self._env.torso_joint_limits
+        # Inspect the current view before issuing any motion. In R1Pro, the
+        # positive-joint1 / negative-joint2 sweep looks down; prioritize it
+        # when the actual SAM mask is below the image center. Preserve both
+        # existing sweeps as fallback when the target is not yet visible.
+        if self.detect_object_sam3(object_name, require_full_view=require_full_view):
+            return True
+        quality = self._last_target_view_quality or {}
+        center = quality.get("center_fraction")
+        first_direction = 1 if center is not None and center[1] > 0.5 else -1
+        print("[torso search]", json.dumps({"initial_view": quality,
+              "first_joint1_direction": first_direction}), flush=True)
         torso_joint_1 = self._env.controller.robot.joints["torso_joint1"]
         torso_joint_2 = self._env.controller.robot.joints["torso_joint2"]
         start_torso_joint_1= torso_joint_1.get_state()[0][0]
         start_torso_joint_2= torso_joint_2.get_state()[0][0]
     
         delta = 0.25
-        sample_torso_joint_positions_1 = np.linspace(start_torso_joint_1, start_torso_joint_1 - delta*6, 6)
-        sample_torso_joint_positions_2 = np.linspace(start_torso_joint_2, start_torso_joint_2 + delta*10, 6)
-
-        for sample_torso_joint_position_1, sample_torso_joint_position_2 in zip(sample_torso_joint_positions_1, sample_torso_joint_positions_2):
-            self._env.update_torso("torso_joint1", torch.tensor(sample_torso_joint_position_1))
-            self._env.update_torso("torso_joint2", torch.tensor(sample_torso_joint_position_2))
-            # self.save_current_observation(f"torso_joint_1_{sample_torso_joint_position_1}_torso_joint_2_{sample_torso_joint_position_2}")
-            if self.detect_object_sam3(object_name):
-                return True
-            
-        sample_torso_joint_positions_1 = np.linspace(start_torso_joint_1, start_torso_joint_1 + delta*6, 6)
-        sample_torso_joint_positions_2 = np.linspace(start_torso_joint_2, start_torso_joint_2 - delta*10, 6)
-        self._env.update_torso("torso_joint1", torch.tensor(start_torso_joint_1), 200)
-        self._env.update_torso("torso_joint2", torch.tensor(start_torso_joint_2), 200)
-
-        for sample_torso_joint_position_1, sample_torso_joint_position_2 in zip(sample_torso_joint_positions_1, sample_torso_joint_positions_2):
-            self._env.update_torso("torso_joint1", torch.tensor(sample_torso_joint_position_1))
-            self._env.update_torso("torso_joint2", torch.tensor(sample_torso_joint_position_2))
-            # self.save_current_observation(f"torso_joint_1_{sample_torso_joint_position_1}_torso_joint_2_{sample_torso_joint_position_2}")
-            
-            if self.detect_object_sam3(object_name):
-                return True
+        for sweep, direction in enumerate((first_direction, -first_direction)):
+            if sweep:
+                self._env.update_torso("torso_joint1", torch.tensor(start_torso_joint_1), 200)
+                self._env.update_torso("torso_joint2", torch.tensor(start_torso_joint_2), 200)
+            # The starting pose was already observed; avoid moving back to it
+            # and taking an identical observation as the first sample.
+            samples_1 = np.linspace(start_torso_joint_1, start_torso_joint_1 + direction*delta*6, 6)[1:]
+            samples_2 = np.linspace(start_torso_joint_2, start_torso_joint_2 - direction*delta*10, 6)[1:]
+            for position_1, position_2 in zip(samples_1, samples_2):
+                self._env.update_torso("torso_joint1", torch.tensor(position_1))
+                self._env.update_torso("torso_joint2", torch.tensor(position_2))
+                if self.detect_object_sam3(object_name, require_full_view=require_full_view):
+                    return True
             
         return False    
     

@@ -268,6 +268,39 @@ def _find_apis(obj, depth=0):
 
 
 DIAGNOSTIC_SESSION_ARTIFACT = "diagnostic_session.json"
+#: CC_TASK_6: set to "1" by the protocol for an aspire-v1 probe. The REPL then
+#: offers only the observation / computation functions below; every other API
+#: function becomes a refusing stub, and `env`, `step` and the trace logger are
+#: withheld. Unset (every other session) nothing below changes.
+OBSERVATION_ONLY_ENV = "ASPIRE_OBSERVATION_ONLY"
+OBSERVATION_FUNCTIONS = frozenset({
+    "get_observation", "segment_sam3_text_prompt", "segment_sam3_point_prompt", "point_prompt_molmo",
+    "plan_grasp", "plan_grasp_from_point_clouds", "get_oriented_bounding_box_from_3d_points", "solve_ik",
+    "subsample_point_cloud", "filter_noise", "rotation_matrix_to_quaternion", "decompose_transform",
+    "depth_to_point_cloud", "mask_to_world_points", "pixel_to_world_point", "transform_points",
+    "interpolate_segment", "normalize_vector", "select_top_down_grasp"})
+
+
+def _observation_only() -> bool:
+    return os.environ.get(OBSERVATION_ONLY_ENV) == "1"
+
+
+def _refused(name: str, record: list):
+    def refused(*args, **kwargs):
+        record.append(name)
+        raise PermissionError(f"{name}() is not available in an observation-only probe")
+    refused.__name__ = name
+    return refused
+
+
+def _robot_state(get_observation) -> dict | None:
+    """Proprioception before/after a probe: the evidence that nothing moved."""
+    try:
+        obs = get_observation()
+        return {k: np.asarray(obs[k], dtype=float).tolist()
+                for k in ("robot_joint_pos", "robot_cartesian_pos") if k in obs}
+    except Exception as exc:  # Recorded, and the protocol then reads the probe as unverified.
+        return {"error": f"{type(exc).__name__}: {exc}"}
 
 
 def _diagnostic_console(code_module):
@@ -360,11 +393,12 @@ def _diagnostic_console(code_module):
     return DiagnosticConsole
 
 
-def _write_diagnostic_session(args: ReplayTrialArgs, console) -> None:
+def _write_diagnostic_session(args: ReplayTrialArgs, console, extra: dict | None = None) -> None:
     """Persist the REPL outcome beside the trial's other artifacts.
 
     Absence of this file means the session never reached its own end: that is
     infrastructure, not an authored error, and the protocol treats it that way.
+    `extra` carries the observation-only probe's evidence (CC_TASK_6).
     """
     payload = {
         "schema_version": 1, "session": "diagnostic",
@@ -373,6 +407,7 @@ def _write_diagnostic_session(args: ReplayTrialArgs, console) -> None:
         "execution": getattr(console, "execution", "interactive"),
         "errors": getattr(console, "errors", []),
         "error_count": len(getattr(console, "errors", [])),
+        **(extra or {}),
     }
     directory = Path(args.output_dir)
     directory.mkdir(parents=True, exist_ok=True)
@@ -420,11 +455,13 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
 
     apis = _find_apis(env)
     sealed = _sealed_outcome_path() is not None
+    probe = _observation_only()
 
     # Collect all API functions into a flat namespace. A sealed trial exposes
-    # the same read-only env view as the policy sandbox and no step() helper.
+    # the same read-only env view as the policy sandbox and no step() helper,
+    # and so does an observation-only probe (CC_TASK_6).
     repl_ns: dict[str, Any] = {
-        "env": _SealedEnvView(getattr(env, "low_level_env", None)) if sealed else env,
+        "env": _SealedEnvView(getattr(env, "low_level_env", None)) if (sealed or probe) else env,
         "obs": obs,
         "np": np,
         "args": args,
@@ -432,11 +469,18 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
 
     fn_names = []
     trace_logger = None
+    refused_actions: list[str] = []
+    observe = None
     for api in apis.values():
         for fn_name, fn in api.functions().items():
-            repl_ns[fn_name] = fn
+            if probe and fn_name not in OBSERVATION_FUNCTIONS:
+                repl_ns[fn_name] = _refused(fn_name, refused_actions)
+            else:
+                repl_ns[fn_name] = fn
+            if fn_name == "get_observation":
+                observe = fn
             fn_names.append(fn_name)
-        if hasattr(api, "get_trace_logger"):
+        if hasattr(api, "get_trace_logger") and not probe:
             trace_logger = api.get_trace_logger()
             repl_ns["trace_logger"] = trace_logger
 
@@ -445,7 +489,7 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
     def step(code_str: str):
         """Execute a code string through env.step() and return (obs, reward, terminated, truncated, info)."""
         return env.step(code_str)
-    if not sealed:
+    if not (sealed or probe):
         repl_ns["step"] = step
 
     # Print banner
@@ -467,13 +511,17 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
     print()
     print("  Other objects in scope:")
     print("    env            — " + ("read-only view: env.handle.task_language only (sealed trial)"
-                                     if sealed else "the gym environment"))
+                                     if sealed else
+                                     "read-only view: env.handle.task_language only (observation-only probe)"
+                                     if probe else "the gym environment"))
     print("    obs            — last observation dict")
     print("    np             — numpy")
     if trace_logger:
         print("    trace_logger   — TraceLogger instance")
-    if not sealed:
+    if not (sealed or probe):
         print("    step(code_str) — execute a code string via env.step()")
+    if probe:
+        print("  OBSERVATION-ONLY PROBE: motor commands and step() are not available.")
     print()
     print("  Example:")
     print("    >>> obs = get_observation()")
@@ -485,6 +533,7 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
     print("=" * 70 + "\n")
 
     console = _diagnostic_console(code_module)(repl_ns)
+    before = _robot_state(observe) if probe and observe else None
     try:
         if sys.stdin.isatty():
             console.interact(banner="", exitmsg="REPL exited.")
@@ -496,7 +545,20 @@ def _run_interactive_repl(env, obs, args: ReplayTrialArgs) -> None:
     finally:
         # Written even when the session ends by EOF, exit() or SystemExit, so a
         # zero exit code is never the only evidence about what the code did.
-        _write_diagnostic_session(args, console)
+        extra = None
+        if probe:
+            after = _robot_state(observe) if observe else None
+            unchanged = bool(before and after and "error" not in before and "error" not in after
+                             and before.keys() == after.keys()
+                             and all(np.array_equal(before[k], after[k]) for k in before))
+            change = None
+            if before and after and "error" not in before and "error" not in after:
+                change = {k: float(np.max(np.abs(np.asarray(after[k]) - np.asarray(before[k]))))
+                          for k in before if k in after}
+            extra = {"session": "probe", "observation_only": True, "refused_actions": refused_actions,
+                     "robot_state_unchanged": unchanged, "robot_state_change": change,
+                     "robot_state_before": before, "robot_state_after": after}
+        _write_diagnostic_session(args, console, extra)
 
 
 def main(args: ReplayTrialArgs) -> None:

@@ -110,6 +110,101 @@ def stop_processes(processes) -> None:
             pass
 
 
+def session_members(sessions, *, since: float | None = None) -> list:
+    """Live processes of this uid whose session id is one of `sessions`.
+
+    Every service is spawned with `start_new_session=True`, so its session id is
+    its own pid and survives reparenting: a vLLM TP worker orphaned when its
+    EngineCore was SIGKILLed still carries it, although no parent-child walk
+    from the supervisor reaches it any more. `since` (epoch seconds) excludes a
+    process created before the supervisor, so a recycled session id cannot
+    match someone else's work.
+    """
+    import psutil
+    sessions, members, me, uid = set(sessions), [], os.getpid(), os.getuid()
+    for process in psutil.process_iter():
+        try:
+            if process.pid == me or process.uids().real != uid:
+                continue
+            if process.status() == psutil.STATUS_ZOMBIE:
+                continue  # Holds no memory or device; only its parent can reap it.
+            if since is not None and process.create_time() < since - 1:
+                continue
+            if os.getsid(process.pid) in sessions:
+                members.append(process)
+        except (ProcessLookupError, PermissionError, psutil.Error):
+            continue
+    return members
+
+
+def _describe(process) -> dict:
+    try:
+        return {"pid": process.pid, "name": process.name(), "status": process.status(),
+                "sid": os.getsid(process.pid)}
+    except Exception:  # Gone while being described.
+        return {"pid": process.pid}
+
+
+def stop_sessions(processes, *, grace: float = 15, kill_wait: float = 15,
+                  since: float | None = None) -> dict:
+    """Stop every owned service session and SAY what is left; never wait forever.
+
+    `stop_processes` sends one SIGTERM per group and nothing checks the result.
+    A vLLM TP worker blocked in an NCCL collective whose peer crashed cannot run
+    its Python SIGTERM handler (and vLLM ignores a second one once its parent
+    died), so it outlived the supervisor and held the node (p4 node1,
+    2026-10-17). Here: TERM each session, wait up to `grace` for every member
+    (orphans included), SIGKILL whatever remains, wait `kill_wait`, reap the
+    owned Popen objects, and return the survivors (uninterruptible processes a
+    SIGKILL cannot remove) instead of hanging on them.
+    """
+    import psutil
+    processes = list(processes)
+    sessions = {p.pid for p in processes}
+
+    def reap():
+        for process in processes:
+            try:
+                process.poll()
+            except Exception:
+                pass
+
+    for process in reversed(processes):
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except (ProcessLookupError, PermissionError):
+            pass
+    for member in session_members(sessions, since=since):  # Moved to another group, same session.
+        try:
+            member.terminate()
+        except psutil.Error:
+            pass
+    deadline = time.monotonic() + grace
+    while time.monotonic() < deadline:
+        reap()
+        if not session_members(sessions, since=since):
+            break
+        time.sleep(.2)
+    left = session_members(sessions, since=since)
+    killed = [_describe(p) for p in left]
+    for member in left:
+        try:
+            member.kill()
+        except psutil.Error:
+            pass
+    for process in processes:
+        try:
+            os.killpg(process.pid, signal.SIGKILL)
+        except (ProcessLookupError, PermissionError):
+            pass
+    if left:
+        psutil.wait_procs(left, timeout=kill_wait)
+    reap()
+    survivors = [_describe(p) for p in session_members(sessions, since=since)]
+    return {"sessions": sorted(sessions), "sigkilled": killed, "survivors": survivors,
+            "verified_empty": not survivors}
+
+
 class ServiceWatch:
     def __init__(self, services, on_failure, *, interval=2):
         self.services, self.on_failure, self.interval = services, on_failure, interval

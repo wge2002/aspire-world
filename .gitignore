@@ -109,3 +109,12 @@ core.*
 
 # Local document backups
 *.bak-*
+
+# Runtime scheduler state and historical experiment replay fixtures
+scheduled_tasks.lock
+/aspire/sim/tests/fixtures/p4_retro/
+/aspire/sim/tests/fixtures/p4_heldout_supplement/
+/aspire/sim/tests/fixtures/p5_budget/
+/aspire/sim/tests/fixtures/p6_closeout/
+/aspire/sim/tests/fixtures/p6b_recovery/
+/aspire/sim/tests/fixtures/p6c_repair/

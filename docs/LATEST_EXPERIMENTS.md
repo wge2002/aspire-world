@@ -1,6 +1,27 @@
 # 最新源码与实验协议入口
 
-源码对齐日期：2026-10-16。当前重点是 **Qwen unit 节点布局（8 卡并行 4 cell）、p3 search-control 和 p2 runtime world**。本页描述代码和协议，不宣称实验已完成，不包含运行结果。
+源码对齐日期：2026-10-23。当前入口是 **p6d 方法修复、p6c pipeline 修复、p6b worker 恢复与 p4–p6 协议**，以及 Qwen 4-cell unit 启动层。本页区分实现、历史验证和设计提案；原始运行结果不入 Git。
+
+## 最新方法与运行链（2026-10-23）
+
+| 入口 | 发布内容与边界 |
+| --- | --- |
+| [p6d 方法修复](../aspire/sim/docs/experiments/code-world-method-repair-p6d-20261022/PLAN.md) | `method_switches` 显式启用 M2/M3/M4：sweep-only 版本评分、冻结前重扫、unseen 66–80、子目标验证、judgment calibration、record-only screening、m4-r1 动作接口及 LIBERO success latch。含 prepare、host gate、启动和验收工具；代码收录不等于新 smoke / trial 已完成。 |
+| [p6c pipeline 修复](../aspire/sim/docs/experiments/code-world-pipeline-repair-p6c-20261022/README.md) | worker API failure 恢复、watchdog 终态归因、完成后持久化宽限与外层 close-infra；保留支持源码。 |
+| [p6b worker 恢复](../aspire/sim/docs/experiments/code-world-worker-recovery-p6b-20261021/PLAN.md) | 原 worker 无法恢复时的新 generation、失败轮次与基础设施收尾；保留 [l10](../aspire/sim/docs/experiments/code-world-worker-recovery-p6b-20261021-l10/PLAN.md) / [ns](../aspire/sim/docs/experiments/code-world-worker-recovery-p6b-20261021-ns/PLAN.md) 协议。 |
+| [p6 并行与收尾](../aspire/sim/docs/experiments/code-world-repair-parallel-p6-20261020/PLAN.md) | held-out 与免费 phase-B sweep 并行、进程树清理、累计开发截止和冻结收尾。N 是 cell 内 replay 并发，区别于节点的 4 个 cell 槽位。 |
+| [p5 开发预算](../aspire/sim/docs/experiments/code-world-budget-p5-20261019/PLAN.md) | `aspire-v1` opt-in：phase A seed 51 至首次成功，phase B 至多 8 版本 / 每 mode 至多 3 版本；开发累计期限 24h。 |
+| [p4 覆盖门控](../aspire/sim/docs/experiments/code-world-coverage-p4-20261016/PLAN.md) | 冻结版本的开发集覆盖、terminal guard、held-out supplement；另保留 p4n / p4fix 准备脚本。PLAN 的初始 design 状态属于当时记录，现行实现以代码与后续协议为准。 |
+| [方法诊断](../aspire/sim/docs/experiments/code-world-method-diagnosis-20261022/REPORT.md) | 方法问题与修复依据的整理文档；原始证据仍在计算存储。 |
+| [跨任务技能库设计](../aspire/sim/docs/experiments/code-world-skill-library-design-20261022/DESIGN.md) | 设计及候选整理，尚不是已接入的技能库；排期和提案不构成启动授权。 |
+
+共享实现入口：[method_switches.py](../aspire/sim/scripts/libero/method_switches.py)、[judgment_calibration.py](../aspire/sim/cap/world_model/judgment_calibration.py)、[子目标验证契约](../aspire/sim/cap/world_model/skills/subgoal-verification.md)、[m4-r1 接口说明](../aspire/sim/cap/world_model/skills/api-revision-m4.md)、[p6d 回归](../aspire/sim/tests/test_p6d_method.py)。
+
+各阶段通过 case 的显式字段选择行为；旧冻结运行不会因同步源码而更新。p5 及后续预算与历史每 seed 三次的 profile 不同，以对应 PLAN 和 case 为准。p6d 的 unseen 测量在冻结后由外层执行，仍与 worker 开发材料及 held-out 1–50 分离。
+
+节点启动层新增 session/后代进程清理、失败 unit teardown、基础设施中断归档后有限重新排队、节点 cell 分配与按 case 并发推导 deadline；见 [清理回归](../aspire/sim/tests/test_node_layout_teardown.py)。这些属于现行源码；下文 10-16 smoke 是旧快照的历史验收，不能替代最新版本的真实运行验收。
+
+BEHAVIOR 仿真同步了 runner / r1pro 的抓取状态检查和启动辅助脚本，入口为 [grasp_checks.py](../aspire/sim/cap/integrations/r1pro/grasp_checks.py)、[回归](../aspire/sim/tests/test_r1pro_grasp_checks.py)及 [b1k_env.sh](../aspire/sim/scripts/behavior/b1k_env.sh)；不包含真实机器人 workspace。
 
 ## 节点布局（2026-10-15 起）
 
@@ -13,7 +34,7 @@
 - 实现：[`scripts/common/node_layout/`](../aspire/sim/scripts/common/node_layout/)（`unit_layout.py`、`unit_supervisor.py`、`unit-entry.sh`、`reference/model-server.json`）；新研究的 prepare 用 `unit_layout.freeze_launch()` 把它冻结进结果根的 `launch/`，不再继承 p3 的 `support/dlc-supervisor.py`。测试：[test_node_layout.py](../aspire/sim/tests/test_node_layout.py)。
 - 已删除的旧逻辑：eager 模型配置、`expandable_segments`、“一节点一 cell、Qwen 0–3 / SAM3 4 / GraspNet 5 / sim 6 / 卡 7 空闲”的布局。历史研究目录及其冻结的 `support/`、`launch/` 保持原样，只代表当时的运行。
 
-## 4-cell 验收与停止逻辑（2026-10-16）
+## 历史 4-cell 验收与停止逻辑（2026-10-16）
 
 - `native_smoke` 由 supervisor 观察各 cell 自己的账本：第一条 charged trial 到终态后清理该 cell 的进程树并记录 `supervisor_smoke_stop`，不再依赖模型遵守暂停提示。正在运行的首条 trial 不会为此中断；`full` 模式保持原来的完成条件。
 - `--preflight` 完成检查后退出，不向结果根写入；节点时间窗不足以容纳启动、一个 cell 和清理时直接拒绝启动。
@@ -43,7 +64,7 @@
 - [prepare-prediction-study.py](../aspire/sim/docs/experiments/code-world-prediction-base-20261008/prepare-prediction-study.py)、[support](../aspire/sim/docs/experiments/code-world-prediction-base-20261008/support/)：准备、隔离、队列、预算与原生 agent 支持。
 - [契约回归](../aspire/sim/tests/test_prediction_contract.py)、[准备流程回归](../aspire/sim/tests/test_prediction_study_support.py)：CPU 测试及合成 fixture。
 
-求解器记录保持 local Qwen3.8-Flash-Next、native CC 2.1.220、xhigh、1M context、64K 配置输出。开发 seeds 51–65，原 per-seed 尝试预算，冻结后外层评估 1–50；真实感知和 nonprivileged API 不变。任务规模、窗口与资源配置以各轮 PLAN 和代码为准，不把历史授权视为新任务授权。
+上述 p1–p3 历史求解器记录保持 local Qwen3.8-Flash-Next、native CC 2.1.220、xhigh、1M context、64K 配置输出。开发 seeds 51–65，原 per-seed 尝试预算，冻结后外层评估 1–50；真实感知和 nonprivileged API 不变。任务规模、窗口与资源配置以各轮 PLAN 和代码为准，不把历史授权视为新任务授权。
 
 ## 当前支持协议
 

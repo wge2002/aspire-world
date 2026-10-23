@@ -1,4 +1,4 @@
-# Reviewed engineering design and source only; no runtime records.
+# Explicit source and protocol publication scope; runtime data stays outside Git.
 *
 !*/
 !/.gitignore

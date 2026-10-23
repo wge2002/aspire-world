@@ -194,10 +194,16 @@ class CodeExecutionEnvBase(Env):
                 contextlib.redirect_stderr(tee_err),
             ):
                 exec(code, self._exec_globals, self._exec_globals)
-        except BaseException:  # defensive; propagate minimal info
-            ok = False
-            # Always print full traceback to the redirected stderr (tee -> console and buffer)
-            traceback.print_exc(file=tee_err)
+        except BaseException as exc:  # defensive; propagate minimal info
+            if getattr(exc, "episode_budget_exhausted", False):
+                # CC_TASK_14 success_rule libero_latch: the step budget ran out. The
+                # program ends here and the trial is scored by the success latch, not
+                # as a program error (only the simulator marks this exception).
+                print(f"[episode] step budget exhausted; program stopped ({exc})", file=tee_out)
+            else:
+                ok = False
+                # Always print full traceback to the redirected stderr (tee -> console and buffer)
+                traceback.print_exc(file=tee_err)
 
         return {
             "ok": ok,

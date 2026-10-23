@@ -252,6 +252,48 @@ def started(cell: Path) -> bool:
     return any((Path(cell) / marker).exists() for marker in STARTED_MARKERS)
 
 
+def claimable(root: Path, cells: list[Path]) -> list[Path]:
+    """Cells a slot could claim right now (not started, not claimed)."""
+    claims = Path(root) / "queue/claims"
+    return [Path(c) for c in cells if not started(c) and not (claims / Path(c).name).exists()]
+
+
+def in_flight(root: Path, cells: list[Path]) -> list[str]:
+    """Claimed cells with no run result yet: each may still come back requeued."""
+    claims = Path(root) / "queue/claims"
+    return [Path(c).name for c in cells
+            if (claims / Path(c).name).is_dir() and not (claims / Path(c).name / "result.json").exists()]
+
+
+def node_cells(study: dict, cells: list[Path], node: int, nodes: int) -> list[Path]:
+    """The cells this node's slots may claim, in the study's claim order (CC_TASK_6).
+
+    Without `node_cells` in study.json every node claims from the whole shared
+    queue, as before. With it, `{"0": [...], "1": [...], ...}` pins each cell to
+    one node: the mapping must name exactly the nodes 0..nodes-1 and partition the
+    study's cells, so a cell can be neither lost nor claimed twice. A pinned
+    cell's infrastructure requeue stays on its node (the node only ever sees its
+    own cells), and nodes whose cells are short finish early instead of taking
+    long cells off a shared queue.
+    """
+    mapping = study.get("node_cells")
+    if mapping is None:
+        return list(cells)
+    if not isinstance(mapping, dict) or sorted(mapping, key=str) != sorted(str(i) for i in range(nodes)):
+        raise RuntimeError(f"study node_cells names nodes {sorted(mapping) if isinstance(mapping, dict) else mapping}; "
+                           f"this job has --node-count {nodes}")
+    names = [Path(c).name for c in cells]
+    assigned = [name for i in range(nodes) for name in mapping[str(i)]]
+    if len(set(assigned)) != len(assigned) or sorted(assigned) != sorted(names):
+        raise RuntimeError(f"study node_cells {mapping} does not partition the cells {names}")
+    if not 0 <= node < nodes:
+        raise RuntimeError(f"--node-id {node} is outside 0..{nodes - 1}")
+    mine = set(mapping[str(node)])
+    if not mine:
+        raise RuntimeError(f"study node_cells assigns no cell to node {node}")
+    return [Path(c) for c in cells if Path(c).name in mine]
+
+
 def claim_next(root: Path, cells: list[Path], worker: str, binding: dict) -> Path | None:
     """Atomically claim the next unclaimed cell for one slot.
 
@@ -275,6 +317,66 @@ def claim_next(root: Path, cells: list[Path], worker: str, binding: dict) -> Pat
                                           "claimed_at": time.time()})
         return Path(cell)
     return None
+
+
+#: A cell interrupted by its UNIT (a service died: GPU/driver/NCCL) is requeued
+#: at most this many times; after that it keeps its claim for manual review, so
+#: a cell that keeps landing on bad hardware cannot loop.
+INFRA_REQUEUE_CAP = 1
+#: What prepare stages into a cell's control directory. Everything else there
+#: was written by a run. `native/config` and `outputs/working_codes` are staged
+#: as empty directories and recreated empty.
+#: Beside case.json in a held-out supplement entry (CC_TASK_5): names the
+#: preserved source cell whose interrupted sweep the entry finishes in place.
+SUPPLEMENT_MARKER = "heldout-supplement.json"
+STAGED_FILES = ("case.json", "staged-inputs.json", "runtime-manifest.json", "nvidia-egl-vendor.json",
+                "worker-prompt.md", "worker-prompt.diff", "coordinator-prompt.md", SUPPLEMENT_MARKER)
+STAGED_EMPTY_DIRS = ("native/config", "outputs/working_codes")
+
+
+def infra_archive(root: Path, cell: Path) -> Path:
+    """Outside every cell, so the next attempt's read guard cannot reach it."""
+    return Path(root) / "queue/infra-archive" / Path(cell).name
+
+
+def infra_requeue(root: Path, cell: Path, record: dict, *, cap: int = INFRA_REQUEUE_CAP) -> dict:
+    """Return an infrastructure-interrupted cell to the queue as a FRESH cell.
+
+    Fresh, not resumed: the driver refuses a cell that already has a
+    `campaign_state.json` and the ledger refuses an existing task directory, and
+    neither has an automatic resume (`automatic_resume: False`). Every
+    run-written file of the interrupted attempt — ledger, trials, transcripts,
+    queue result, bound slot case, the claim itself — is MOVED to
+    `queue/infra-archive/<cell>/<n>/`, so none of its trials can count as
+    evidence and nothing is deleted. Releasing the claim is the last step, so a
+    concurrent `claim_next` sees either the old claim or a fresh cell.
+    """
+    root, cell = Path(root), Path(cell)
+    archive = infra_archive(root, cell)
+    done = sorted(p for p in archive.glob("*") if p.is_dir()) if archive.is_dir() else []
+    if len(done) >= cap:
+        return {"requeued": False, "reason": f"infra requeue cap {cap} reached", "previous": len(done)}
+    target = archive / str(len(done) + 1)
+    (target / "cell").mkdir(parents=True)
+    moved = []
+    for entry in sorted(cell.iterdir()):
+        if entry.name in STAGED_FILES:
+            continue
+        entry.rename(target / "cell" / entry.name)
+        moved.append(entry.name)
+    for relative in STAGED_EMPTY_DIRS:
+        (cell / relative).mkdir(parents=True, exist_ok=True)
+    leftover = [m for m in STARTED_MARKERS if (cell / m).exists()]
+    if leftover:
+        raise RuntimeError(f"{cell.name}: run markers {leftover} survived the archive; keep the claim")
+    write_once(target / "requeue.json", {"cell": cell.name, "attempt": len(done) + 1, "cap": cap,
+                                         "moved": moved, "interrupted_record": record,
+                                         "resume": "fresh: the interrupted attempt's trials are archived "
+                                                   "and never counted", "requeued_at": time.time()})
+    claim = root / "queue/claims" / cell.name
+    if claim.exists():
+        claim.rename(target / "claim")
+    return {"requeued": True, "attempt": len(done) + 1, "archive": str(target), "moved": moved}
 
 
 # ---- DLC plan --------------------------------------------------------------

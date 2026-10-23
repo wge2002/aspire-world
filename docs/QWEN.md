@@ -1,6 +1,6 @@
 # Qwen 部署配置与接口
 
-本文整理仓库已有配置，2026-10-09 随核心源码对齐；2026-10-15 起实验服务配置改为 CUDA graph 配置并按 4 卡 unit 布局启动（见下文“实验服务配置”与 [节点布局契约](../aspire/sim/docs/engineering/node-layout-20261015/DESIGN.md)）。源码入口包括：
+本文整理仓库已有配置，2026-10-23 随核心源码对齐；2026-10-15 起实验服务配置改为 CUDA graph 配置并按 4 卡 unit 布局启动（见下文“实验服务配置”与 [节点布局契约](../aspire/sim/docs/engineering/node-layout-20261015/DESIGN.md)）。源码入口包括：
 
 - [通用服务启动/状态/停止脚本](../aspire/sim/scripts/common/serve_qwen3_8_flash_next.sh)
 - [OpenAI 接口 smoke](../aspire/sim/scripts/common/smoke_qwen3_8_flash_next.py)
@@ -46,11 +46,15 @@
 
 `model-server.example.json` 把模型、vLLM、CUDA 和 workspace 路径改成占位路径，其他参数与现行配置一致；使用前须按目标主机修正这些路径并验证容量。记录使用具备 Qwen3.8 支持的 vLLM 环境，具体依赖兼容性仍需在目标 GPU 上检验。
 
-## 当前启动层验收（2026-10-16）
+## 历史启动层验收（2026-10-16）
 
-8 卡、两个独立 Qwen unit、四个 cell 的真实 smoke 已核验通过。每个 cell 的首条 charged seed-51 到终态后，由 supervisor 清理进程树并记录 `supervisor_smoke_stop`；四个 cell 均没有额外 trial，队列为 `native_smoke_complete`，节点为 `node_complete`。当前源码与该次运行冻结的 supervisor 哈希一致。`full` 模式不使用此停止条件。
+8 卡、两个独立 Qwen unit、四个 cell 的真实 smoke 已核验通过。每个 cell 的首条 charged seed-51 到终态后，由 supervisor 清理进程树并记录 `supervisor_smoke_stop`；四个 cell 均没有额外 trial，队列为 `native_smoke_complete`，节点为 `node_complete`。该结果对应 10-16 冻结的 supervisor；10-23 发布的源码已经包含后续修复，不能沿用旧哈希作为现版本的验收。`full` 模式不使用此停止条件。
 
 两 unit 的 native compatibility 与 SAM3 实际推理健康检查通过；GraspNet 各收到 1 和 8 次成功请求，无 OOM。但此次没有逐卡显存采样，不能据此声称已量出 util 0.82 下 GraspNet 的峰值余量。此次 smoke 的四个首次 bowl trial 均 reward 0，其中一个 sandbox_rc 1；它验证服务与编排，不代表任务质量或完整研究结果。完整 50-seed held-out 运行未包含在本次验收中。验证范围见 [SYNC_SCOPE](SYNC_SCOPE.md)。
+
+## 当前源码补充（2026-10-23）
+
+Qwen reference 配置与上述 TP4 / 4-cell 布局保持不变。unit supervisor 已加入失败后的 session / 后代清理、有限基础设施重新排队、节点 cell 分配和按 case 并发计算时间界限。p6 的 replay 并发属于 cell 内部，不等于增加 Qwen cell 槽位。最新 p6b–p6d 协议、CPU 验证和未收录的历史数据依赖见 [最新实验](LATEST_EXPERIMENTS.md) 与 [同步验证](SYNC_SCOPE.md)。本次发布不部署模型或启动新实验。
 
 ## 连接已就绪的实验服务
 

@@ -41,12 +41,17 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import re
 
 REVISION = "p3-search"
 DEFAULT_CLASS = "undeclared"
 RETRY_LIMIT = 3
 GRADED_PHASES = ("smoke", "initial", "repair")
 CHARGED_PHASES = (*GRADED_PHASES, "diagnostic")
+#: p4 coverage sweep: graded, but spends no repair retry, so it is never part of
+#: the charged-attempt statistics (early stop, saturation, informative fraction).
+#: Only the triage table, which groups the sweep's failures, includes it.
+SWEEP_PHASE = "sweep"
 RESOLVED_STATUSES = frozenset({"complete", "world_program_error", "diagnostic_program_error"})
 PROPRIOCEPTIVE_APIS = frozenset({"get_observation"})
 MEASURED_LAYERS = frozenset({"observed", "rehearsal"})
@@ -55,6 +60,16 @@ RESOLVED_CHECKS = ("match", "mismatch")
 SIGNATURE_STEP = 0.1
 SATURATION_DEFAULTS = {"K": 5, "N": 8, "frac": 0.3, "gripper_match": 0.8}
 UNOBSERVED_HINT = "target not re-observed: this attempt is not evidence for saturation"
+#: p4: the world could not resolve the fact at all, which is a broken channel and
+#: not merely an idle one. Different defect, different repair, different hint.
+UNAVAILABLE_HINT = ("the world's measurement channel for the target is broken, not merely idle: "
+                    "the fact could not be resolved at all (typically a lost association). "
+                    "Repair the association in the world — re-observe the target, then re-associate "
+                    "it — before spending more attempts; this attempt is not saturation evidence either")
+#: The values a recorded progress channel can take. `error` is a raising progress().
+PROGRESS_STATUSES = ("observed", "unobserved", "unavailable", "error")
+#: Components of one trial signature, in the order the report names them.
+SIGNATURE_FIELDS = ("object_residuals", "world_facts", "outcome")
 RULES = [
     "physically infeasible is not an accepted BLOCKED root cause while untried primitive "
     "classes remain: benchmark tasks are feasible by construction",
@@ -67,7 +82,60 @@ RULES = [
     "re-perceive the target object after every manipulation primitive and before the trial "
     "ends; progress() returns None when the target was not observed since the last "
     "manipulation, and such a trial is unobserved: it is not evidence for saturation",
+    "a None progress() has two different causes and the world must say which: `unobserved` "
+    "(this trial did not re-perceive the target) or `unavailable` (the world cannot resolve "
+    "the fact at all — a lost association, not an idle channel). An unavailable attempt is "
+    "not evidence for saturation either, and a class whose attempts are all unavailable is a "
+    "broken channel to repair (re-observe the target, then re-associate it) before more "
+    "attempts are spent",
+    "a candidate is only evidence once its OWN bytes have run on the whole development set "
+    "51–65; the cell may not record `selected` while any development seed is missing. Missing "
+    "seeds are swept with `trial --phase sweep`, which spends no repair retry (once per seed per "
+    "tested candidate; sweep only the candidate you intend to freeze, and never select one whose "
+    "coverage is incomplete); a gate no candidate can reach is a terminal blocker, never a "
+    "lowered gate",
+    "a sweep's failures are grouped by trial signature into modes; repair the MODE (one "
+    "defect), not one seed — seeds that failed the same way are one problem",
 ]
+
+
+#: CC_TASK_6: the ASPIRE v1.0 development budget, added to RULES only in a cell
+#: whose identity carries `development_budget: "aspire-v1"`.
+BUDGET_REVISION = "aspire-v1"
+BUDGET_RULES = [
+    "aspire-v1 phase A: until development seed 51 actually passes, every attempt runs on seed 51 "
+    "and attempts there are uncapped while diagnostics make progress; no sweep, no select, no freeze",
+    "aspire-v1 phase B: every version runs on all 15 development seeds (its first seed with "
+    "`trial --phase repair --mode <mode> --mode-seeds <seeds>`, the rest with `trial --phase sweep`, "
+    "which spends nothing); each version declares the failure mode it targets; at most 3 versions per "
+    "mode and 8 in total; a mode still unfixed after 3 versions is blocked: write "
+    "attempts/mode_<mode>_BLOCKED.md (root cause, what was tried) and spend no more on it; a renamed "
+    "mode is the same mode",
+    "aspire-v1 freeze: only when the selected version passes 15/15, all 8 versions are used, or every "
+    "remaining failing seed belongs to a blocked mode; select the complete version with the most passes, "
+    "then fewer crashes (program_ok=false), then the simpler one",
+    "aspire-v1 probes (`trial --phase probe`) observe without any motor command; they are not versions "
+    "and cost nothing",
+]
+
+
+#: The one RULES clause the budget supersedes, and what it reads under aspire-v1.
+BUDGET_RULE_EDIT = ("sweep only the candidate you intend to freeze, and never select one whose "
+                    "coverage is incomplete",
+                    "under aspire-v1 every version is swept in full before the next one, and never "
+                    "select one whose coverage is incomplete")
+
+
+def rules_for(ledger):
+    """RULES, plus the budget's rules for an aspire-v1 ledger (CC_TASK_6)."""
+    identity = (ledger.get("identity") or {}) if isinstance(ledger, dict) else {}
+    if identity.get("development_budget") != BUDGET_REVISION:
+        return list(RULES)
+    old, new = BUDGET_RULE_EDIT
+    edited = [rule.replace(old, new) for rule in RULES]
+    if sum(old in rule for rule in RULES) != 1:
+        raise ValueError("budget rule anchor changed")
+    return edited + list(BUDGET_RULES)
 
 
 # --- contract ---------------------------------------------------------------
@@ -228,15 +296,41 @@ def is_observed(progress, levels):
     return progress is not None and bool(levels) and levels["object"]["resolved"] > 0
 
 
+def observation_reason(value, status, levels):
+    """Why a graded trial is not observed: the world's own reason, else the trace's.
+
+    `unavailable` wins when the world reported it: a world that cannot resolve
+    the fact at all is saying something stronger and more actionable than "no
+    value was recorded", and the two repairs differ. A world that returned a
+    value but left every object-level prediction undecided is `unobserved` for
+    a trace-side reason, which the hint names separately.
+    """
+    if status == "unavailable":
+        return "unavailable"
+    if value is None:
+        return "unobserved"
+    return "no_object_prediction" if not (levels and levels["object"]["resolved"]) else None
+
+
 def trial_observation(trial_dir):
-    """Observed/unobserved verdict of one recorded trial, with the solver hint."""
+    """Observed/unobserved verdict of one recorded trial, with the solver hint.
+
+    p4: an unobserved trial carries WHICH kind of nothing it was. `unavailable`
+    means the world's measurement channel could not resolve the fact (repair the
+    channel, e.g. re-observe and re-associate the target); `unobserved` means it
+    simply did not look since the last manipulation, and is not saturation
+    evidence.
+    """
     levels = prediction_levels(read_events(trial_dir))
-    progress = recorded_progress_value(trial_dir)
-    observed = is_observed(progress, levels)
-    out = {"progress": progress, "object_predictions_decided": levels["object"]["resolved"],
-           "gripper_predictions_decided": levels["gripper"]["resolved"], "observed": observed}
+    value, status = record_progress(trial_dir)
+    observed = is_observed(value, levels)
+    reason = None if observed else observation_reason(value, status, levels)
+    out = {"progress": value, "progress_status": status,
+           "object_predictions_decided": levels["object"]["resolved"],
+           "gripper_predictions_decided": levels["gripper"]["resolved"], "observed": observed,
+           "reason": reason}
     if not observed:
-        out["hint"] = UNOBSERVED_HINT
+        out["hint"] = UNAVAILABLE_HINT if reason == "unavailable" else UNOBSERVED_HINT
     return out
 
 
@@ -264,6 +358,119 @@ def gripper_checks(events, levels=None):
     return Counter(e["status"] for e in events
                    if e.get("event") == "prediction_check" and e.get("status") in RESOLVED_CHECKS
                    and levels.get(e.get("entity")) == "gripper")
+
+
+def target_entities(attempts):
+    """The object-level entity a cell's world models in most detail.
+
+    `progress()` is identity-aware — it measures ONE target object — and the
+    recovered reason must ask about that same entity, not about whichever object
+    happened to be written. A world tracks its target with more than a single
+    position reading (a displacement, an angle, a pull direction), so the entity
+    owning the most distinct observed facts across the cell is the target. On the
+    p3 cells this picks `knob` for stove and `target_handle` for drawer, which is
+    exactly what each cell's own `progress()` reads.
+    """
+    facts = {}
+    for a in attempts:
+        if not a["graded"]:
+            continue
+        for key in (a["signature"] or {}).get("object_change") or {}:
+            entity, _, fact = key.partition(".")
+            facts.setdefault(entity, set()).add(fact)
+    if not facts:
+        return set()
+    widest = max(len(v) for v in facts.values())
+    return {e for e, v in facts.items() if len(v) == widest and widest > 1}
+
+
+def trace_progress_reason(value, signature, targets=None):
+    """Recover the p4 progress reason of a PRE-p4 trial from its own trace.
+
+    Every trial recorded before p4 carries only `search_progress`; reading
+    `unobserved` into all of them is the very ambiguity p4 exists to remove. The
+    reason is therefore recovered from the world's own recorded object facts,
+    which is what `progress()` had to resolve to produce a number:
+      * a value was recorded                        -> `observed`;
+      * no value, and a TARGET object fact was never
+        written, is `never_known` or is `unknown_at_end` -> `unavailable` — the
+        world could not resolve the fact, so the channel is broken, not idle;
+      * no value, but every target fact was resolved -> `unobserved` — the
+        conservative reading, since the inputs existed and no number was
+        produced, which is what "did not look" means.
+
+    `targets` narrows the question to the cell's target entity (see
+    `target_entities`). Without it every recorded object fact is considered,
+    which is the right reading for a single-object world and the conservative
+    one for any other.
+    """
+    if value is not None:
+        return "observed"
+    change = signature.get("object_change") or {}
+    keys = [k for k in change if not targets or k.partition(".")[0] in targets]
+    if not keys:
+        # The target's facts were never recorded at all, so there was nothing for
+        # progress() to resolve. That is a broken channel, not an idle one — but
+        # only assert it when the caller named a target to be absent.
+        return "unavailable" if targets else "unobserved"
+    for key in keys:
+        if change[key] in ("never_known", "unknown_at_end"):
+            return "unavailable"
+    return "unobserved"
+
+
+def mode_families(modes):
+    """Group modes into the few defects they are variants of.
+
+    An exact signature digest is the right definition of a mode — two seeds are
+    the same mode only if their whole information content matches — but it is
+    too fine to answer "how many distinct things are wrong". On bowl_p3_r1 the
+    digest yields a dozen modes whose object residuals differ only in how far a
+    bowl that did not move is measured to have moved; the actionable count is
+    two families: the object never moved, and it moved and then went somewhere
+    else. Families are therefore reported BESIDE the modes, never instead of
+    them: the family is what a solver plans a repair against, the mode is what
+    the ledger can actually defend.
+    """
+    families = {}
+    for m in modes:
+        definition = m.get("signature_definition") or {}
+        residuals = definition.get("object_residuals") or []
+        if residuals:
+            moved = any(not r.endswith("=0") for r in residuals)
+            key = ("object_residuals", "object_moved" if moved else "no_object_motion")
+        else:
+            key = (m.get("deciding_field", "outcome"), "non_object_evidence")
+        f = families.setdefault(key, {"family": key[0] + ":" + key[1], "deciding_field": key[0],
+                                      "behavior": key[1], "modes": 0, "seeds": [],
+                                      "mode_digests": [], "labels": []})
+        f["modes"] += 1
+        f["seeds"] += m["seeds"]
+        f["mode_digests"].append(m["signature"])
+        f["labels"].append(m["label"])
+    out = []
+    for f in families.values():
+        f["seeds"] = sorted(set(f["seeds"]))
+        f["labels"] = sorted(set(f["labels"]))
+        out.append(f)
+    out.sort(key=lambda f: (-len(f["seeds"]), f["family"]))
+    return out
+
+
+def claimed_counts(text):
+    """Every `N of M` / `N/M` pass-count claim in a selection reason, as (N, M).
+
+    Deliberately narrow: only explicit "of" and slash forms are read, so an
+    ordinary seed list ("seeds 55, 57, 58") is never mistaken for a claim. The
+    caller re-derives each against the ledger and reports the disagreement
+    instead of trusting the solver's prose.
+    """
+    out = []
+    for match in re.finditer(r"(\d+)\s*(?:of|/)\s*(\d+)\b", text or ""):
+        count, total = int(match.group(1)), int(match.group(2))
+        if total > 0 and count <= total:
+            out.append((count, total))
+    return out
 
 
 def trial_signature(trial_dir, outcome=None, *, step=SIGNATURE_STEP, include_change=False):
@@ -338,16 +545,18 @@ def passed(row, sealed=False):
     return bool(row.get("task_completed"))
 
 
-def charged_attempts(ledger, task_dir, *, order=None):
+def charged_attempts(ledger, task_dir, *, order=None, sweeps=False):
     """Charged attempts with signature, class and gripper checks attached.
 
     `order` maps a row to a sort key (the retrospective sorts by lifecycle
     completion); None keeps ledger order, which is completion order live.
+    `sweeps=True` adds the uncharged p4 sweep rows (for the triage table only).
     """
     task_dir = Path(task_dir)
     sealed = (ledger.get("identity") or {}).get("development_gate") not in (None, "oracle")
     rows = [r for r in ledger["trials"]
-            if r.get("phase") in CHARGED_PHASES and r.get("spends_retry")
+            if ((r.get("phase") in CHARGED_PHASES and r.get("spends_retry"))
+                or (sweeps and r.get("phase") == SWEEP_PHASE))
             and r.get("executed", True) and not r.get("alias_of")
             and r.get("status") != "running"]
     if order is not None:
@@ -355,13 +564,14 @@ def charged_attempts(ledger, task_dir, *, order=None):
     attempts = []
     for n, row in enumerate(rows, 1):
         directory = task_dir / row["directory"]
-        graded = row["phase"] in GRADED_PHASES and row["status"] in RESOLVED_STATUSES
+        graded = row["phase"] in (*GRADED_PHASES, SWEEP_PHASE) and row["status"] in RESOLVED_STATUSES
         attempt = {"n": n, "phase": row["phase"], "seed": row["seed"],
                    "directory": row["directory"], "bundle_sha256": row.get("bundle_sha256"),
                    "status": row["status"], "graded": graded, "passed": graded and passed(row, sealed),
                    "primitive_class": primitive_class(directory / "code.py"),
                    "policy_body_sha256": _policy_body(directory / "code.py"),
-                   "signature": None, "gripper_checks": {}, "prediction_levels": None}
+                   "signature": None, "gripper_checks": {}, "prediction_levels": None,
+                   "progress_status": None}
         if graded:
             events = read_events(directory)
             outcome = {"status": row["status"], "sandbox_rc": row.get("sandbox_rc"),
@@ -370,6 +580,10 @@ def charged_attempts(ledger, task_dir, *, order=None):
             attempt["gripper_checks"] = dict(gripper_checks(events))
             attempt["prediction_levels"] = {level: {k: v for k, v in row_.items() if k != "entities"}
                                             for level, row_ in prediction_levels(events).items()}
+            # p4: the world's own reason for a missing progress value, so the
+            # report can tell a broken channel from an idle one. A p3-era
+            # manifest carries no reason and reads back as `unobserved`.
+            attempt["progress_status"] = record_progress(directory)[1]
         attempts.append(attempt)
     return attempts
 
@@ -442,7 +656,114 @@ def initial_early_stop(ledger, k=3, *, task_dir=None, seeds=None, retry_limit=RE
             "largest_identical_group": max(counts.values(), default=0)}
 
 
-def primitive_report(ledger, progress_fn, *, task_dir=None, class_fn=None):
+def signature_factors(signature):
+    """Which of the signature's three components are populated, for the triage table.
+
+    `object_residuals` is the rounded object-level residual list, `world_facts`
+    the prediction-status counts per entity/fact, `outcome` the graded verdict.
+    Naming them lets the table say WHAT a mode is a mode about, which is what
+    makes "repair the mode" actionable rather than "the seeds failed".
+    """
+    return {"object_residuals": list(signature.get("object_residuals") or []),
+            "world_facts": dict(signature.get("prediction_status") or {}),
+            "outcome": dict(signature.get("outcome") or {})}
+
+
+def outcome_label(signature):
+    """A short human label for a mode: the outcome plus its dominant residual."""
+    outcome = signature.get("outcome") or {}
+    residuals = signature.get("object_residuals") or []
+    if outcome.get("passed"):
+        return "passed"
+    if outcome.get("status") and outcome["status"] != "complete":
+        return str(outcome["status"])
+    if residuals:
+        return "residual:" + ",".join(residuals[:2])
+    facts = signature.get("prediction_status") or {}
+    if facts:
+        return "facts:" + ", ".join(sorted(facts)[:2])
+    return "no_residual_no_fact"
+
+
+def failure_modes(attempts, *, step=SIGNATURE_STEP):
+    """Group a bundle's sweep FAILURES by the ledger's own trial signature.
+
+    The sweep produces a per-seed pass/fail vector for one bundle; grouping the
+    failures by signature turns "six seeds failed" into the one or two distinct
+    defects the next repair can act on. bowl_p3_r1 is the motivating case: six
+    no-lift seeds and six lift-then-release seeds are two modes with different
+    fixes, and a per-seed list never showed them as modes.
+
+    Deliberately groups failures only. Passing trials are not modes to repair,
+    and a seed that passed is coverage, not triage input. One failing seed is
+    still a group of size one: a single unfamiliar mode is exactly the thing
+    that must survive into the next round rather than be rounded away as noise.
+    """
+    groups = {}
+    for a in attempts:
+        if not a["graded"] or a["passed"] or a["signature"] is None:
+            continue
+        digest = a["signature"]["digest"]
+        g = groups.setdefault(digest, {"signature": digest, "seeds": [], "attempts": [],
+                                       "phases": [], "classes": [],
+                                       "factors": signature_factors(a["signature"]),
+                                       "signature_definition": {k: v for k, v in a["signature"].items()
+                                                                if k in ("prediction_status",
+                                                                         "object_residuals", "outcome",
+                                                                         "step")},
+                                       "events": a["signature"].get("events")})
+        g["seeds"].append(a["seed"])
+        g["attempts"].append(a["n"])
+        g["phases"].append(a["phase"])
+        g["classes"].append(a["primitive_class"])
+    modes = []
+    for g in groups.values():
+        g["seeds"] = sorted(set(g["seeds"]))
+        g["classes"] = sorted(set(g["classes"]))
+        g["label"] = outcome_label(g["signature_definition"])
+        # The field that decides the mode: residuals when the object was measured
+        # to move differently, otherwise the fact pattern, otherwise the outcome.
+        g["deciding_field"] = ("object_residuals" if g["signature_definition"].get("object_residuals")
+                               else "world_facts" if g["signature_definition"].get("prediction_status")
+                               else "outcome")
+        modes.append(g)
+    modes.sort(key=lambda m: (-len(m["seeds"]), m["signature"]))
+    return modes
+
+
+def triage_table(attempts, *, step=SIGNATURE_STEP):
+    """The `coverage_triage.json` body: the sweep's modes and the seeds in each.
+
+    Reported per bundle, because two bundles' failures are not the same defect
+    however similar the signatures look; the mode digest is meaningful only for
+    the bytes that produced it.
+    """
+    graded = [a for a in attempts if a["graded"]]
+    by_bundle = {}
+    for a in graded:
+        by_bundle.setdefault(a["bundle_sha256"], []).append(a)
+    bundles = []
+    for digest, rows in by_bundle.items():
+        modes = failure_modes(rows, step=step)
+        bundles.append({"bundle_sha256": digest,
+                        "partial_digest": (digest or "")[:12],
+                        "tested_seeds": sorted({r["seed"] for r in rows}),
+                        "passed_seeds": sorted({r["seed"] for r in rows if r["passed"]}),
+                        "failed_seeds": sorted({r["seed"] for r in rows if not r["passed"]}),
+                        "mode_count": len(modes), "modes": modes,
+                        "family_count": len(mode_families(modes)),
+                        "families": mode_families(modes)})
+    bundles.sort(key=lambda b: (-len(b["failed_seeds"]), b["partial_digest"]))
+    return {"schema": "p4-coverage-triage/1", "signature_step": step,
+            "signature_definition": "prediction-status counts per entity/fact + rounded object-level "
+                                    "residuals + outcome",
+            "grouping": "failures of one bundle, by identical trial_signature digest",
+            "bundles": bundles,
+            "step": step,
+            "empty": not any(b["failed_seeds"] for b in bundles)}
+
+
+def primitive_report(ledger, progress_fn, *, task_dir=None, class_fn=None, status_fn=None):
     """Per primitive class (and per bundle): best progress, attempts, gripper match.
 
     `progress_fn(attempt)` returns the object-level goal progress in [0, 1] or
@@ -456,6 +777,13 @@ def primitive_report(ledger, progress_fn, *, task_dir=None, class_fn=None):
     over observed attempts only, and saturation's N counts observed attempts
     only; an unobserved attempt still counts as an attempt and a bundle, and its
     decided gripper rows still enter gripper_match.
+
+    p4 splits the not-observed attempts by the world's own reason
+    (`status_fn`, default: the status charged_attempts read from the manifest).
+    An `unavailable` attempt means the measurement channel could not resolve the
+    fact at all — a world defect to repair — while `unobserved` means the trial
+    merely did not look. Both are excluded from N and from best progress; only
+    the reported counters and the solver hint differ.
     """
     attempts = _attempts(ledger, task_dir)
     classes = {}
@@ -465,20 +793,28 @@ def primitive_report(ledger, progress_fn, *, task_dir=None, class_fn=None):
         name = class_fn(a) if class_fn else a["primitive_class"]
         value = progress_fn(a)
         value = None if value is None else min(1.0, max(0.0, float(value)))
+        status = status_fn(a) if status_fn else a.get("progress_status")
+        if status not in PROGRESS_STATUSES:
+            status = "observed" if value is not None else "unobserved"
         observed = is_observed(value, a.get("prediction_levels"))
+        unavailable = (not observed
+                       and observation_reason(value, status, a.get("prediction_levels")) == "unavailable")
         c = classes.setdefault(name, {"class": name, "bundles": {}, "attempts": 0, "passes": 0,
                                       "observed_attempts": 0, "unobserved_attempts": 0,
+                                      "unavailable_attempts": 0,
                                       "best_progress": None, "progress_unknown": 0,
                                       "first_attempt": a["n"],
                                       "gripper_checks": Counter(), "history": []})
         b = c["bundles"].setdefault(a["bundle_sha256"], {"attempts": 0, "passes": 0,
                                                          "observed_attempts": 0, "unobserved_attempts": 0,
+                                                         "unavailable_attempts": 0,
                                                          "best_progress": None, "first_attempt": a["n"],
                                                          "policy_body_sha256": a.get("policy_body_sha256")})
         for group in (c, b):
             group["attempts"] += 1
             group["passes"] += int(a["passed"])
-            group["observed_attempts" if observed else "unobserved_attempts"] += 1
+            group["observed_attempts" if observed
+                  else "unavailable_attempts" if unavailable else "unobserved_attempts"] += 1
             if observed and (group["best_progress"] is None or value > group["best_progress"]):
                 group["best_progress"] = value
         c["progress_unknown"] += int(value is None)
@@ -486,6 +822,7 @@ def primitive_report(ledger, progress_fn, *, task_dir=None, class_fn=None):
         resolved = sum(c["gripper_checks"][s] for s in RESOLVED_CHECKS)
         c["history"].append({"n": a["n"], "bundles": len(c["bundles"]), "attempts": c["attempts"],
                              "observed_attempts": c["observed_attempts"], "observed": observed,
+                             "unavailable_attempts": c["unavailable_attempts"],
                              "passes": c["passes"], "best_progress": c["best_progress"],
                              "gripper_match": c["gripper_checks"]["match"] / resolved if resolved else None,
                              "gripper_resolved": resolved})
@@ -502,7 +839,8 @@ def primitive_report(ledger, progress_fn, *, task_dir=None, class_fn=None):
                                           for digest, b in sorted(c["bundles"].items(),
                                                                   key=lambda kv: kv[1]["first_attempt"])],
                        "attempts": c["attempts"], "observed_attempts": c["observed_attempts"],
-                       "unobserved_attempts": c["unobserved_attempts"], "passes": c["passes"],
+                       "unobserved_attempts": c["unobserved_attempts"],
+                       "unavailable_attempts": c["unavailable_attempts"], "passes": c["passes"],
                        "best_progress": c["best_progress"], "progress_unknown": c["progress_unknown"],
                        "gripper_checks": dict(c["gripper_checks"]),
                        "gripper_match": last["gripper_match"], "bundles": c["bundles"],
@@ -515,6 +853,9 @@ def primitive_report(ledger, progress_fn, *, task_dir=None, class_fn=None):
     renamed = [{"policy_body_sha256": body, "classes": sorted(names)}
                for body, names in sorted(bodies.items()) if len(names) > 1]
     return {"classes": report, "graded_attempts": sum(a["graded"] for a in attempts),
+            "observed_attempts": sum(c["observed_attempts"] for c in report),
+            "unobserved_attempts": sum(c["unobserved_attempts"] for c in report),
+            "unavailable_attempts": sum(c["unavailable_attempts"] for c in report),
             "same_policy_body_across_classes": renamed}
 
 
@@ -549,30 +890,56 @@ def saturation(report, K=5, N=8, frac=0.3, gripper_match=0.8):
     return out
 
 
-def summary(report, saturated, *, remaining=None, thresholds=None):
+def summary(report, saturated, *, remaining=None, thresholds=None, rules=None):
     """The compact block the solver reads before its next charged repair."""
     return {"revision": REVISION,
             "thresholds": thresholds or dict(SATURATION_DEFAULTS),
             "saturated_classes": [s["class"] for s in saturated if s["saturated"]],
             "classes": [{k: c[k] for k in ("class", "bundle_count", "attempts", "observed_attempts",
-                                           "unobserved_attempts", "passes", "best_progress",
-                                           "gripper_match")}
+                                           "unobserved_attempts", "unavailable_attempts", "passes",
+                                           "best_progress", "gripper_match")}
                         for c in report["classes"]],
+            # A class whose channel is dead everywhere is visible here rather than
+            # reading as "no evidence". A single observed attempt clears it: the
+            # channel recovered, so more attempts are worth spending on this class.
+            "unavailable_classes": [c["class"] for c in report["classes"]
+                                    if c["unavailable_attempts"] > 0 and c["observed_attempts"] == 0],
+            "observed_attempts": report.get("observed_attempts", 0),
+            "unobserved_attempts": report.get("unobserved_attempts", 0),
+            "unavailable_attempts": report.get("unavailable_attempts", 0),
             "same_policy_body_across_classes": report.get("same_policy_body_across_classes", []),
-            "remaining_budget": remaining, "rules": list(RULES)}
+            "remaining_budget": remaining, "rules": list(RULES) if rules is None else list(rules)}
+
+
+def record_progress(trial_dir):
+    """The recorded progress channel of one trial: (value, status).
+
+    p3 recorded only `search_progress`; the p4 contract adds the reason beside
+    it (`search_progress_status`) so "the channel is broken" and "this trial did
+    not look" stop being the same fact. A manifest that predates the reason —
+    every p3 and earlier trial — is read as `unobserved`: that is exactly the
+    ambiguity the reason field was added to remove, and inventing `unavailable`
+    for it would be a claim the old trial never made.
+    """
+    try:
+        manifest = json.loads((Path(trial_dir) / "judgment_world/manifest.json").read_text())
+    except (OSError, json.JSONDecodeError):
+        return None, "unobserved"
+    value = manifest.get("search_progress")
+    status = manifest.get("search_progress_status")
+    if status not in PROGRESS_STATUSES:
+        status = "unobserved" if value is None else "observed"
+    if status != "observed":
+        return None, status
+    try:
+        return check_progress(value), "observed"
+    except ValueError:
+        return None, "unobserved"
 
 
 def recorded_progress_value(trial_dir):
     """The world's recorded progress() of one trial; None when unobserved or invalid."""
-    try:
-        manifest = json.loads((Path(trial_dir) / "judgment_world/manifest.json").read_text())
-    except (OSError, json.JSONDecodeError):
-        return None
-    value = manifest.get("search_progress")
-    try:
-        return None if value is None else check_progress(value)
-    except ValueError:
-        return None
+    return record_progress(trial_dir)[0]
 
 
 def recorded_progress(task_dir):
@@ -590,7 +957,8 @@ def control_report(ledger, task_dir, *, k=3, thresholds=None, remaining=None):
     info = informative_attempts(attempts)
     return {"revision": REVISION, "progress_source": "world.progress()",
             "class_source": "declared PRIMITIVE_CLASS",
-            "summary": summary(report, saturated, remaining=remaining, thresholds=thresholds),
+            "summary": summary(report, saturated, remaining=remaining, thresholds=thresholds,
+                               rules=rules_for(ledger)),
             "saturation": saturated, "primitive_report": report,
             "informative": {key: info[key] for key in ("graded", "informative", "fraction",
                                                        "distinct_signatures", "first_success")},

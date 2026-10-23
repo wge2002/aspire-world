@@ -361,6 +361,12 @@ class ExecutableSession(WorldSession):
                 except Unsupported:
                     raise
                 except Exception as exc:
+                    if getattr(exc, "episode_budget_exhausted", False):
+                        # CC_TASK_14 success_rule: the simulator's step budget ran out.
+                        # Not the authored world's or policy's fault; the trial is scored
+                        # by the success latch.
+                        self.emit("episode_budget_exhausted", function=name, error=str(exc))
+                        raise
                     self.fault("public_call", exc)
                     raise
             return call
@@ -400,17 +406,49 @@ class ExecutableSession(WorldSession):
 
         None is a legal return: the target was not observed since the last
         manipulation. It is recorded as unobserved, not as 0 and not as a fault.
+
+        p4: a None return must say WHICH kind of nothing it was. `unobserved`
+        means the trial did not re-perceive the target; `unavailable` means the
+        world cannot resolve the fact at all (typically a lost association), so
+        the measurement channel itself is broken and must be repaired before more
+        attempts are spent. The world declares this by defining an optional
+        `progress_reason() -> str`; without it the reason is `unobserved`, which
+        is exactly what every p3-era world means by returning None.
         """
-        from .search_control import check_progress
+        from .search_control import check_progress, PROGRESS_STATUSES
         try:
             value = finite_json(self.module.progress())
             self.progress = None if value is None else check_progress(value)
-            self.progress_status = "unobserved" if value is None else "observed"
+            if value is not None:
+                self.progress_status = "observed"
+            else:
+                self.progress_status = self.progress_reason()
         except Exception as exc:
             self.progress, self.progress_status = None, "error"
             self.fault("progress", exc)
         self.emit("search_progress", progress=self.progress, progress_status=self.progress_status)
         return self.progress
+
+    def progress_reason(self):
+        """Why progress() returned None, as the world itself declares it.
+
+        An unknown or absent answer is `unobserved`: a world that predates this
+        contract means "did not look", and reading a stronger claim into it would
+        invent evidence the trial never recorded.
+        """
+        from .search_control import PROGRESS_STATUSES
+        reason = getattr(self.module, "progress_reason", None)
+        if not callable(reason):
+            return "unobserved"
+        try:
+            value = reason()
+        except Exception as exc:
+            # A raising reason must not silently become `unavailable`: the world
+            # is broken in a way it did not declare, so report the fault and keep
+            # the conservative reading.
+            self.fault("progress_reason", exc)
+            return "unobserved"
+        return value if value in PROGRESS_STATUSES else "unobserved"
 
     def close(self, status):
         for api, original in reversed(self.restores):

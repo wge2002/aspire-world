@@ -332,7 +332,7 @@ class R1ProBehaviourLowLevel(BaseEnv):
             self.obs_buffer['robot']['right_wrist'].append(obs[f'{robot_key}'][f'{robot_key}:right_realsense_link:Camera:0']['rgb'][:,:,:3])
             self.obs_buffer['external'].append(self.env.external_sensors['external_camera'].get_obs()[0]['rgb'][:,:,:3])
         
-        self._record_frame()
+        self._record_frame(obs=obs)
         
         for metric in self.metrics:
             metric.step_callback(self.env)
@@ -769,20 +769,24 @@ class R1ProBehaviourLowLevel(BaseEnv):
         #         if torch.allclose(current_joint_positions, cur_target, atol=0.005):
         #             break
         
-        action = self.robot.q_to_action(holonomic_base_command_in_world_frame(self.robot, target_joint_positions))
+        check_interval = max(1, int(settle_steps))
         for idx in range(max_steps):
-            _ = self.step(action)
-            if idx % int(settle_steps) == 0:
-                self._settle_robot()
-            current_joint_positions = self.robot.get_joint_positions()
-            if torch.allclose(current_joint_positions, target_joint_positions, atol=0.005):
-                break
-            
-        # current_joint_positions = self.get_joint_positions()
-        if torch.allclose(current_joint_positions, target_joint_positions, atol=0.005):
-            return True
-        else:
-            return False
+            # The base command is relative to the robot's current pose.
+            action = self.robot.q_to_action(
+                holonomic_base_command_in_world_frame(self.robot, target_joint_positions)
+            )
+            self.step(action)
+            if (idx + 1) % check_interval == 0 or idx == max_steps - 1:
+                current_joint_positions = self.robot.get_joint_positions()
+                if torch.allclose(current_joint_positions, target_joint_positions, atol=0.005):
+                    # Settling holds the CURRENT joints for at least 50 steps.
+                    # Calling it during convergence repeatedly interrupts the
+                    # requested motion. Settle once, after reaching the target.
+                    self._settle_robot()
+                    return bool(torch.allclose(
+                        self.robot.get_joint_positions(), target_joint_positions, atol=0.005
+                    ))
+        return False
     
     def _lift_arm(self, arm=0):
         """
@@ -876,10 +880,13 @@ class R1ProBehaviourLowLevel(BaseEnv):
             self._frame_buffer.clear()
         return frames
     
-    def _record_frame(self) -> None:
+    def _record_frame(self, obs=None) -> None:
         if not self._record_frames:
             return
-        obs = self.get_observation()
+        # step() already read the current post-action sensor observations.
+        # Reuse that same frame instead of reading/remapping every sensor twice.
+        if obs is None:
+            obs = self.get_observation()
         obs_keys = list(obs.keys())
         robot_key = [key for key in obs_keys if 'robot' in key][0]
         frame ={

@@ -490,11 +490,157 @@ strongest and say plainly in findings.md that none of them succeeded.
 """
 
 
+#: CC_TASK_6 (p5): the ASPIRE v1.0 development budget. Rendered only for a case
+#: with `development_budget: "aspire-v1"`; every other render is byte-identical.
+BUDGET_REVISION = "aspire-v1"
+
+BUDGET_ACCOUNTING = """**Development budget (aspire-v1)** — this replaces a per-seed retry count.
+
+Phase A — until development seed 51 actually passes: every simulator attempt
+(smoke, initial, repair, interactive diagnostic) runs on seed 51, and attempts
+there are NOT capped — keep going while your diagnostics make progress. Other
+seeds, sweeps, `select` and the freeze are refused until seed 51 passes; before
+that the cell stays pending, whatever the count. Only the development
+wall-clock deadline ends phase A.
+
+Phase B — after seed 51 has passed (the passing bundle is v0): sweep v0 over the
+other 14 development seeds (`--phase sweep`, no cost), triage the failures into
+modes, and write at most **8 versions** in total. Every version runs on ALL 15
+development seeds: its first run is `--phase repair --mode <mode> --mode-seeds
+<failing seeds of that mode>` on one of those seeds, the other seeds are
+`--phase sweep` runs of the same files. The next version is refused until the
+current one has run every seed. **At most 3 versions per mode.** A mode still
+unfixed after 3 versions is BLOCKED: write its note and spend no more versions
+on it — move to the next mode. A renamed mode is the same mode.
+
+Probes are free: `--phase probe --seed <N> --code "$TASK_DIR/probe.py"` runs an
+observation-only REPL session (perception and computation only, no motor
+command, no step()) on any development seed. It is not a version and spends
+nothing. Static reading of the API reference, sources, traces and images is
+free and unlimited, and there is no cap on how often you edit code.
+
+Failures, timeouts and crashes are recorded like any other run. An interrupted
+run that really executed is reported as a blocker instead of retried as if it
+never happened; re-running the same bytes after an infrastructure loss keeps
+the same version number. The recorded ledger holds the counts. Ask it rather
+than guessing:
+
+  .venv-libero/bin/python3 {protocol} status
+
+(`development_budget`: `phase`, `versions_used`, `versions_left`,
+`mode_versions`, `blocked_modes`, `freeze_conditions`, `next`.)
+
+Write a blocked mode's note:
+  $TASK_DIR/attempts/mode_<mode>_BLOCKED.md
+  Format:
+    ## Root Cause: [Physical|Perception|Algorithmic]
+    ## Details: <what exactly fails and why, with the seeds>
+    ## What Was Tried: <the versions and approaches>
+"""
+
+BUDGET_SELECTION = """### Step 4 — Synthesize task-level fix
+
+Every version is already a task-level synthesis (not seed-specific). Use
+evidence across seeds; do not assume that one successful seed generalizes.
+
+Save the version you select to TWO locations (create `outputs/working_codes` first if missing):
+  $TASK_DIR/fix_code.py                            ← the frozen evaluation reads this exact path
+  outputs/working_codes/${{SUITE}}_${{TASK}}_fix.py  ← named copy
+{world_files}
+**Freeze only when one of these holds** for the version you select: it passes
+all 15 development seeds; all 8 versions are used; or every development seed it
+still fails belongs to a blocked mode. Select, among the versions that ran all
+15 development seeds (v0 included), the one with the most passes, then fewer
+crashes (program_ok=false), then the simpler one — never merely the last
+version. `select` refuses anything else. Then record the choice and its reason:
+
+  .venv-libero/bin/python3 {protocol} select --reason "<why this version>"
+  .venv-libero/bin/python3 {protocol} check
+
+Remaining failures are reported honestly; 100% success is not required.
+{fallback}"""
+
+#: Pristine-template sentences the budget supersedes (anchor -> replacement).
+BUDGET_WORDING = (
+    ("a smoke spends one of that seed's retries like any other execution.",
+     "a smoke is one phase-A attempt on seed 51 like any other execution (phase-A attempts on "
+     "seed 51 are uncapped)."),
+    ("Run the initial program once on every development seed:",
+     "Run the initial program on the FIRST development seed, 51 (phase A of the development "
+     "budget below); the other seeds come after seed 51 has passed:"),
+    ("# One initial program on every development seed, one process per Bash call.\n"
+     "# Each of these spends one of that seed's three retries.\n",
+     "# Phase A: the initial program runs on seed 51 only; then iterate on seed 51\n"
+     "# with --phase repair until it passes. Attempts on seed 51 are uncapped.\n"),
+    ("--phase initial --seed <N>", "--phase initial --seed 51"),
+    ("For each seed 51–65, check the reward in the replay output dir name: `_reward_1.000` = "
+     "success, `_reward_0.000` = failure. List which seeds passed and which failed. Debug only "
+     "the failed seeds.",
+     "Check the reward in the replay output dir name: `_reward_1.000` = success, `_reward_0.000` "
+     "= failure. Phase A: read seed 51's result and keep iterating on seed 51 until it passes. "
+     "Phase B: once v0 (the bundle that first passed seed 51) has been swept over 51–65, list "
+     "which seeds passed and which failed, group the failures into modes (`coverage_triage.json`) "
+     "and work one mode at a time."),
+    ("Write a fix based on your diagnosis and re-test it on the SAME failed seed while that\n"
+     "seed still has budget:\n",
+     "Write a fix based on your diagnosis. Phase A: re-test it on seed 51 (uncapped):\n"),
+    ("\nThe recorded result names the reward.",
+     "\nPhase B: every fix is a VERSION. Run it first on one seed of the mode it targets,\n"
+     "declaring the mode (`--mode <mode> --mode-seeds <that mode's failing seeds>` on the\n"
+     "same repair command), then run the SAME files on every other development seed with\n"
+     "`--phase sweep --seed <N>` (no cost). At most 3 versions per mode, 8 in total.\n\n"
+     "The recorded result names the reward."),
+    ("If the fix fails, read the new trace.json from the replay output dir and iterate.",
+     "If the fix fails, read the new trace.json from the replay output dir and iterate "
+     "(phase A: on seed 51; phase B: with the next version for that mode, at most 3)."),
+    ("# Write the whole batch session to a file first, then run it once. Same API\n"
+     "# execution semantics as before; it counts as ONE attempt for that seed.\n",
+     "# Write the whole batch session to a file first, then run it once. Same API\n"
+     "# execution semantics as before. Phase A: on seed 51, one uncapped attempt.\n"
+     "# Phase B has no acting diagnostic session: use --phase probe (observation\n"
+     "# only, no motor command, spends nothing) on any development seed.\n"),
+)
+
+
+FALLBACK_BUDGET = """`check` lists what is still missing. This cell has no minimal-program fallback: a
+policy and world that never executed together in development cannot be selected,
+and before seed 51 passes nothing can be selected at all — the cell stays pending.
+Say plainly in findings.md which development seeds the selected version still fails.
+"""
+
+#: The ASPIRE v1.0 coordinator rules (main-agent prompt section 3), for the
+#: one cell this coordinator owns.
+BUDGET_COORDINATOR = """Development budget (aspire-v1): keep the worker on the first development seed
+(51) until it actually succeeds there, then have it test and adapt on the rest.
+Do not cap its attempts while its diagnostics make progress. Keep the cell
+pending before the first development-seed success: never accept a selection or a
+stop before seed 51 has passed. After the generalization work, accept complete
+tested coverage (the selected version run on all of 51-65) with honest remaining
+failures; 100% success is not required. `check` reports the budget's phase,
+versions used, versions per mode and blocked modes under `development_budget`.
+"""
+
+
+def budgeted(case: dict) -> bool:
+    return case.get("development_budget") == BUDGET_REVISION
+
+
+def budget_wording(text: str) -> str:
+    for anchor, replacement in BUDGET_WORDING:
+        if text.count(anchor) != 1:
+            raise ProtocolFailure(f"budget render anchor missing or duplicated: {anchor[:60]!r}")
+        text = text.replace(anchor, replacement)
+    return text
+
+
 def _rewrite_accounting(text: str, case: dict, task_dir: str) -> str:
+    if budgeted(case) and is_sealed(case):
+        raise ProtocolFailure("the aspire-v1 development budget renders oracle cells only")
+    accounting = BUDGET_ACCOUNTING if budgeted(case) else ACCOUNTING
     text = re.sub(
         r"\*\*Hard limit: 3 replay attempts per seed\.\*\*.*?"
         r"## What Was Tried: <list of approaches>\n",
-        ACCOUNTING.format(protocol=PROTOCOL), text, count=1, flags=re.S)
+        accounting.format(protocol=PROTOCOL), text, count=1, flags=re.S)
     if case["condition"] not in WORLD_CONDITIONS:
         world_files = ""
     elif is_judgment(case):
@@ -505,11 +651,16 @@ def _rewrite_accounting(text: str, case: dict, task_dir: str) -> str:
         world_files = ("  $TASK_DIR/fix_world_program.py, $TASK_DIR/fix_inventory.json"
                        "   ← frozen with the program, part of its identity\n")
     fallback = FALLBACK_JUDGMENT if is_judgment(case) else FALLBACK_BASELINE
+    if budgeted(case):
+        fallback = FALLBACK_BUDGET
+    selection = BUDGET_SELECTION if budgeted(case) else SELECTION
     text = re.sub(r"### Step 4 — Synthesize task-level fix\n.*?"
                   r"as fix_code\.py so Stage 2 can still run\.\n",
-                  SELECTION.format(protocol=PROTOCOL, world_files=world_files,
+                  selection.format(protocol=PROTOCOL, world_files=world_files,
                                    fallback=fallback),
                   text, count=1, flags=re.S)
+    if budgeted(case):
+        text = budget_wording(text)
     text = text.replace("The coordinator reads ONLY this file to promote your discoveries into "
                         "the shared skill library",
                         "This is the reviewable record of what you learned")
@@ -577,9 +728,15 @@ create one, and do not write strategy documents of your own.
 def coordinator_prompt(case: dict, prompt_path: Path) -> str:
     promotion = (PROMOTION_C if case["condition"] == "C"
                  else PROMOTION_AB.format(skills=case["skill_library_dir"]))
-    return COORDINATOR.format(cell=case["id"], suite=case["suite"], task=case["task"],
+    text = COORDINATOR.format(cell=case["id"], suite=case["suite"], task=case["task"],
                               prompt_path=prompt_path, promotion=promotion.strip(),
                               protocol=PROTOCOL)
+    if budgeted(case):
+        anchor = "You never run held-out seeds 1-50,"
+        if text.count(anchor) != 1:
+            raise ProtocolFailure("coordinator budget anchor missing or duplicated")
+        text = text.replace(anchor, BUDGET_COORDINATOR + "\n" + anchor)
+    return text
 
 
 def is_local_vllm(case: dict) -> bool:

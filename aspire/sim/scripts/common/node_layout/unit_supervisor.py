@@ -6,7 +6,8 @@ GraspNet, PyRoKi (CPU) and two cell slots, perception and simulators on the
 unit's own cards. A 4-GPU worker runs one unit, an 8-GPU worker two. Units are
 independent: own ports, logs, health checks and ServiceWatch. A failed unit
 stops only itself; the cells it was running are recorded as infrastructure
-failures and keep their claims, and the other unit keeps claiming.
+failures, archived and requeued FRESH once (`unit_layout.infra_requeue`, cap
+`INFRA_REQUEUE_CAP`), and any slot with a sufficient window may claim them.
 
 Each slot claims the next cell atomically (the p3 `mkdir` semantics), binds it
 to its unit for the cell's whole life (model endpoint, service URLs, simulator
@@ -17,6 +18,12 @@ In `native_smoke` mode the supervisor enforces the smoke boundary: it watches
 the cell's development ledger and, once the first charged trial is terminal,
 ends the driver tree (never the trial in flight) and records the smoke result.
 The prompt's pause request is no longer what stops a smoke.
+
+Teardown (CC_TASK_2, 2026-10-17): a unit stops its services by SESSION, with a
+SIGKILL escalation and a verified-empty check (`native_cc_runtime.stop_sessions`);
+the node exits a bounded time after a unit failure, sweeps every session it
+started, records what survived in status.json and ends the process with
+`os._exit`, so no orphan or interpreter shutdown can keep the job Running.
 
 Derived from the p3 search-control `dlc-supervisor.py` (2026-10-14). Kept: the
 launch/support/runtime pins, nonprivileged and identity gates, SAM3 inference
@@ -47,7 +54,7 @@ HERE = Path(__file__).resolve().parent
 sys.path[:0] = [str(HERE), str(HERE.parent)]
 import unit_layout as layout
 from native_cc_runtime import (Service, ServiceWatch, atomic_json, isolated_jit_env,
-                               new_attempt, stop_processes)
+                               new_attempt, stop_processes, stop_sessions)
 
 GRASPNET_ROOT = Path("/mnt/home/gewang/code/ASPIRE/aspire/sim/cap/third_party/contact_graspnet_pytorch")
 GRASPNET_CHECKPOINT_REL = "checkpoints/contact_graspnet/checkpoints"
@@ -63,6 +70,10 @@ COMPAT_ATTEMPTS = 3
 #: Unit startup (Qwen load, SAM3 health, native compat) the node window must allow
 #: before a slot can still claim one whole cell. Measured ~13 min on DSW (Task 4).
 STARTUP_ALLOWANCE = 1800
+#: CC_TASK_5 (2026-10-19): a queue entry carrying this file beside its case.json
+#: supplements an existing, preserved held-out sweep in place (its case names the
+#: source cell's control dir); the driver runs with `--heldout-supplement`.
+SUPPLEMENT_MARKER = layout.SUPPLEMENT_MARKER
 #: Checkpoints only an older recovery chain wrote; such a cell is recovered by hand.
 RECOVERY_CHECKPOINTS = ("native_smoke_state.json", "native_work_continuation_checkpoint.json")
 #: Native smoke ends when the supervisor, not the prompt, sees the first charged
@@ -74,6 +85,12 @@ SMOKE_STOP_REASON = "supervisor_smoke_stop"
 SMOKE_PASS_STATUSES = frozenset({"complete", "world_program_error", "diagnostic_program_error"})
 SMOKE_TRIAL_FIELDS = ("phase", "seed", "attempt", "status", "reward", "task_completed",
                       "sandbox_rc", "process_exit_code", "error", "directory", "trial_dir")
+#: After a unit fails, the node waits at most this long for that unit's threads
+#: (cell cleanup is <= ~2 min) before it stops waiting and exits anyway; the
+#: final session sweep then ends whatever those threads still owned.
+UNIT_STOP_GRACE = 600
+#: How often an idle slot looks for a requeued cell (see `Node.wait_for_requeue`).
+REQUEUE_POLL = 60
 
 
 class UnitDown(RuntimeError):
@@ -231,16 +248,20 @@ class UnitState:
         self.slots = {slot.name: {"state": "idle", "gpu": slot.gpu} for slot in unit.slots}
         self.initial_health = []
         self.watch = None
+        self.failed_at = None
+        self.teardown = None
 
     def fail(self, reason):
         with self.lock:
             if self.failure is None:
                 self.failure = str(reason)
+                self.failed_at = time.monotonic()
         self.down.set()
 
     def describe(self):
         return {**self.unit.describe(), "state": self.state, "failure": self.failure,
-                "slots": self.slots, "owned_pids": [p.pid for p in self.processes]}
+                "slots": self.slots, "owned_pids": [p.pid for p in self.processes],
+                "teardown": self.teardown}
 
 
 class Node:
@@ -252,6 +273,10 @@ class Node:
         self.status_path, self.node_stop_at, self.cell_timeout = status_path, node_stop_at, cell_timeout
         self.mode, self.terminal = mode, TERMINAL[mode]
         self.units = [UnitState(u) for u in units]
+        self.unit_stop_grace = UNIT_STOP_GRACE
+        self.requeue_poll = REQUEUE_POLL
+        #: Notified whenever a cell finishes (and possibly requeues) or the node stops.
+        self.queue_changed = threading.Condition()
         self.stop = threading.Event()
         self.records = []
         self.lock = threading.Lock()
@@ -266,7 +291,9 @@ class Node:
             self.state.update(extra, updated_at=time.time(),
                               units=[u.describe() for u in self.units],
                               completed=[r["cell"] for r in self.records if r["state"] == self.terminal],
-                              failed=[r["cell"] for r in self.records if r["state"] != self.terminal])
+                              failed=[r["cell"] for r in self.records if r["state"] != self.terminal],
+                              requeued=[r["cell"] for r in self.records
+                                        if (r.get("requeue") or {}).get("requeued")])
             atomic_json(self.status_path, self.state)
 
     def slot_state(self, unit, slot, state, **extra):
@@ -281,19 +308,29 @@ class Node:
         self.status("units_starting")
         for thread in threads:
             thread.start()
+        abandoned = []
         while any(t.is_alive() for t in threads):
             for thread in threads:
                 thread.join(.5)
             if self.stop.is_set():
+                with self.queue_changed:
+                    self.queue_changed.notify_all()
                 # Units still starting have no cell to unwind; stop them now.
                 for unit in self.units:
                     if unit.state in ("pending", "starting_services", "startup_checks"):
                         unit.fail("node stopping")
                         stop_processes(unit.processes)
+            alive = [u for t, u in zip(threads, self.units) if t.is_alive()]
+            if alive and all(u.failed_at is not None and time.monotonic() - u.failed_at > self.unit_stop_grace
+                             for u in alive):
+                # Only failed units are left and they overran their grace: a unit
+                # that lost a service must not keep the whole node alive.
+                abandoned = [u.unit.index for u in alive]
+                break
         failed_units = [u.unit.index for u in self.units if u.failure]
         bad = [r for r in self.records if r["state"] != self.terminal]
         name = "node_complete" if not bad and not failed_units else "node_finished_with_failures"
-        self.status(name, failed_units=failed_units)
+        self.status(name, failed_units=failed_units, abandoned_units=abandoned)
         return 0 if not bad and not failed_units else 1
 
     def run_unit(self, unit):
@@ -328,15 +365,13 @@ class Node:
         finally:
             if unit.watch:
                 unit.watch.close()
-            stop_processes(unit.processes)
-            for process in unit.processes:
-                try:
-                    process.wait(timeout=15)
-                except subprocess.TimeoutExpired:
-                    try:
-                        os.killpg(process.pid, signal.SIGKILL)
-                    except ProcessLookupError:
-                        pass
+            # By session, with SIGKILL escalation and a verified-empty check: the
+            # group leader exiting is no proof that its TP workers did.
+            try:
+                unit.teardown = stop_sessions(unit.processes, since=self.state["started_at"])
+            except Exception as exc:  # Never let teardown bookkeeping keep the unit alive.
+                unit.teardown = {"error": f"{type(exc).__name__}: {exc}"}
+                stop_processes(unit.processes)
             unit.state = "failed" if unit.failure else "stopped"
             self.status()
 
@@ -360,6 +395,8 @@ class Node:
                 return
             cell = layout.claim_next(self.root, self.cells, name, binding)
             if cell is None:
+                if self.wait_for_requeue(unit, slot):
+                    continue
                 self.slot_state(unit, slot, "drained")
                 return
             record = self.run_cell(unit, slot, binding, cell, name)
@@ -369,6 +406,30 @@ class Node:
                 unit.fail(f"cleanup failed for {record['cell']}: {record.get('cleanup_error')}")
                 stop_processes(unit.processes)
                 return
+
+    def wait_for_requeue(self, unit, slot) -> bool:
+        """Nothing to claim: wait (True) while a requeue can still arrive, else drain.
+
+        A cell running elsewhere may come back requeued after an infrastructure
+        failure. A slot keeps polling for it only while its own unit is kept up
+        anyway by its sibling slot's cell, so waiting never holds a unit's GPUs
+        on its own; the window check at the top of the slot loop still applies.
+        """
+        while not (self.stop.is_set() or unit.down.is_set()):
+            if layout.claimable(self.root, self.cells):
+                return True
+            flying = layout.in_flight(self.root, self.cells)
+            sibling = any(state.get("state") == "cell_running"
+                          for name, state in unit.slots.items() if name != slot.name)
+            if not (flying and sibling):
+                return False
+            if time.monotonic() + self.cell_timeout + 90 >= self.node_stop_at:
+                return False
+            if unit.slots[slot.name].get("state") != "waiting_for_requeue":
+                self.slot_state(unit, slot, "waiting_for_requeue", in_flight=flying)
+            with self.queue_changed:
+                self.queue_changed.wait(self.requeue_poll)
+        return False
 
     def run_cell(self, unit, slot, binding, cell, name):
         claim = self.root / "queue/claims" / cell.name
@@ -425,9 +486,22 @@ class Node:
                     record.update(state="cleanup_failed", cleanup_error=f"{type(exc).__name__}: {exc}")
         atomic_json(claim / "result.json", record)
         atomic_json(cell / "queue-result.json", record)
+        if record["state"] == "infrastructure":
+            record["requeue"] = self.requeue(cell, record)
         with self.lock:
             self.records.append(record)
+        with self.queue_changed:
+            self.queue_changed.notify_all()
         return record
+
+    def requeue(self, cell, record):
+        """Return a unit-interrupted cell to the queue, fresh, once its tree is gone."""
+        if not (record.get("process_cleanup") or {"verified_no_live_work": True}).get("verified_no_live_work"):
+            return {"requeued": False, "reason": "cell process cleanup was not verified; claim kept"}
+        try:
+            return self.hooks.requeue(self.root, cell, record)
+        except Exception as exc:  # The claim stays; the record says why.
+            return {"requeued": False, "reason": f"{type(exc).__name__}: {exc}"}
 
 
 # ---- production hooks --------------------------------------------------------
@@ -501,6 +575,9 @@ class RealHooks:
         self.py = str(self.repo / ".venv-libero/bin/python3")
         self.service_startup = deadlines.SERVICE_STARTUP
         self.manifest = json.loads((launch / "launch-manifest.json").read_text())
+        #: Every process this node started (services, compat, drivers): the
+        #: final sweep stops each one's session before the supervisor exits.
+        self.spawned = []
 
     # environment
 
@@ -524,6 +601,7 @@ class RealHooks:
         with Path(log).open("x") as output:
             process = subprocess.Popen(command, cwd=cwd or self.repo, env=env, stdin=subprocess.DEVNULL,
                                        stdout=output, stderr=subprocess.STDOUT, start_new_session=True)
+        self.spawned.append(process)
         if track:
             unit.processes.append(process)
         return process
@@ -617,25 +695,31 @@ class RealHooks:
         if differing:
             raise RuntimeError(f"cell {case['id']} differs from the unit's service family: {differing}")
         check_case(case, self.study)
+        check_supplement_entry(cell, case)
         repo = Path(case["sim"])
         self.campaign.verify_runtime(case, repo)
         verify_staged_runtime(repo, self.receipt, case["id"], self.study["required_runtime"])
         self.ownership.verify(case, repo)
-        leftover = [n for n in RECOVERY_CHECKPOINTS if (cell / n).exists()]
+        control = Path(case["control"])
+        leftover = [n for n in RECOVERY_CHECKPOINTS if (control / n).exists()]
         if leftover:
             raise RuntimeError(f"cell carries recovery checkpoints {leftover}; recover it manually")
         return case
 
-    def driver_args(self, bound_path):
+    def driver_args(self, bound_path, supplement=False):
         if self.study["mode"] == "native_smoke":
             return ["--case", bound_path, "--deadline-development", self.study["smoke_deadline_seconds"],
                     "--deadline-heldout", 60, "--native-smoke"]
-        return ["--case", bound_path, "--deadline-development", self.deadlines.DEVELOPMENT,
-                "--deadline-heldout", self.deadlines.HELDOUT]
+        if supplement:
+            return ["--case", bound_path, "--heldout-supplement"]
+        # No --deadline-heldout: the driver derives it from the seeds still to run
+        # (`full_deadlines.heldout_deadline`), which `cell_timeout` is sized from.
+        return ["--case", bound_path, "--deadline-development", self.deadlines.DEVELOPMENT]
 
     def spawn_driver(self, unit, slot, bound, bound_path, cell):
         env = self.env_for(bound)
-        command = python_entry(self.py, self.root / self.study["driver"], *self.driver_args(bound_path))
+        command = python_entry(self.py, self.root / self.study["driver"],
+                               *self.driver_args(bound_path, (cell / SUPPLEMENT_MARKER).is_file()))
         log = self.unit_dir(unit) / "logs" / f"cell-{cell.name}.log"
         return self.spawn(unit, command, log, env, cwd=bound["sim"], track=False)
 
@@ -644,13 +728,18 @@ class RealHooks:
         return (Path(bound["sim"]) / "outputs/libero_fix_loop" / bound["suite"] / bound["task"]
                 / "development_state.json")
 
+    def requeue(self, root, cell, record):
+        return layout.infra_requeue(root, cell, record)
+
     def accept(self, cell, code, smoke_stop=None):
         if self.study["mode"] == "native_smoke":
             state = read_ledger(cell / "native_smoke_state.json")
             if state is None and smoke_stop is None:
                 raise RuntimeError(f"native smoke wrote no readable native_smoke_state.json (exit {code})")
             return accept_smoke(state, code, smoke_stop)
-        return accept_full(json.loads((cell / "campaign_state.json").read_text()), code)
+        # The case's control dir: the cell itself, or a supplemented source cell.
+        control = Path(json.loads((cell / "case.json").read_text())["control"])
+        return accept_full(json.loads((control / "campaign_state.json").read_text()), code)
 
 
 def check_case(case, study):
@@ -671,6 +760,28 @@ def check_case(case, study):
                  for k, v in study.get("expect", {}).items() if case.get(k) != v]
     if problems:
         raise RuntimeError(f"{case.get('id')}: " + "; ".join(problems))
+
+
+def check_supplement_entry(cell: Path, case: dict) -> dict | None:
+    """A supplement entry must name, and match, the source cell it continues."""
+    marker_path = Path(cell) / SUPPLEMENT_MARKER
+    if not marker_path.is_file():
+        if Path(case["control"]).resolve() != Path(cell).resolve():
+            raise RuntimeError(f"{case['id']}: case control {case['control']} is not its queue cell")
+        return None
+    marker = json.loads(marker_path.read_text())
+    problems = []
+    if marker.get("cell") != case["id"]:
+        problems.append(f"marker names {marker.get('cell')!r}")
+    if Path(marker.get("source_control", "")).resolve() != Path(case["control"]).resolve():
+        problems.append(f"marker source {marker.get('source_control')!r} != case control")
+    if Path(case["control"]).resolve() == Path(cell).resolve():
+        problems.append("a supplement entry must not be its own source cell")
+    if marker.get("source_case_sha256") != digest(Path(cell) / "case.json"):
+        problems.append("case.json is not the source cell's staged case")
+    if problems:
+        raise RuntimeError(f"{case['id']}: invalid held-out supplement entry: {problems}")
+    return marker
 
 
 def verify_staged_runtime(repo: Path, receipt: dict, cell_id: str, required) -> dict:
@@ -708,6 +819,25 @@ def verify_launch(launch: Path, root: Path) -> tuple[dict, dict, dict]:
         if name not in receipt["frozen_support"]:
             raise RuntimeError(f"support file not frozen: {name}")
     return manifest, study, receipt
+
+
+#: The window the node keeps back from claims before platform expiry (`main`).
+CLAIM_STOP_RESERVE = 15 * 60
+
+
+def minimum_window_minutes(cell_timeout: int) -> int:
+    """Smallest --node-window-minutes in which a slot can still claim one whole cell."""
+    return -(-(cell_timeout + 90 + STARTUP_ALLOWANCE + CLAIM_STOP_RESERVE) // 60)
+
+
+def node_cell_timeout(cases, deadlines):
+    """One node reserves enough time for its slowest assigned case (mixed-N P6).
+
+    Old studies have no per-case sizing function and retain their original bound.
+    """
+    if hasattr(deadlines, "cell_timeout"):
+        return max(deadlines.cell_timeout(case) for case in cases)
+    return deadlines.DEVELOPMENT + deadlines.HELDOUT + deadlines.FINALIZE_MARGIN
 
 
 def queue_cells(root: Path, study: dict) -> list[Path]:
@@ -774,7 +904,7 @@ def main(argv=None):
     if args.plan:
         print(json.dumps(plan(args, reference), indent=2))
         return 0
-    node_stop_at = time.monotonic() + args.node_window_minutes * 60 - 15 * 60
+    node_stop_at = time.monotonic() + args.node_window_minutes * 60 - CLAIM_STOP_RESERVE
     root = args.root.resolve()
     if launch != root / "launch":
         raise RuntimeError(f"run the supervisor frozen at {root / 'launch'}, not {launch}")
@@ -788,8 +918,24 @@ def main(argv=None):
     sys.path.insert(0, str(root / "support"))
     import full_deadlines
     import output_ownership
+    if not hasattr(full_deadlines, "heldout_deadline"):
+        raise RuntimeError("frozen support/full_deadlines.py predates the derived held-out deadline "
+                           "(CC_TASK_5); restage with the p4 support overlay")
     for cell in cells:
-        check_case(json.loads((cell / "case.json").read_text()), study)
+        case = json.loads((cell / "case.json").read_text())
+        check_case(case, study)
+        if hasattr(full_deadlines, "cell_timeout"):
+            problems = full_deadlines.check_case(case)
+            if problems:
+                raise RuntimeError(f"{case['id']}: " + "; ".join(problems))
+        check_supplement_entry(cell, case)
+        if case["trial_timeout"] > full_deadlines.TRIAL_TIMEOUT:
+            # The driver's derived held-out bound must fit inside cell_timeout.
+            raise RuntimeError(f"{case['id']}: trial_timeout {case['trial_timeout']} exceeds the "
+                               f"{full_deadlines.TRIAL_TIMEOUT}s the cell allowance is sized for")
+        if (cell / SUPPLEMENT_MARKER).is_file() and "heldout_supplement.py" not in receipt["frozen_support"]:
+            raise RuntimeError(f"{case['id']} is a held-out supplement but support/heldout_supplement.py "
+                               "is not frozen")
     campaign.local_vllm_pilot_check(reference_case)
     import yaml
     env_config = yaml.safe_load((repo / reference_case["env_config"]).read_text())["env"]["cfg"]
@@ -815,16 +961,23 @@ def main(argv=None):
     for unit in units:
         case = layout.bind_case(reference_case, layout.slot_binding(unit, unit.slots[0]))
         preflight[unit.index] = environment_preflight(py, repo, runtime_env(case, repo, clean_env()))
+    claim_cells = layout.node_cells(study, cells, args.node_id, args.node_count)
     cell_timeout = (study["smoke_deadline_seconds"] + 600 if study["mode"] == "native_smoke" else
-                    full_deadlines.DEVELOPMENT + full_deadlines.HELDOUT + full_deadlines.FINALIZE_MARGIN)
+                    node_cell_timeout([json.loads((c / "case.json").read_text()) for c in claim_cells],
+                                      full_deadlines))
     window = node_stop_at - time.monotonic()
     if cell_timeout + 90 + STARTUP_ALLOWANCE > window:
         # Otherwise every slot reports time_window_exhausted and the node ends "cleanly" with no work.
         raise RuntimeError(f"node window leaves {window:.0f}s before the claim stop, less than one cell "
-                           f"({cell_timeout}s + 90s cleanup) after {STARTUP_ALLOWANCE}s of unit startup")
+                           f"({cell_timeout}s + 90s cleanup) after {STARTUP_ALLOWANCE}s of unit startup; "
+                           f"--node-window-minutes must be >= {minimum_window_minutes(cell_timeout)}")
+    # CC_TASK_6: a study may pin cells to nodes (`node_cells`); otherwise every
+    # node claims from the whole queue. Every cell was checked above either way.
     if args.preflight:
         # Writes nothing under the root: the real run must still find no worker registered.
-        print(json.dumps({"preflight": "passed", "cells": [c.name for c in cells], "mode": study["mode"],
+        print(json.dumps({"preflight": "passed", "cells": [c.name for c in cells],
+                          "node_cells": [c.name for c in claim_cells], "node_id": args.node_id,
+                          "mode": study["mode"], "cell_timeout_seconds": cell_timeout,
                           "units": [u.describe() for u in units], "util": args.util,
                           "environment_preflight": preflight}, indent=2))
         return 0
@@ -835,7 +988,7 @@ def main(argv=None):
                       reference_case=reference_case, model_reference=reference, util=args.util,
                       invocation=invocation, deadlines=full_deadlines, campaign=campaign,
                       ownership=output_ownership, runtime_env=runtime_env)
-    node = Node(root=root, cells=cells, units=units, hooks=hooks, worker=worker,
+    node = Node(root=root, cells=claim_cells, units=units, hooks=hooks, worker=worker,
                 status_path=invocation / "status.json", node_stop_at=node_stop_at,
                 cell_timeout=cell_timeout, mode=study["mode"])
     node.state.update(host=os.uname().nodename, supervisor_pid=os.getpid(), attempt_dir=str(invocation),
@@ -848,14 +1001,52 @@ def main(argv=None):
         node.stop.set()
 
     handlers = {sig: signal.signal(sig, interrupted) for sig in (signal.SIGTERM, signal.SIGINT)}
+    code = 1
     try:
-        return node.run()
+        code = node.run()
+        return code
     finally:
-        for unit in node.units:
-            stop_processes(unit.processes)
+        node.status(exit_cleanup=final_sweep(hooks.spawned, since=node.state["started_at"]),
+                    exit_code=code)
         for sig, handler in handlers.items():
             signal.signal(sig, handler)
 
 
+def final_sweep(spawned, *, since=None) -> dict:
+    """Before the supervisor exits: no session it started and no descendant survives.
+
+    Covers what per-unit teardown cannot reach: a cell driver's separately owned
+    sessions, and anything a unit thread abandoned past UNIT_STOP_GRACE.
+    """
+    import psutil
+    result = {"sessions": stop_sessions(spawned, grace=10, kill_wait=10, since=since)}
+    children = psutil.Process().children(recursive=True)
+    for child in children:
+        try:
+            child.kill()
+        except psutil.Error:
+            pass
+    _, alive = psutil.wait_procs(children, timeout=10)
+    result["descendants_killed"] = [c.pid for c in children]
+    result["descendants_surviving"] = [c.pid for c in alive]
+    result["verified_empty"] = result["sessions"]["verified_empty"] and not alive
+    return result
+
+
+def run_and_exit(argv=None):
+    """Run, flush, and end the PROCESS: interpreter shutdown cannot hang the job."""
+    try:
+        code = main(argv)
+    except SystemExit as exc:
+        code = exc.code if isinstance(exc.code, int) else (0 if exc.code is None else 1)
+    except BaseException:
+        import traceback
+        traceback.print_exc()
+        code = 1
+    sys.stdout.flush()
+    sys.stderr.flush()
+    os._exit(int(code or 0))
+
+
 if __name__ == "__main__":
-    raise SystemExit(main())
+    run_and_exit()

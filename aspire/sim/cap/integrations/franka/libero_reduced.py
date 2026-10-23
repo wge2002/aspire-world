@@ -5,6 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import logging
+import os
 import pathlib
 import time
 from typing import Any
@@ -16,6 +17,15 @@ from PIL import Image, ImageDraw
 from scipy.spatial.transform import Rotation as SciRotation
 
 logger = logging.getLogger(__name__)
+
+#: CC_TASK_14 M4: the policy-API revision a case's method switch selects (env var set by
+#: the protocol's runtime_env). Absent: every function, docstring and output unchanged.
+API_REVISION_ENV = "ASPIRE_API_REVISION"
+IK_WORKSPACE = (np.array([-0.1, -0.5, 0.005]), np.array([0.75, 0.5, 0.9]))
+
+
+def api_revision() -> str | None:
+    return os.environ.get(API_REVISION_ENV) or None
 
 from aspire.sim.cap.envs.base import (
     BaseEnv,
@@ -117,6 +127,11 @@ class FrankaLiberoApiReduced(ApiBase):
         fns["goto_home_joint_position"] = self.goto_home_joint_position
         fns["subsample_point_cloud"] = self.subsample_point_cloud
         fns["filter_noise"] = self.filter_noise
+        if api_revision() == "m4-r1":
+            # Same names, so every action list, world binding and probe rule is unchanged.
+            fns["solve_ik"] = self.solve_ik_m4
+            fns["goto_pose"] = self.goto_pose_m4
+            fns["subsample_point_cloud"] = self.subsample_point_cloud_m4
 
         # # CuRobo, uncomment these for the coding agent to use them!
         # fns["parse_grasp_poses_for_curobo"] = self.parse_grasp_poses_for_curobo
@@ -480,6 +495,157 @@ class FrankaLiberoApiReduced(ApiBase):
         joints = self.solve_ik(pos, quat)
         self.move_to_joints(joints)
     
+    # ---- CC_TASK_14 API revision m4-r1 (registered under the same names) ---- #
+
+    def solve_ik_m4(
+        self,
+        position: np.ndarray,
+        quaternion_wxyz: np.ndarray,
+    ) -> np.ndarray:
+        """Solve inverse kinematics for the panda_hand link.
+
+        Args:
+            position:
+                Target position in world frame.
+                Shape: (3,), dtype float64.
+            quaternion_wxyz:
+                Target orientation as a unit quaternion in world frame.
+                Shape: (4,), [w, x, y, z], dtype float64.
+
+        Returns:
+            joints:
+                np.ndarray of shape (7,), dtype float64.
+                Joint angles for the 7 DoF Franka arm.
+
+        The target is clipped to the reachable workspace x in [-0.1, 0.75],
+        y in [-0.5, 0.5], z in [0.005, 0.9]. If the requested orientation fails,
+        top-down, 45-tilt and side-approach orientations are tried in that order.
+        Whenever the target was clipped or another orientation was used, one line
+        starting with "[solve_ik]" is printed with the requested and the USED
+        position and orientation: the joints then reach the used pose, not the
+        requested one. The joints are a best-effort solution; check the reached
+        pose with get_observation()["robot_cartesian_pos"] after moving.
+
+        Example:
+            >>> target_pos = np.array([0.5, 0.0, 0.3])
+            >>> target_quat = np.array([1.0, 0.0, 0.0, 0.0])  # identity, wxyz
+            >>> joints = solve_ik(target_pos, target_quat)
+            >>> move_to_joints(joints)
+        """
+        requested = np.asarray(position, dtype=np.float64).reshape(3)
+        used = np.clip(requested, *IK_WORKSPACE)
+        quat_wxyz = np.asarray(quaternion_wxyz, dtype=np.float64).reshape(4)
+        orientations = [
+            ("requested", quat_wxyz),
+            ("top-down", np.array([0.0, 1.0, 0.0, 0.0], dtype=np.float64)),
+            ("45-tilt", np.array([0.707, 0.707, 0.0, 0.0], dtype=np.float64)),
+            ("side-approach", np.array([0.707, 0.0, 0.707, 0.0], dtype=np.float64)),
+        ]
+        for label, quat in orientations:
+            try:
+                off_pos = apply_tcp_offset(used, quat, self._TCP_OFFSET)
+                self.cfg = solve_ik_with_convergence(self.ik_solve_fn, quat, off_pos, self.cfg)
+            except Exception:
+                logger.warning("IK failed with orientation '%s', trying next fallback", label)
+                continue
+            clipped = not np.allclose(used, requested)
+            if clipped or label != "requested":
+                parts = []
+                if clipped:
+                    parts.append(f"target clipped to the workspace: requested {np.round(requested, 4).tolist()} "
+                                 f"-> used {np.round(used, 4).tolist()}")
+                if label != "requested":
+                    parts.append(f"orientation substituted: requested wxyz {np.round(quat_wxyz, 4).tolist()} "
+                                 f"-> used {label} {np.round(quat, 4).tolist()}")
+                print("[solve_ik] " + "; ".join(parts), flush=True)
+            return extract_arm_joints(self.cfg)
+        raise RuntimeError(f"IK failed for position {used} (requested {requested}) with all orientation fallbacks")
+
+    def goto_pose_m4(
+        self,
+        position: np.ndarray,
+        quaternion_wxyz: np.ndarray,
+        z_approach: float = 0.0,
+        max_step: float | None = None,
+    ) -> None:
+        """Go to pose using Inverse Kinematics with optional approach motion.
+
+        Combines solve_ik + move_to_joints into a single call. If z_approach > 0,
+        first moves to position offset by z_approach in the gripper's Z axis,
+        then moves to the final position.
+
+        A single blocking move of more than about 0.07 m can stop short of its
+        target. Pass max_step (metres, e.g. 0.05) for a segmented move: the path
+        from the current end-effector position (get_observation()
+        ["robot_cartesian_pos"][:3]) to each target is split into straight-line
+        steps of at most max_step, each solved and executed in turn; the final
+        target is then re-issued once if the hand is still more than 0.01 m away.
+        One line starting with "[goto_pose]" reports the steps and the remaining
+        distance. max_step=None is the single move.
+
+        Args:
+            position: (3,) XYZ target in meters (world frame).
+            quaternion_wxyz: (4,) WXYZ unit quaternion (world frame).
+            z_approach: Z offset for approach motion (meters). Default 0.0.
+            max_step: longest straight-line step of a segmented move (meters), or None.
+
+        Example:
+            >>> goto_pose(np.array([0.5, 0.0, 0.3]), np.array([0.0, 1.0, 0.0, 0.0]), z_approach=0.075)
+            >>> goto_pose(np.array([0.5, 0.2, 0.3]), np.array([0.0, 1.0, 0.0, 0.0]), max_step=0.05)
+        """
+        pos = np.asarray(position, dtype=np.float64).reshape(3)
+        quat = np.asarray(quaternion_wxyz, dtype=np.float64).reshape(4)
+        targets = []
+        if z_approach > 0.0:
+            approach_pos = pos.copy()
+            approach_pos[2] += z_approach
+            targets.append(approach_pos)
+        targets.append(pos)
+        if max_step is None:
+            for target in targets:
+                self.move_to_joints(self.solve_ik_m4(target, quat))
+            return
+        max_step = float(max_step)
+        if not np.isfinite(max_step) or max_step < 0.005:
+            raise ValueError("max_step must be a finite step length of at least 0.005 m")
+        start = self._hand_position()
+        steps = 0
+        for target in targets:
+            count = max(1, int(np.ceil(np.linalg.norm(target - start) / max_step)))
+            for i in range(1, count + 1):
+                self.move_to_joints(self.solve_ik_m4(start + (target - start) * (i / count), quat))
+            steps += count
+            start = target
+        remaining = float(np.linalg.norm(self._hand_position() - pos))
+        if remaining > 0.01:
+            self.move_to_joints(self.solve_ik_m4(pos, quat))
+            remaining = float(np.linalg.norm(self._hand_position() - pos))
+        print(f"[goto_pose] segmented move: {steps} step(s) of <= {max_step:.3f} m; "
+              f"remaining distance to target {remaining:.4f} m", flush=True)
+
+    def _hand_position(self) -> np.ndarray:
+        return np.asarray(self._env.get_observation()["robot_cartesian_pos"][:3], dtype=np.float64)
+
+    def subsample_point_cloud_m4(self, pc: np.ndarray, max_points: int = 10000) -> np.ndarray:
+        """Randomly subsample a point cloud to a maximum number of points.
+
+        The subsample is drawn from a random generator seeded by the point cloud's
+        own content, so the same point cloud always gives the same subsample.
+
+        Args:
+            pc: (N, 3) array of points.
+            max_points: The maximum number of points to subsample to. Default is 10000.
+        Returns:
+            subsampled_pc: (M, 3) array of subsampled points where M <= max_points.
+        """
+        if len(pc) > max_points:
+            import hashlib
+            data = np.ascontiguousarray(pc)
+            seed = int.from_bytes(hashlib.sha256(data.tobytes() + str((data.shape, max_points)).encode())
+                                  .digest()[:4], "little")
+            return pc[np.random.RandomState(seed).choice(len(pc), max_points, replace=False)]
+        return pc
+
     def goto_home_joint_position(self) -> None:
         """Return the arm to its reset joint configuration with high manipulability"""
         home = getattr(self._env, "home_joint_position", None)

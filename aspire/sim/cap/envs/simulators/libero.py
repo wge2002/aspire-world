@@ -37,6 +37,26 @@ from libero.utils import get_libero_path  # type: ignore[import-not-found]
 #     ) from e
 
 
+#: CC_TASK_14 method switch `success_rule` (env var set by the protocol's runtime_env).
+SUCCESS_RULE_ENV = "ASPIRE_SUCCESS_RULE"
+LATCH_RULE = "libero_latch"
+BUDGET_EXHAUSTED_MESSAGE = "executing action in terminated episode"
+
+
+class EpisodeBudgetExhausted(ValueError):
+    """robosuite's horizon error, marked: the step budget is used up (not a program fault).
+
+    Raised only under the libero_latch success rule, with robosuite's own message,
+    so every caller that matched the ValueError or its text still does.
+    """
+
+    episode_budget_exhausted = True
+
+
+def latch_rule() -> bool:
+    return os.environ.get(SUCCESS_RULE_ENV) == LATCH_RULE
+
+
 class FrankaLiberoEnv(BaseEnv):
     """Franka Libero environment.
 
@@ -82,6 +102,10 @@ class FrankaLiberoEnv(BaseEnv):
         self._current_info = None
         self._current_reward = None
         self._current_done = None
+        #: libero_latch: LIBERO's per-step success (done = _check_success()) seen at any
+        #: control step since reset, and whether the step budget ran out.
+        self._success_latched = False
+        self._budget_exhausted = False
 
         # Video capture
         self._record_frames = False
@@ -186,6 +210,9 @@ class FrankaLiberoEnv(BaseEnv):
         # 10 steps suffice — joints converge by step ~5.
         for _ in range(10):
             self._step_once()
+        # The latch counts the program's steps only, as every reset starts unsolved.
+        self._success_latched = False
+        self._budget_exhausted = False
 
         obs = self.get_observation()
         self.gripper_link_wxyz_xyz = np.concatenate(
@@ -248,7 +275,7 @@ class FrankaLiberoEnv(BaseEnv):
 
             # Step the environment
             self._current_obs, self._current_reward, self._current_done, self._current_info = (
-                self.handle.step(action)
+                self._handle_step(action)
             )
             self._sim_step_count += 1
 
@@ -270,6 +297,21 @@ class FrankaLiberoEnv(BaseEnv):
 
             steps += 1
 
+    def _handle_step(self, action):
+        """One LIBERO control step; under libero_latch it latches success and marks the budget error."""
+        if not latch_rule():
+            return self.handle.step(action)
+        try:
+            result = self.handle.step(action)
+        except ValueError as exc:
+            if BUDGET_EXHAUSTED_MESSAGE in str(exc):
+                self._budget_exhausted = True
+                raise EpisodeBudgetExhausted(str(exc)) from exc
+            raise
+        if result[2]:  # LIBERO's done is _check_success() at this control step.
+            self._success_latched = True
+        return result
+
     def _set_gripper(self, fraction: float) -> None:
         """Set gripper opening fraction.
 
@@ -286,7 +328,7 @@ class FrankaLiberoEnv(BaseEnv):
         action[-1] = 1.0 - action[-1] * 2.0
 
         self._current_obs, self._current_reward, self._current_done, self._current_info = (
-            self.handle.step(action)
+            self._handle_step(action)
         )
         self._sim_step_count += 1
 
@@ -433,6 +475,8 @@ class FrankaLiberoEnv(BaseEnv):
         return poses
 
     def compute_reward(self) -> float:
+        if latch_rule() and self._success_latched:
+            return 1.0
         return self._current_reward
 
     def get_observation(self) -> dict[str, Any]:
@@ -531,7 +575,9 @@ class FrankaLiberoEnv(BaseEnv):
         return self._sim_step_count / self._control_freq
 
     def task_completed(self) -> bool:
-        """Compute if the task is completed."""
+        """Compute if the task is completed (under libero_latch: at any step since reset)."""
+        if latch_rule() and self._success_latched:
+            return True
         return self.handle.env.check_success()
 
     # ------------------------- Video Capture -------------------------

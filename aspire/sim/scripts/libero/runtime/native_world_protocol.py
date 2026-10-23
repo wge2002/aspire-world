@@ -4,6 +4,15 @@ The ordinary protocol and ledger remain authoritative. An ended infrastructure
 attempt may be explicitly closed as unusable; its original status and all spent
 attempts survive. It never becomes graded evidence. A later actual execution is
 needed for coverage, and exhausted missing coverage remains terminal.
+
+CC_TASK_12: a row the trial watchdog killed is first judged by the protocol's
+`watchdog_verdict` from its preserved evidence. A policy that had already
+finished (its outcome recorded before the kill during artifact saving) or that
+ran out of its trial budget is settled as that graded trial, exactly as a new
+trial would now be recorded, with `recovery.disposition` SETTLED; only a stalled
+or unjudgeable row is closed without usable evidence. Before, close-infra refused
+the first kind ("usable-looking trial evidence exists") and nothing else could
+settle it, so l10 twomoka blocked with 19 h of development left.
 """
 from __future__ import annotations
 
@@ -19,6 +28,7 @@ import native_world_protocol as protocol
 from native_world_fixloop_state import NativeWorldState, ProtocolError
 
 DISPOSITION = "closed_without_usable_evidence"
+SETTLED = "settled_from_watchdog_evidence"
 original_progress = NativeWorldState.progress
 original_replay = protocol.run_replay
 
@@ -44,10 +54,32 @@ def progress(self):
         {"seed": r["seed"], "phase": r["phase"], "directory": r["directory"],
          "spends_retry": r["spends_retry"], "status": r["status"], "recovery": r["recovery"]}
         for r in closed_rows]
+    # CC_TASK_12: rows close-infra settled from watchdog evidence (now graded trials).
+    result["settled_watchdog_attempts"] = [
+        {"seed": r["seed"], "phase": r["phase"], "directory": r["directory"],
+         "kind": (r.get("watchdog") or {}).get("kind"), "recovery": r["recovery"]}
+        for r in self.data["trials"] if (r.get("recovery") or {}).get("disposition") == SETTLED]
     return result
 
 
-def close_attempt(state, directory, reason):
+def settle_watchdog(case, state, row, reason):
+    """A watchdog-killed row whose own evidence settles it (CC_TASK_12); None otherwise."""
+    directory = state.task_dir / row["directory"]
+    verdict = protocol.watchdog_verdict(case, directory,
+                                        protocol.result_root(case, directory, row["phase"], row["seed"]),
+                                        row["phase"], row["seed"], row.get("error", ""))
+    if not verdict or not verdict["settled"]:
+        return None
+    original = {k: row.get(k) for k in ("status", "error", "process_exit_code")}
+    row.update(protocol.watchdog_result(state, verdict, directory), status="complete", error="",
+               watchdog={k: v for k, v in verdict.items() if k != "result"},
+               recovery={"bundle_sha256": row["bundle_sha256"], "disposition": SETTLED, "reason": reason,
+                         "original": original, "executions_added": 0, "attempts_refunded": 0})
+    state.save()
+    return row
+
+
+def close_attempt(state, directory, reason, case=None):
     if not reason.strip():
         raise ProtocolError("a concrete infrastructure disposition reason is required")
     rows = [r for r in state.data["trials"] if r["directory"] == str(directory)]
@@ -56,6 +88,10 @@ def close_attempt(state, directory, reason):
     row = rows[0]
     if row["phase"] == "snapshot":
         raise ProtocolError("a lost single snapshot cannot be replaced or counted complete; report terminal cell")
+    if case is not None and not closed(row):
+        settled = settle_watchdog(case, state, row, reason)
+        if settled is not None:
+            return settled
     if protocol.parse_result(state.task_dir / directory / "results", row["seed"]) is not None:
         raise ProtocolError("usable-looking trial evidence exists; outer recovery must inspect it, do not discard it")
     if closed(row):
@@ -91,7 +127,7 @@ def main():
     state = NativeWorldState(task, protocol.identity(case, repo), resume=True)
     with (task / ".trial.lock").open("a") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        row = close_attempt(state, args.directory, args.reason)
+        row = close_attempt(state, args.directory, args.reason, case)
     print(json.dumps({"closed": row, "progress": state.progress()}, indent=2))
     return 0
 

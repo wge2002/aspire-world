@@ -129,7 +129,9 @@ def test_unflagged_judgment_prompt_still_carries_its_own_contract():
 # --- protocol wiring ------------------------------------------------------
 
 def test_only_ordinary_development_trials_are_audited():
-    assert set(protocol.TRIAL_PHASES) == {"smoke", "initial", "repair"}
+    # `sweep` (p4, CC_TASK_2) re-runs a tested candidate's exact bytes on a
+    # development seed: a graded development trial, audited like the others.
+    assert set(protocol.TRIAL_PHASES) == {"smoke", "initial", "repair", "sweep"}
     assert not set(protocol.TRIAL_PHASES) & protocol.NON_TRIAL_PHASES
 
 

@@ -54,26 +54,40 @@ def trace(*, gripper=("match", "match"), handle_residual=0.06, handle_y=(0.0, 0.
     return events
 
 
-def write_trial(task_dir, directory, events, *, cls=None, progress=None, passed=False):
+def write_trial(task_dir, directory, events, *, cls=None, progress=None, passed=False,
+                progress_status=None):
     folder = task_dir / directory
     (folder / "judgment_world").mkdir(parents=True, exist_ok=True)
     (folder / "judgment_world/events.jsonl").write_text("".join(json.dumps(e) + "\n" for e in events))
     header = f'PRIMITIVE_CLASS = "{cls}"\n' if cls else ""
     (folder / "code.py").write_text(header + "get_observation()\n")
-    (folder / "judgment_world/manifest.json").write_text(json.dumps({
-        "status": "complete", "search_progress": progress,
-        "result": {"sandbox_rc": 0, "task_completed": passed}}))
+    manifest = {"status": "complete", "search_progress": progress,
+                "result": {"sandbox_rc": 0, "task_completed": passed}}
+    if progress_status is not None:
+        manifest["search_progress_status"] = progress_status
+    (folder / "judgment_world/manifest.json").write_text(json.dumps(manifest))
 
 
-def synthetic_ledger(task_dir, rows):
-    """rows: (phase, seed, bundle, events, cls, progress, passed)."""
+def synthetic_ledger(task_dir, rows, *, real_bundles=False):
+    """rows: (phase, seed, bundle, events, cls, progress, passed[, status]).
+
+    `bundle` is normally a short label expanded to a 64-char digest. With
+    `real_bundles` it is instead the policy name of a genuine bundle, so the row
+    digest equals `bundle_identity({"policy": code_hash(name)})` and coverage
+    lookups by bundle can find it.
+    """
     trials = []
-    for i, (phase, seed, bundle, events, cls, progress, passed) in enumerate(rows):
+    for i, row in enumerate(rows):
+        phase, seed, bundle, events, cls, progress, passed = row[:7]
+        status = row[7] if len(row) > 7 else None
         directory = f"development/{phase}/seed_{seed}/attempt_{i}"
-        write_trial(task_dir, directory, events, cls=cls, progress=progress, passed=passed)
+        write_trial(task_dir, directory, events, cls=cls, progress=progress, passed=passed,
+                    progress_status=status)
+        digest = (ledger.bundle_identity({"policy": ledger.code_hash(bundle)}) if real_bundles
+                  else bundle * 64)
         trials.append({"phase": phase, "seed": seed, "attempt": 1, "status": "complete",
                        "directory": directory, "spends_retry": True, "executed": True,
-                       "bundle_sha256": bundle * 64, "sandbox_rc": 0, "task_completed": int(passed)})
+                       "bundle_sha256": digest, "sandbox_rc": 0, "task_completed": int(passed)})
     return {"identity": {"dev_seeds": list(range(51, 66))}, "trials": trials}
 
 
@@ -641,13 +655,16 @@ def test_search_control_next_flags_an_unobserved_trial(harness):
     assert observed["this_trial"]["observed"] is True and "hint" not in observed
     h.events = trace(handle_residual=None)  # gripper re-checked, target never judged
     unobserved = h.trial("initial", 52)["search_control_next"]
-    assert unobserved["this_trial"] == {"progress": 0.0, "object_predictions_decided": 0,
+    assert unobserved["this_trial"] == {"progress": 0.0, "progress_status": "observed",
+                                        "object_predictions_decided": 0,
                                         "gripper_predictions_decided": 2, "observed": False,
+                                        "reason": "no_object_prediction",
                                         "hint": sc.UNOBSERVED_HINT}
     assert unobserved["hint"] == "target not re-observed: this attempt is not evidence for saturation"
     h.events, h.progress = trace(), None  # object judged, but progress() returned None
     none = h.trial("initial", 53)["search_control_next"]
     assert none["this_trial"]["observed"] is False and none["hint"] == sc.UNOBSERVED_HINT
+    assert none["this_trial"]["reason"] == "unobserved"
     cls, = none["classes"]
     assert (cls["observed_attempts"], cls["unobserved_attempts"]) == (1, 2)
 
@@ -673,6 +690,118 @@ def test_admission_rejects_a_rehearsal_without_both_prediction_levels_free_of_ch
     assert not [r for r in h.state.data["trials"] if r["phase"] == "initial"]
 
 
+def _early_stopped(h):
+    """Snapshot + three identical failing initial trials: seeds 54-65 deferred."""
+    h.trial("snapshot", 51)
+    for seed in (51, 52, 53):
+        h.trial("initial", seed)
+    assert h.state.deferred_seeds() == list(range(54, 66))
+    return ledger.bundle_identity({"policy": ledger.code_hash((h.task_dir / "initial_code.py").read_text()),
+                                   "world": ledger.code_hash((h.task_dir / "initial_world_program.py").read_text())})
+
+
+def test_protocol_sweep_spends_no_repair_retry_and_counts_as_coverage(harness):
+    h = harness()
+    initial = _early_stopped(h)
+    record = h.trial("sweep", 54)
+    assert record["status"] == "complete" and record["phase"] == "sweep"
+    assert record["spends_retry"] is False and record["executed"] is True
+    assert record["directory"] == "development/sweep/seed_54/attempt_1"
+    assert h.state.retries_used(54) == 0 and h.state.retries_remaining(54) == 3
+    assert h.state.covered_seeds(initial) == [51, 52, 53, 54]
+    # The sweep row is graded evidence the next repair is triaged on, and a later
+    # charged repair on the same seed does not collide with its directory.
+    triage = protocol.coverage_triage(h.case, h.state)
+    assert 54 in json.loads(Path(triage["report"]).read_text())["bundles"][0]["tested_seeds"]
+    repair = h.trial("repair", 54, h.policy("fix_code.py", "pull", "v2"))
+    assert repair["directory"] == "development/repair/seed_54/attempt_1" and h.state.retries_used(54) == 1
+
+
+def test_protocol_sweep_limits(harness):
+    h = harness()
+    _early_stopped(h)
+    untested = h.policy("fix_code.py", "pull", "never-ran")
+    with pytest.raises(ledger.ProtocolError, match="already tested candidate"):
+        h.trial("sweep", 55, untested)
+    with pytest.raises(ledger.ProtocolError, match="already covered"):
+        h.trial("sweep", 51)  # the initial bytes already ran seed 51
+    h.trial("sweep", 54)
+    with pytest.raises(ledger.ProtocolError, match="already covered"):
+        h.trial("sweep", 54)  # once per seed per candidate
+    second = h.policy("second.py", "push", "v2")
+    h.trial("repair", 55, second)
+    assert h.trial("sweep", 56, second)["status"] == "complete"  # second swept candidate
+    # CC_TASK_4: no per-cell candidate cap — a third candidate may be swept too.
+    third = h.policy("third.py", "lift", "v3")
+    h.trial("repair", 57, third)
+    assert h.trial("sweep", 58, third)["status"] == "complete"
+    assert [r["seed"] for r in h.state.records("sweep")] == [54, 56, 58]
+    assert all(not r["spends_retry"] for r in h.state.records("sweep"))
+
+
+def test_an_interrupted_sweep_is_closable_and_may_be_rerun_without_charging(harness):
+    h = harness()
+    _early_stopped(h)
+    record = h.state.begin_trial("sweep", 54, h.state.data["trials"][1]["bundle"], {"policy": "p"})
+    h.state.finish_trial(record, result=None, exit_code=None, error="unit down")
+    assert record["status"] == "infrastructure_error" and not record["spends_retry"]
+    h.state.resolve_interrupted(record, result=None, exit_code=None, error="unit down",
+                                recovery={"disposition": "closed_without_usable_evidence"})
+    assert not record["spends_retry"] and h.state.retries_used(54) == 0
+    # It covered nothing, so the same candidate may sweep the seed again.
+    again = h.trial("sweep", 54)
+    assert again["status"] == "complete" and again["directory"].endswith("attempt_2")
+
+
+def test_held_out_seeds_cannot_be_swept(harness):
+    h = harness()
+    _early_stopped(h)
+    with pytest.raises(ledger.ProtocolError, match="held out"):
+        h.trial("sweep", 7)
+
+
+def _freeze_initial_on_disk(h):
+    for src, dst in (("initial_code.py", "fix_code.py"), ("initial_world_program.py", "fix_world_program.py")):
+        (h.task_dir / dst).write_text((h.task_dir / src).read_text())
+
+
+def test_check_is_incomplete_not_terminal_while_the_sweep_is_payable(harness):
+    h = harness()
+    _early_stopped(h)
+    _freeze_initial_on_disk(h)
+    result = protocol.check(h.case, h.repo, h.state)
+    assert result["decision_type"] == "incomplete" and result["terminal_reasons"] == []
+    gate = result["coverage_gate"]
+    assert gate["missing"] == list(range(54, 66)) and gate["payable"]
+    assert gate["reachability"]["reachable"]
+    assert any("trial --phase sweep" in e for e in result["errors"])
+
+
+def test_check_reports_an_unreachable_gate_as_terminal_with_a_structured_reason(harness):
+    h = harness()
+    _early_stopped(h)
+    _freeze_initial_on_disk(h)
+    # CC_TASK_4: with no sweep cap every TESTED candidate stays sweepable, so the
+    # gate is unreachable only when nothing was ever graded: the initial rows were
+    # lost to infrastructure, and no retry is left anywhere to test anything.
+    trials = h.state.data["trials"]
+    for row in trials:
+        if row["phase"] == "initial" and row["status"] == "complete":
+            row["status"] = "infrastructure_error"
+    for seed in h.state.seeds:
+        while h.state.retries_remaining(seed):
+            trials.append({"phase": "diagnostic", "seed": seed, "attempt": 9, "status": "diagnostic_program_error",
+                           "directory": None, "spends_retry": True, "executed": True,
+                           "bundle_sha256": "d" * 64, "bundle": {"policy": "d" * 64}})
+    h.state.data["trials"] = [r for r in trials]
+    with patch.object(protocol, "search_control", lambda case, state: None):
+        result = protocol.check(h.case, h.repo, h.state)
+    assert result["decision_type"] == "terminal" and not result["ready"]
+    (reason,) = [r for r in result["terminal_reasons"] if r["code"] == "coverage_unreachable"]
+    assert reason["missing"] == list(range(51, 66)) and reason["retries_remaining_total"] == 0
+    assert reason["unsweepable"] and reason["seeds_pending_repair"] == []
+
+
 def test_p2_runtime_protocol_is_untouched_by_search_control(harness):
     h = harness("p2-runtime")
     h.trial("snapshot", 51)
@@ -688,7 +817,360 @@ def test_p2_runtime_protocol_is_untouched_by_search_control(harness):
         protocol.run_trial(h.case, h.repo, h.state, "initial", 55, None, None, None, None, "x")
 
 
-# --- retrospective -----------------------------------------------------------------
+# --- p4: coverage gate, triage, progress reasons ---------------------------------
+
+
+def _p4_state(tmp_path, rows, *, identities=None):
+    """A NativeWorldState over a synthetic ledger, without a real task directory.
+
+    Rows carry real bundle digests (`real_bundles`), so a coverage lookup by
+    bundle finds exactly the rows that ran those bytes.
+    """
+    task_dir = tmp_path / "cell"
+    task_dir.mkdir(parents=True, exist_ok=True)
+    data = synthetic_ledger(task_dir, rows, real_bundles=True)
+    data.update(identity={"dev_seeds": list(range(51, 66)), **(identities or {})},
+                rejected=[], aliases=[], selected=None, stage1_complete=False)
+    state = ledger.NativeWorldState.__new__(ledger.NativeWorldState)
+    state.task_dir = task_dir
+    state.path = task_dir / "development_state.json"
+    state.seeds = list(range(51, 66))
+    state.gate = "oracle"
+    state.sealed = False
+    state.data = data
+    return state
+
+
+def _bundle(name="a"):
+    """A real policy-only bundle whose rows the ledger can match by digest."""
+    return {"policy": ledger.code_hash(name)}
+
+
+def test_coverage_gate_names_the_seeds_the_frozen_bundle_never_ran(tmp_path):
+    # Ten seeds covered by bundle 'a', five by bundle 'b': the frozen bytes are
+    # only evidenced on ten, and the gate says which five are missing.
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(51, 61)]
+    rows += [("repair", s, "b", trace(), "pull", 0.0, True) for s in range(61, 66)]
+    state = _p4_state(tmp_path, rows)
+    gate = state.coverage_gate(_bundle("a"))
+    assert gate["required_seeds"] == list(range(51, 66))
+    assert gate["covered_seeds"] == list(range(51, 61))
+    assert gate["missing"] == [61, 62, 63, 64, 65]
+    assert gate["sweep_charged"] == 5 and not gate["complete"]
+
+
+def test_finalize_is_refused_until_the_sweep_covers_every_development_seed(tmp_path):
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(51, 61)]
+    state = _p4_state(tmp_path, rows)
+    errors = state.coverage_errors(_bundle("a"))
+    assert len(errors) == 1 and "coverage gate" in errors[0] and "[61, 62, 63, 64, 65]" in errors[0]
+    # Everything swept: the gate is green and stays silent.
+    rows += [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(61, 66)]
+    complete = _p4_state(tmp_path / "full", rows)
+    assert complete.coverage_errors(_bundle("a")) == []
+    assert complete.coverage_gate(_bundle("a"))["complete"]
+
+
+def test_gate_reports_current_sweep_availability_not_the_early_stop_snapshot(tmp_path):
+    # CC_TASK_2: the old gate printed the early stop's `banked_attempts` (a snapshot)
+    # as if it paid for the sweep. Sweeps are now counted apart from repair retries,
+    # and every number the gate prints is read from the ledger at that moment.
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(51, 61)]
+    state = _p4_state(tmp_path, rows)
+    state.data["search_control"] = {"banked_attempts": 12}
+    gate = state.coverage_gate(_bundle("a"))
+    assert gate["sweep_runs_needed"] == gate["sweep_charged"] == 5
+    assert gate["sweepable"] == [61, 62, 63, 64, 65] and gate["unsweepable"] == {}
+    assert gate["payable"] and gate["sweep_candidate_limit"] is None and "sweep_rounds_left" not in gate
+    assert gate["banked_attempts_at_early_stop"] == 12 and "banked_attempts" not in gate
+    error = state.coverage_errors(_bundle("a"))[0]
+    assert "trial --phase sweep" in error and "banked" not in error
+
+
+def test_a_bundle_that_cannot_be_swept_is_a_blocker_not_a_relaxed_gate(tmp_path):
+    # CC_TASK_4: the only structural reason a missing seed cannot be swept is that
+    # the bytes were never tested. Such a bundle's gate is a blocker; it never passes.
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(51, 61)]
+    rows += [("sweep", 61, "x", trace(), "pull", 0.0, False), ("sweep", 61, "y", trace(), "pull", 0.0, False)]
+    state = _p4_state(tmp_path, rows)
+    for row in state.data["trials"]:
+        row["spends_retry"] = row["phase"] != "sweep"
+    untested = _bundle("never-ran")
+    gate = state.coverage_gate(untested)
+    assert not gate["payable"] and gate["sweepable"] == [] and not gate["candidate_tested"]
+    assert set(gate["unsweepable"]) == {str(s) for s in range(51, 66)}
+    errors = state.coverage_errors(untested)
+    assert len(errors) == 1 and "BLOCKED" in errors[0] and "cannot sweep" in errors[0]
+    assert not gate["complete"]
+    # Two other candidates already swept no longer block a third: 'a' stays sweepable.
+    assert state.coverage_gate(_bundle("a"))["sweepable"] == [61, 62, 63, 64, 65]
+    reach = state.coverage_reachability(untested)
+    assert reach["reachable"] and {v["bundle_sha256"] for v in reach["viable_candidates"]} >= {
+        ledger.bundle_identity(_bundle("a")), ledger.bundle_identity(_bundle("x"))}
+
+
+def test_sweep_stays_payable_after_repair_spent_every_retry(tmp_path):
+    # The bowldrawer_p4_r1 shape: 45/45 retries spent, the chosen bundle ran only
+    # 7 seeds. Under the old accounting the gate was unpayable by construction.
+    rows = []
+    for s in range(51, 66):
+        rows.append(("initial", s, "init", trace(), "pull", 0.0, False))
+        rows.append(("repair", s, "v12" if s in range(54, 61) else "v9", trace(), "pull", 0.0, s < 61))
+        rows.append(("repair", s, "v9", trace(), "pull", 0.0, False))
+    state = _p4_state(tmp_path, rows)
+    assert all(state.retries_remaining(s) == 0 for s in state.seeds)
+    gate = state.coverage_gate(_bundle("v12"))
+    assert gate["missing"] == [51, 52, 53, 61, 62, 63, 64, 65]
+    assert gate["payable"] and gate["sweepable"] == gate["missing"]
+    assert state.coverage_reachability(_bundle("v12"))["reachable"]
+    assert "BLOCKED" not in state.coverage_errors(_bundle("v12"))[0]
+
+
+def test_unreachable_coverage_is_named_by_reachability(tmp_path):
+    # No tested candidate exists (every execution was lost to infrastructure) and
+    # no retry is left to test a new one: nothing further can make the gate pass.
+    rows = [("repair", s, "a", trace(), "pull", 0.0, False) for s in range(51, 61)]
+    rows += [("sweep", 61, "x", trace(), "pull", 0.0, False), ("sweep", 62, "y", trace(), "pull", 0.0, False)]
+    state = _p4_state(tmp_path, rows)
+    for row in state.data["trials"]:
+        row["spends_retry"] = row["phase"] != "sweep"
+        row["status"] = "infrastructure_error"  # nothing was ever graded
+    for s in range(51, 66):  # every retry spent
+        while state.retries_remaining(s):
+            state.data["trials"].append({"phase": "diagnostic", "seed": s, "status": "diagnostic_program_error",
+                                         "spends_retry": True, "executed": True, "directory": None,
+                                         "bundle_sha256": "d" * 64})
+    reach = state.coverage_reachability(_bundle("a"))
+    assert not reach["reachable"] and reach["retries_remaining_total"] == 0
+    assert reach["viable_candidates"] == [] and "no tested candidate" in reach["reason"]
+
+
+def test_a_tested_candidate_stays_reachable_with_every_retry_spent(tmp_path):
+    # CC_TASK_4: before, two other swept candidates plus zero retries made a tested
+    # bundle unreachable. With no sweep cap it can always finish its own sweep.
+    rows = [("repair", s, "a", trace(), "pull", 0.0, False) for s in range(51, 61)]
+    rows += [("sweep", 61, "x", trace(), "pull", 0.0, False), ("sweep", 62, "y", trace(), "pull", 0.0, False)]
+    state = _p4_state(tmp_path, rows)
+    for s in range(51, 66):
+        while state.retries_remaining(s):
+            state.data["trials"].append({"phase": "diagnostic", "seed": s, "status": "diagnostic_program_error",
+                                         "spends_retry": True, "executed": True, "directory": None,
+                                         "bundle_sha256": "d" * 64})
+    gate = state.coverage_gate(_bundle("a"))
+    assert gate["payable"] and gate["sweepable"] == [61, 62, 63, 64, 65]
+    assert state.coverage_reachability(_bundle("a"))["reachable"]
+
+
+def test_sweeping_with_the_same_bytes_does_not_change_the_bundle_digest(tmp_path):
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(51, 61)]
+    state = _p4_state(tmp_path, rows)
+    before = ledger.bundle_identity(_bundle("a"))
+    assert not state.coverage_gate(_bundle("a"))["complete"]
+    # Sweep the five missing seeds with the same bundle: the digest is unchanged,
+    # so the rows the sweep adds are rows of the SAME candidate.
+    rows += [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(61, 66)]
+    swept = _p4_state(tmp_path / "swept", rows)
+    after = ledger.bundle_identity(_bundle("a"))
+    assert before == after
+    gate = swept.coverage_gate(_bundle("a"))
+    assert gate["complete"] and gate["covered_seeds"] == list(range(51, 66))
+
+
+def test_held_out_seeds_are_never_swept_or_read(tmp_path):
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(51, 66)]
+    state = _p4_state(tmp_path, rows)
+    gate = state.coverage_gate(_bundle("a"))
+    assert gate["required_seeds"] == list(range(51, 66))
+    assert not any(s <= 50 for s in gate["required_seeds"] + gate["covered_seeds"])
+
+
+def test_selection_reason_pass_count_is_recomputed_from_the_ledger(tmp_path):
+    # The p3 overclaim: bytes that ran six trials described as "12 of 15".
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(55, 61)]
+    state = _p4_state(tmp_path, rows)
+    bundle = _bundle("a")
+    state.data["selected"] = {"bundle_sha256": ledger.bundle_identity(bundle), "bundle": bundle}
+    evidence = state.reason_evidence("passed 12 of 15 dev seeds")
+    assert evidence["ledger_passed"] == 6 and evidence["ledger_tested"] == 6
+    assert len(evidence["claims"]) == 1
+    assert evidence["claims"][0] == {"claimed_passed": 12, "claimed_tested": 15,
+                                     "ledger_passed": 6, "ledger_tested": 6}
+    assert evidence["warnings"] and "12 of 15" in evidence["warnings"][0]
+    # An honest reason produces no warning.
+    honest = state.reason_evidence("passed 6 of 6 dev seeds with these bytes")
+    assert honest["warnings"] == []
+
+
+def test_claimed_counts_reads_only_explicit_pass_counts():
+    assert sc.claimed_counts("passed 12 of 15 dev seeds") == [(12, 15)]
+    assert sc.claimed_counts("4/4 passing seeds (51,53,54,55)") == [(4, 4)]
+    # A bare seed list is not a claim.
+    assert sc.claimed_counts("tested on seeds 55, 57, 58 and 59") == []
+    assert sc.claimed_counts("") == []
+
+
+def test_failures_are_grouped_by_signature_and_distinct_modes_stay_separate(tmp_path):
+    # Six "no lift" (large object residual, gripper matched) and six
+    # "lifted then released": two modes with different repairs.
+    rows = [("repair", 51 + i, "a", trace(handle_residual=0.06), "pull", 0.0, False)
+            for i in range(6)]
+    rows += [("repair", 57 + i, "a", trace(handle_residual=0.34), "pull", 0.2, False)
+             for i in range(6)]
+    state = _p4_state(tmp_path, rows)
+    modes = sc.failure_modes(sc.charged_attempts(state.data, state.task_dir))
+    assert len(modes) == 2 and all(len(m["seeds"]) == 6 for m in modes)
+    assert [m["seeds"] for m in modes] == [list(range(51, 57)), list(range(57, 63))]
+    assert modes[0]["deciding_field"] == "object_residuals"
+    assert all(m["factors"]["world_facts"] for m in modes)
+
+
+def test_a_single_failing_seed_is_still_a_mode(tmp_path):
+    rows = [("repair", 51, "a", trace(handle_residual=0.06), "pull", 0.0, False),
+            ("repair", 52, "a", trace(handle_residual=0.34), "pull", 0.2, False)]
+    state = _p4_state(tmp_path, rows)
+    modes = sc.failure_modes(sc.charged_attempts(state.data, state.task_dir))
+    assert len(modes) == 2 and all(len(m["seeds"]) == 1 for m in modes)
+
+
+def test_a_sweep_with_no_failures_has_an_empty_table_and_does_not_block(tmp_path):
+    rows = [("repair", s, "a", trace(), "pull", 0.0, True) for s in range(51, 66)]
+    state = _p4_state(tmp_path, rows)
+    table = sc.triage_table(sc.charged_attempts(state.data, state.task_dir))
+    assert table["empty"] and table["bundles"][0]["failed_seeds"] == []
+    assert table["bundles"][0]["mode_count"] == 0
+    # Nothing to repair, and the coverage gate is satisfied: the cell can freeze.
+    assert state.coverage_errors(_bundle("a")) == []
+
+
+def test_triage_separates_two_bundles_failing_the_same_way(tmp_path):
+    rows = [("repair", 51, "a", trace(handle_residual=0.06), "pull", 0.0, False),
+            ("repair", 52, "b", trace(handle_residual=0.06), "pull", 0.0, False)]
+    state = _p4_state(tmp_path, rows)
+    table = sc.triage_table(sc.charged_attempts(state.data, state.task_dir))
+    assert len(table["bundles"]) == 2
+    assert all(b["mode_count"] == 1 and len(b["failed_seeds"]) == 1 for b in table["bundles"])
+
+
+def test_prompt_states_the_coverage_gate_triage_and_progress_reasons():
+    p3 = " ".join(profile.section(executable_case(prediction_contract="p3-search")).split())
+    for phrase in ("Coverage before freezing (p4)",
+                   "A candidate is only EVIDENCE once it has run on the WHOLE development set 51–65",
+                   "coverage_gate", "Held-out stays sealed throughout",
+                   "Triage the sweep by mode, then repair once (p4)", "coverage_triage.json",
+                   "Repair the MODE, not one seed", "One repair round is allowed",
+                   "Say WHY progress() returned None", "progress_reason()",
+                   '"unavailable"', '"unobserved"', "unavailable_classes",
+                   "RECOVERY: `unavailable` must be recoverable, not permanent silence"):
+        assert phrase in p3, phrase
+
+
+def test_p4_rules_reach_the_solver_summary():
+    report = sc.primitive_report(
+        [{"n": 1, "phase": "repair", "seed": 51, "directory": "d", "bundle_sha256": "a" * 64,
+          "status": "complete", "graded": True, "passed": False, "primitive_class": "pull",
+          "policy_body_sha256": "p", "signature": {"digest": "s", "prediction_status": {},
+                                                   "object_residuals": [], "outcome": {}},
+          "gripper_checks": {}, "prediction_levels": None, "progress_status": "unobserved"}],
+        lambda a: None)
+    summary = sc.summary(report, sc.saturation(report))
+    assert summary["revision"] == sc.REVISION
+    assert any("unavailable" in rule for rule in summary["rules"])
+
+
+def test_unavailable_progress_is_counted_apart_from_unobserved(tmp_path):
+    rows = [("repair", 51, "a", trace(), "pull", None, False, "unavailable"),
+            ("repair", 52, "a", trace(), "pull", None, False, "unobserved"),
+            ("repair", 53, "a", trace(), "pull", 0.4, False, "observed")]
+    state = _p4_state(tmp_path, rows)
+    report = sc.primitive_report(state.data, sc.recorded_progress(state.task_dir),
+                                 task_dir=state.task_dir)
+    cls, = report["classes"]
+    assert (cls["observed_attempts"], cls["unobserved_attempts"],
+            cls["unavailable_attempts"]) == (1, 1, 1)
+    assert report["unavailable_attempts"] == 1
+    assert cls["best_progress"] == 0.4
+
+
+def test_unavailable_never_counts_toward_n(tmp_path):
+    # 10 attempts, none observed, all unavailable: N = 8 must not be met.
+    rows = [("repair", 51 + i, "abcde"[i // 2], trace(), "pull", None, False, "unavailable")
+            for i in range(10)]
+    state = _p4_state(tmp_path, rows)
+    report = sc.primitive_report(state.data, sc.recorded_progress(state.task_dir),
+                                 task_dir=state.task_dir)
+    cls, = report["classes"]
+    assert cls["unavailable_attempts"] == 10 and cls["observed_attempts"] == 0
+    row, = sc.saturation(report)
+    assert not row["saturated"] and row["conditions_now"]["observed_attempts>=N"] is False
+
+
+def test_a_dead_channel_is_visible_in_the_report(tmp_path):
+    rows = [("repair", 51, "a", trace(), "pull", None, False, "unavailable")]
+    state = _p4_state(tmp_path, rows)
+    report = sc.primitive_report(state.data, sc.recorded_progress(state.task_dir),
+                                 task_dir=state.task_dir)
+    summary = sc.summary(report, sc.saturation(report))
+    assert summary["unavailable_classes"] == ["pull"]
+    assert summary["unavailable_attempts"] == 1
+    assert summary["classes"][0]["unavailable_attempts"] == 1
+
+
+def test_reobserving_returns_the_channel_to_observed(tmp_path):
+    # The same bundle: an unavailable attempt, then one that re-observed and
+    # resolved the fact. The channel recovered, so the class is not dead.
+    rows = [("repair", 51, "a", trace(), "pull", None, False, "unavailable"),
+            ("repair", 52, "a", trace(), "pull", 0.6, True, "observed")]
+    state = _p4_state(tmp_path, rows)
+    report = sc.primitive_report(state.data, sc.recorded_progress(state.task_dir),
+                                 task_dir=state.task_dir)
+    summary = sc.summary(report, sc.saturation(report))
+    assert summary["unavailable_classes"] == []  # a recovery exists
+    cls, = report["classes"]
+    assert (cls["observed_attempts"], cls["unavailable_attempts"]) == (1, 1)
+
+
+def test_none_is_never_recorded_as_zero_progress(tmp_path):
+    rows = [("repair", 51, "a", trace(), "pull", None, False, "unavailable")]
+    state = _p4_state(tmp_path, rows)
+    report = sc.primitive_report(state.data, sc.recorded_progress(state.task_dir),
+                                 task_dir=state.task_dir)
+    cls, = report["classes"]
+    assert cls["best_progress"] is None and cls["progress_unknown"] == 1
+
+
+def test_an_old_manifest_without_a_reason_reads_as_unobserved(tmp_path):
+    # Every p3-era trial recorded only search_progress. Inventing `unavailable`
+    # for it would claim the old trial reported something it never did.
+    folder = tmp_path / "old"
+    write_trial(tmp_path, "old", trace(), progress=None)  # no progress_status key
+    assert sc.record_progress(folder) == (None, "unobserved")
+    observation = sc.trial_observation(folder)
+    assert observation["reason"] == "unobserved" and observation["hint"] == sc.UNOBSERVED_HINT
+
+
+def test_progress_reason_distinguishes_a_broken_channel_from_an_idle_one(tmp_path):
+    world = SEARCH_WORLD.replace("return 0.25", "return None")
+    # A world that declares the reason: the channel is broken.
+    broken = world + '\ndef progress_reason():\n    return "unavailable"\n'
+    result, _, session = fx.run(tmp_path / "broken", world=broken, contract="p3-search")
+    assert result["manifest"]["search_progress"] is None
+    assert result["manifest"]["search_progress_status"] == "unavailable"
+    assert session.errors == []
+    observation = sc.trial_observation(tmp_path / "broken")
+    assert observation["reason"] == "unavailable" and observation["hint"] == sc.UNAVAILABLE_HINT
+    # Without the declaration the same None stays `unobserved`.
+    result, _, _ = fx.run(tmp_path / "idle", world=world, contract="p3-search")
+    assert result["manifest"]["search_progress_status"] == "unobserved"
+
+
+def test_a_raising_progress_reason_is_a_fault_not_an_unavailable_claim(tmp_path):
+    world = SEARCH_WORLD.replace("return 0.25", "return None")
+    world += '\ndef progress_reason():\n    raise RuntimeError("boom")\n'
+    result, _, session = fx.run(tmp_path, world=world, contract="p3-search")
+    assert result["manifest"]["search_progress_status"] == "unobserved"
+    assert any(f["operation"] == "progress_reason" for f in session.errors)
+
+
 
 
 @pytest.mark.skipif(not (P2_LEDGERS / "stove_p2_r1/case.json").is_file(),
