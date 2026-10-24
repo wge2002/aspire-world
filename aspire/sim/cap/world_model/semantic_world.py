@@ -13,6 +13,7 @@ import math
 import numpy as np
 
 from .World import FrameError, TrackingError, World, _finite
+from .identity_evidence import SeedSelectionError, deduplicate, measured_motion_association
 
 
 SEMANTIC_MODE = "sam2-semantic-world-v2"
@@ -80,36 +81,101 @@ def visible_geometry(frame, mask, min_points=10):
             "visible_bounds": [points.min(axis=0).tolist(), points.max(axis=0).tolist()]}
 
 
-def choose_seed(frame, candidates, definition, previous=None, *, max_distance=.06):
+def choose_seed(frame, candidates, definition, previous=None, *, max_distance=.06, **kwargs):
     """Associate actual SAM3 candidates; scores alone never prove instance identity."""
+    return select_seed(frame, candidates, definition, previous, max_distance=max_distance, **kwargs)[0]
+
+
+# Two distinct candidates whose mean image coordinates differ by less than
+# this many pixels have no well-defined public rank order (declared heuristic).
+RANK_MARGIN_PIXELS = 1.0
+
+
+def select_seed(frame, candidates, definition, previous=None, *, max_distance=.06,
+                motion_previous=None, max_age=None):
+    """Return (mask, evidence) or raise SeedSelectionError with structured evidence.
+
+    Near-duplicate masks are merged deterministically before counting/ranking.
+    With ``previous`` (reacquisition), the original 3D gate/ambiguity margin
+    applies; only if it fails may CURRENT measured RGB-D motion from
+    ``motion_previous`` (the identity's last accepted surface) associate a
+    moved instance, and only uniquely. Otherwise the identity stays unknown.
+    """
     threshold = definition.get("min_seed_score", .5)
     if isinstance(threshold, bool) or not isinstance(threshold, (int, float)) or not 0 <= threshold <= 1:
         raise ValueError("invalid min_seed_score")
+    above = [c for c in candidates if float(c.get("score", 0)) >= threshold]
+    distinct, merged = deduplicate(above)
     options = []
-    for candidate in candidates:
-        if float(candidate.get("score", 0)) < threshold:
-            continue
+    for candidate in distinct:
         geometry = visible_geometry(frame, candidate["mask"])
         if geometry is not None:
             options.append((candidate, geometry))
+    evidence = {"identity": definition.get("identity"), "prompt": definition.get("prompt"),
+                "frame_id": frame.frame_id, "captured_at": frame.captured_at,
+                "min_seed_score": threshold, "candidates_total": len(candidates),
+                "above_threshold": len(above), "duplicates_merged": merged,
+                "distinct": len(distinct), "with_depth": len(options)}
     if previous is not None:
+        previous = np.asarray(previous, dtype=float)
         ordered = sorted((float(np.linalg.norm(np.asarray(g["visible_center"]) - previous)), i)
                          for i, (_, g) in enumerate(options))
-        if not ordered or ordered[0][0] > max_distance or (len(ordered) > 1 and ordered[1][0] - ordered[0][0] < .01):
-            raise FrameError("public reacquisition is missing, ambiguous or conflicts with the previous identity")
-        return options[ordered[0][1]][0]["mask"]
+        evidence.update(previous_center=previous.tolist(), distances=[d for d, _ in ordered],
+                        gate=max_distance)
+        tied = len(ordered) > 1 and ordered[1][0] - ordered[0][0] < .01
+        strict = ordered[0][1] if ordered and ordered[0][0] <= max_distance and not tied else None
+        motion = None
+        if motion_previous is not None and options and max_age is not None:
+            motion = measured_motion_association(motion_previous, frame,
+                [{"mask": c["mask"], "visible_center": g["visible_center"]} for c, g in options],
+                gate=max_distance, max_age=max_age)
+            evidence["measured_motion"] = motion
+        if strict is not None:
+            if motion is not None and motion["status"] == "verified" and motion["candidate"] != strict:
+                # Coherent measured motion says the identity moved to ANOTHER
+                # candidate: the nearby one is a different instance.
+                raise SeedSelectionError("identity_conflict", "a nearby candidate conflicts with coherent "
+                                         "measured motion of the previous identity", evidence)
+            return options[strict][0]["mask"], {**evidence, "association": "strict_gate",
+                                                "distance": ordered[0][0]}
+        if motion is not None and motion["status"] == "verified":
+            return options[motion["candidate"]][0]["mask"], {**evidence, "association": "measured_motion"}
+        kind = ("missing" if not options else
+                "ambiguous" if tied and ordered[0][0] <= max_distance
+                or evidence.get("measured_motion", {}).get("status") == "ambiguous" else "identity_conflict")
+        raise SeedSelectionError(kind, "public reacquisition is missing, ambiguous or conflicts "
+                                 f"with the previous identity ({kind})", evidence)
     selector = definition.get("selector")
     if selector is not None:
         if not isinstance(selector, dict) or set(selector) != {"axis", "rank"} or selector["axis"] not in ("image_x", "image_y") or type(selector["rank"]) is not int or selector["rank"] < 0:
             raise ValueError("selector requires image_x/image_y axis and a nonnegative rank")
         axis = 1 if selector["axis"] == "image_x" else 0
-        options.sort(key=lambda c: float(np.mean(np.where(np.asarray(c[0]["mask"], dtype=bool))[axis])))
-        if selector["rank"] >= len(options):
-            raise FrameError("public candidate rank is unavailable")
-        return options[selector["rank"]][0]["mask"]
+        keyed = sorted((float(np.mean(np.where(np.asarray(c["mask"], dtype=bool))[axis])), i)
+                       for i, (c, _) in enumerate(options))
+        rank = selector["rank"]
+        evidence.update(selector=dict(selector), rank_coordinates=[k for k, _ in keyed])
+        if rank >= len(keyed):
+            raise SeedSelectionError("rank_unavailable", f"public candidate rank {rank} is unavailable: "
+                                     f"{len(keyed)} distinct candidate(s) with depth", evidence)
+        neighbours = [keyed[j][0] for j in (rank - 1, rank + 1) if 0 <= j < len(keyed)]
+        if any(abs(keyed[rank][0] - n) < RANK_MARGIN_PIXELS for n in neighbours):
+            raise SeedSelectionError("ambiguous", f"public candidate rank {rank} has no well-defined "
+                                     "image order", evidence)
+        return options[keyed[rank][1]][0]["mask"], {**evidence, "association": "initial_rank"}
     if len(options) != 1:
-        raise FrameError("initial public part seed is missing or ambiguous")
-    return options[0][0]["mask"]
+        kind = "missing" if not options else "ambiguous"
+        raise SeedSelectionError(kind, f"initial public part seed is {kind}: {len(options)} distinct "
+                                 "candidate(s) with depth", evidence)
+    return options[0][0]["mask"], {**evidence, "association": "initial_unique"}
+
+
+def _association_summary(evidence):
+    keep = ("association", "prompt_used", "distance", "duplicates_merged", "frame_id")
+    summary = {k: evidence[k] for k in keep if k in evidence}
+    motion = evidence.get("measured_motion")
+    if summary.get("association") == "measured_motion" and motion is not None:
+        summary["measured_motion"] = motion
+    return summary
 
 
 class SemanticWorld(World):
@@ -128,6 +194,26 @@ class SemanticWorld(World):
         self.review_requests = []
         self._last_good = {}
         self._candidate_parts = None
+        self._seed_association = {}
+
+    def seed(self, frame, masks, *, association=None):
+        """Explicit (re)seeding. ``association`` (select_seed evidence) is recorded
+        as a diagnostic ``claimed_association`` only; identity across a jump
+        beyond max_identity_jump is always recomputed from this frame's mask
+        and the previous measured surface, else geometry is withdrawn."""
+        with self._lock:
+            reseed = self._candidate_parts is None and bool(self._identities)
+            self._seed_association = dict(association or {})
+            try:
+                super().seed(frame, masks)
+            finally:
+                self._seed_association = {}
+            if reseed:
+                # Pre-loss/pre-reseed interaction baselines cannot verify an effect.
+                for pending in self._pending.values():
+                    self.interactions.append({"id": pending["id"], "status": "unresolved",
+                        "reason": "objects explicitly reseeded before interaction verification"})
+                self._pending.clear()
 
     def _accept(self, frame, masks):
         nodes = self._candidate_parts or self.parts
@@ -145,13 +231,29 @@ class SemanticWorld(World):
         for key, fact in self._objects.items():
             old = self._last_good.get(key)
             if fact["status"] == "known" and old is not None and self._candidate_parts is None:
-                jump = np.linalg.norm(np.asarray(fact["value"]["visible_center"]) - old["center"])
+                center = np.asarray(fact["value"]["visible_center"])
+                jump = np.linalg.norm(center - old["center"])
+                if key in self._seed_association:
+                    # Caller-supplied association is diagnostic only; it never
+                    # authorizes identity. A jump is re-verified below from the
+                    # current mask/frame and the previous measured surface.
+                    fact["claimed_association"] = _association_summary(self._seed_association[key])
                 if jump > self.max_identity_jump:
-                    fact.update(status="unknown", value=None, reason="part identity jump; explicit public reacquisition required")
-                    self._request_review("identity_conflict", key, fact["evidence_ids"])
+                    # Only CURRENT coherent RGB-D motion may explain a large jump;
+                    # otherwise the original strict rejection applies.
+                    motion = measured_motion_association(old, frame,
+                        [{"mask": exclusive[key], "visible_center": center.tolist()}],
+                        gate=self.max_identity_jump, max_age=self.cadence.object_max_age)
+                    fact["identity_association"] = {"association": "measured_motion", **motion}
+                    if motion["status"] != "verified":
+                        fact.update(status="unknown", value=None,
+                                    reason="part identity jump; explicit public reacquisition required "
+                                           f"({motion['reason']})")
+                        self._request_review("identity_conflict", key, fact["evidence_ids"])
             if fact["status"] == "known":
                 self._last_good[key] = {"center": np.asarray(fact["value"]["visible_center"]),
-                                       "at": frame.captured_at}
+                                       "at": frame.captured_at, "frame": frame,
+                                       "mask": np.asarray(exclusive[key], dtype=bool).copy()}
                 self._evidence.update(fact["evidence_ids"])
 
     def _request_review(self, reason, identity, evidence_ids):

@@ -35,6 +35,42 @@ above 0.06 m per acquisition withdraw geometry; public SAM3 reacquisition
 uses 3D association with a 0.06 m gate and 0.01 m ambiguity margin. These are
 declared heuristics, not controller/action/recovery budget caps.
 
+Candidate handling (`cap/world_model/identity_evidence.py`, phase-2 repair):
+candidates above min_seed_score are deduplicated deterministically (descending
+score, then index; IoU >= 0.85 is the same region), so duplicates never create
+identities or shift ranks. A selector rank whose mean image coordinate is
+within 1 pixel of a neighbour is ambiguous. Failures raise a typed
+`SeedSelectionError` (missing, ambiguous, rank_unavailable, identity_conflict)
+with public candidate counts/distances; `StreamingSeedError.evidence` and the
+`reacquire_failed` journal carry it. Optional author-declared
+`alternative_prompts` are tried in order only while earlier prompts are
+missing; ambiguity/conflict stops immediately. Missing startup geometry stays
+unknown and startup fails; nothing is guessed.
+
+Measured-motion association: a jump beyond 0.06 m (tracking or reacquisition)
+is accepted only when CURRENT forward/backward-checked RGB-D correspondences
+from the identity's last accepted surface (same episode, camera, clock and
+the same declared coordinate frame — undeclared/unsupported pose frames never
+qualify; age within object_max_age) are >= 8, >= 70% land inside
+exactly one candidate mask, robust rigid registration succeeds and carries the
+previous visible centre to that candidate within the original 0.06 m gate.
+Predictions, solver assertions and commands never authorize identity. Without
+that evidence the original strict rejection holds. An association passed to
+`SemanticWorld.seed(..., association=...)` is recorded only as diagnostic
+`claimed_association`; every jump beyond 0.06 m is recomputed by the World from
+the current seed mask/frame and the previous measured surface
+(`identity_association`), otherwise the geometry is withdrawn.
+
+Recovery: `world_recovery_status()` returns a detached report (`state`
+armed/unseeded/tracking_lost/reacquire_failed/structure_grounding_failed/
+closed, `reason`, `evidence`, `motion_permitted`, `motion_refusals`,
+`required_action`, per-object status, `recovered_from`). A driver pre-step
+gate (`add_motion_gate_callback`, run before every `handle.step` and gripper
+command) refuses the next actual step while disarmed, and while a focused part
+is unknown/stale. Only valid reseeding (reacquire_world or a successful
+structure revision) rearms; pending interaction baselines and motion epochs
+are invalidated by a reseed.
+
 The method differences are semantic part hypotheses/revisions, identity-aware
 tracking/reacquisition, optional focus interruption, public motion reports and
 interaction-effect checks. No additional LLM service or replacement agent loop
@@ -62,15 +98,21 @@ relation verifiers and explicit reacquire_world remain available. Callbacks
 and predicates continue to be authored by the policy; a constant-true contact
 predicate is not a validated physical contact detector.
 
-Motion report distinguishes public robot_base/panda_hand observation,
-world/panda_hand observation and the requested world/TCP. TCP is reconstructed
-using the inverse of the existing IK offset. Reports expose requested target,
+Motion report compares the requested robot_base/TCP with the measured
+robot_base/panda_hand in the same frame (see `docs/robot-frame-contract.md`);
+world/panda_hand is never compared with robot_base targets. TCP is
+reconstructed using the inverse of the existing IK offset recorded in IK
+telemetry. Contradictory frame metadata fails rather than reporting arrival.
+World robot facts add a named robot_base `frame_view` (hand/TCP pose, gripper
+opening). Reports expose requested target,
 effective IK target, position clipping, orientation fallback, final Cartesian
 and joint errors, convergence and actual acquisition time. Stationarity and
 normal RPC return do not establish arrival. Missing calibration or telemetry
 returns unknown. The original IK fallbacks, motor iteration limit and API
 return values are unchanged. No force/contact sensor is invented.
 
+A clip/fallback smaller than tolerance may report reached=true with
+target_modified=true; reached measures the requested pose only.
 Execution not reached/unknown or a modified IK target yields execution_unverified.
 Fresh valid execution without a fresh contact relation yields contact_unverified.
 Missing post-action part observations yields unknown. Only valid execution,

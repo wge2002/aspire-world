@@ -1,5 +1,17 @@
 # RS 项目交接：ASPIRE Streaming World（2026-10-12）
 
+2026-10-24 核对：当前发布包含 [10 月 19 日 wine 修复](DLC_WINE_REPAIR_20261019.md)，
+该轮已被用户停止且未测 held-out。旧工程 `/root/github/aspire-world` 当前不存在；
+来源快照在 RS `/mnt/data/aspire-world-deployment-20261019-wine-repair/source-overlay/`。
+本文后续授权、状态和路径保留历史语境，不作为恢复依据；见[同步说明](SYNC_SCOPE.md)。
+
+最新 2026-10-13 授权是默认空间 `1000309` 的双节点四-cell 修复续跑，
+累计尝试次数不重置，本轮整体五小时上限已取消，见
+[DLC_REPAIR_CONTINUATION_20261013.md](DLC_REPAIR_CONTINUATION_20261013.md)。
+上一轮 `1493863` 任务已按五小时上限停止，历史交接见
+[DLC_RUN_20261012.md](DLC_RUN_20261012.md)。本机 ASPIRE 实验/服务保持释放；
+下方准备状态、早期授权和旧提交信息属于历史快照，不能作为当前运行状态。
+
 补充总览：[Code as World 开发交接](CODE_AS_WORLD_HANDOFF_20261012.md)，包含
 对话中的方法演进、失败分析、明确约束和当前待办。
 2026-10-12 13:29（北京时间）复核：准备已结束，三个正式cell仍未启动。

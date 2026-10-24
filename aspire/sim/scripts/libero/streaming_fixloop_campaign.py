@@ -40,14 +40,17 @@ from __future__ import annotations
 
 import argparse
 import difflib
+import fcntl
 import grp
 import hashlib
 import json
 import os
 import pwd
 import re
+import signal
 import subprocess
 import sys
+import threading
 import time
 import urllib.error
 import urllib.request
@@ -60,6 +63,7 @@ sys.path.insert(0, str(HERE.parent / "common"))
 import native_world_campaign as legacy  # noqa: E402
 import streaming_fixloop_guard as guard  # noqa: E402
 import streaming_fixloop_protocol as sp  # noqa: E402
+import streaming_fixloop_closeout as closeout  # noqa: E402
 from native_cc_freeze import RuntimeChanged, verify_runtime  # noqa: E402
 from native_cc_runtime import ServiceFailure, atomic_json  # noqa: E402
 from native_cc_stream import run_native_cc  # noqa: E402
@@ -74,7 +78,9 @@ ENVIRONMENT_VERSION = sp.ist.ENVIRONMENT_VERSION
 SEED_MAPPING = sp.ist.SEED_MAPPING
 CAMPAIGN_KEYS = ("claude_bin", "claude_config_dir", "libero_config_path",
                  "task_manifest", "task_manifest_sha256")
-TERMINAL = {"stage1_finalized", "complete", "heldout_incomplete", "heldout_refused"}
+TERMINAL = {"stage1_finalized", "complete", "heldout_incomplete", "heldout_refused",
+            # Supervised repair study: development ended without a held-out run.
+            "development_failed", "development_stopped", "development_incomplete", "development_review_failed"}
 
 
 class LaunchRefused(RuntimeError):
@@ -273,7 +279,210 @@ outcome reaches you only through the recorded trial result.
 """
 
 
-def worker_prompt(case: dict, repo: Path) -> str:
+CONTINUATION_SECTION = """
+---
+
+## Repair continuation of this cell (explicitly authorized)
+
+This cell continues ITS OWN earlier, incomplete development phase under a
+corrected engineering runtime. It is not a fresh repeat and not an unchanged
+resume. The earlier phase's rows, outcomes and clock are immutable history; this
+phase has its own ledger, identity and once-recorded 50,400 s deadline.
+
+Historical inputs (read-only, this cell's own; nothing from any other cell):
+
+- `{parent_task_dir}/` — the earlier task directory: its scene snapshot
+  images, `task_analysis.md`, `findings.md`, initial and fix code/configs,
+  `attempts/` notes and `development/` attempt evidence.
+- `{parent_ledger}` — the earlier ledger, bound by sha256. Its rows are imported
+  once as `continuation.historical`; never edit or copy it.
+
+Run `status` first. It reports, per seed, the cumulative charged attempts
+(`retries_used`, split into `historical.retries_used` and `new_retries_used`),
+`continuation.owed_initial_seeds` and `continuation.historical_successes`.
+
+- The 3 TOTAL charged attempts per seed are cumulative across both phases. Every
+  earlier charged execution counts once: diagnostics, crashes, timeouts,
+  infrastructure errors and interrupted runs are not refunded. Aliases and the
+  scene snapshot never counted. A seed with no attempts left cannot run again.
+- The earlier scene snapshot is this cell's snapshot; no second one runs.
+- Seeds the earlier phase never ran initially are owed their initial run before
+  any repair. Run the earlier initial program unchanged with `--phase initial`.
+  The exact files that ran are `code.py` and `authored_streaming_config.json` in
+  `{parent_task_dir}/<continuation.initial_anchor.directory>/`. Copy them to
+  `$TASK_DIR/initial_code.py` and `$TASK_DIR/initial_streaming_config.json`. Any
+  change belongs to `repair`.
+- Earlier successes were measured under the previous runtime. They are history,
+  not evidence: a seed counts as passing only after a passing execution in THIS
+  phase, so every seed with initial evidence and attempts left needs a repair
+  trial in this phase, or exhaustion with its `attempts/seed_N_BLOCKED.md` note.
+- `select` accepts only a bundle executed in THIS phase. Earlier bundles,
+  passing or not, are not candidates. Write this phase's own
+  `task_analysis.md`, `findings.md` and blocker notes in `$TASK_DIR`.
+
+The earlier code was written against the previous runtime. Read the corrected
+contracts before reusing it: `docs/robot-frame-contract.md` (which frame and
+control point each pose uses), and the recovery gate, under which a motor or
+gripper command is refused BEFORE it executes while `world_recovery_status()`
+does not permit motion. Earlier traces may show behaviour the corrected runtime
+no longer has. Decide from this phase's own executions.
+"""
+
+
+def continuation_section(case: dict) -> str:
+    ledger = sp.continuation.parent_path(case)
+    return CONTINUATION_SECTION.format(parent_task_dir=ledger.parent, parent_ledger=ledger)
+
+
+SUPERVISED_SECTION = """
+---
+
+## Supervised repair study (explicitly authorized, outer-reviewed rounds)
+
+Study `{study_id}`. This is a NEW development phase of this cell with its own
+ledger, identity and once-recorded 50,400 s deadline. It is not a resume of the
+earlier study and refunds nothing; the earlier study's 45 attempts stay its own.
+
+This session is ROUND {round} of 3. In every round each development seed 51-65
+gets exactly ONE charged attempt (smoke, initial, repair or diagnostic;
+timeouts, crashes and infrastructure errors stay charged; aliases and the
+scene snapshot are free). The protocol refuses a second attempt on a seed in
+the same round: a failed seed waits for the next round, and its next attempt
+cannot be borrowed early. A round is complete when all 15 seeds have a
+resolved attempt of this round. Run `status` first; `supervised.round_seeds_remaining`
+lists the seeds still owed this round. There is no limit on how often you edit
+code between attempts.
+
+{round_rule}
+
+When the round is complete, before you end: update `task_analysis.md` and
+`findings.md`, write `attempts/seed_N_BLOCKED.md` for every seed that has no
+attempts left without a pass, and record your current best tested bundle with
+`select --reason` (a bundle needs its OWN oracle success in THIS study to be
+frozen; another bundle's or an earlier study's success never counts). Then end
+the session. If no bundle in this study has a normal oracle success yet, leave
+the selection empty, record that fact in findings, and end the session without
+retrying selection or attempting extra seeds. The outer runner stops the session at the round boundary
+({grace} s grace), closes the round, and an outer coordinator reviews this
+cell's own development evidence before any next round opens. Nothing you write
+is an approval; reviews are written only by the outer coordinator.
+
+Read-only inputs of THIS cell only (never another cell, never held-out):
+
+- `{prior_dir}/` — your own earlier development inputs, listed in
+  `{prior_manifest}` (ledger, code, configs, findings, task analysis,
+  replay log, lifecycle and the initial outer analysis). History for reading
+  and reuse only: its rows, successes and bundles are not candidates here.
+{reviews}
+"""
+
+ROUND_ONE = ("Round 1 follows the original workflow: scene snapshot, smoke on seed 51 "
+             "(alias it as initial when it completed), then the initial program on the other "
+             "seeds. You may base the initial program on your own earlier code.")
+ROUND_LATER = ("Rounds 2 and 3 continue the same ledger: no new snapshot or smoke. A seed "
+               "still owed initial coverage runs `--phase initial` with the frozen initial "
+               "program first; every other seed runs `repair` (or `diagnostic`). Read the "
+               "outer reviews listed below before you change code.")
+SUPERVISED_COORDINATOR = """
+This is a supervised repair study. The worker covers ONE round per session:
+one charged attempt per development seed, then notes and `select`, then it
+returns. Do not ask it to continue past the round; the outer runner stops this
+session at the round boundary and opens a new one after outer review.
+"""
+
+
+def supervised_section(case: dict, context: dict | None) -> str:
+    context = context or {"round": 1, "reviews": [], "summaries": []}
+    manifest = Path(case["supervised_repair"]["prior_input"]["manifest"]).resolve()
+    lines = [f"- `{p}` — outer review of round {i + 1} (decision, analysis, guidance)"
+             for i, p in enumerate(context["reviews"])]
+    lines += [f"- `{p}` — runner summary of a closed round" for p in context["summaries"]]
+    if sp.autonomous.enabled(case):
+        c = sp.autonomous.config(case)
+        return f"""
+## Explicit remaining-round continuation — overrides initial/smoke/snapshot steps above
+
+Study `{case['supervised_repair']['study_id']}`, repair phase `{c['phase_id']}`.
+The parent completed round 1 and spent 15 attempts (one per seed51–65), then
+expired while awaiting review. Its ledger and clock are immutable. This new
+authorized phase imports those attempts, with only rounds2/3 left: at most30
+additional attempts, at most45 cumulative. Infra errors/crashes stay charged.
+Historical rows and successes are never corrected-runtime validation.
+
+This native session is ROUND {context['round']} of 3. Run `status` first and
+cover ONLY `supervised.round_seeds_remaining`. Use `trial --phase repair` for
+every remaining seed51–65, ONCE per seed this round. Even the parent's timed-out
+seed51 may now use a repair attempt; do not replay its old initial or smoke.
+No new snapshot, initial batch, or diagnostic trial. Edits have no revision cap.
+
+The outer initializer copied this cell's engineering-assisted, UNVALIDATED
+starting policy/config into `fix_code.py` and `fix_streaming_config.json`.
+Read them and the guidance at `{c['seed_input']['guidance']['path']}` before
+repairing. Your own immutable parent development directory is
+`{Path(c['parent']['ledger']).parent}`. Do not read any other cell or held-out data.
+After current failures, use your own observed geometry, code and logs to improve
+the program; all existing nonprivileged/checked-motion/World gates remain.
+
+Read these independent local-Qwen reviews and development summaries:
+{chr(10).join(lines)}
+
+Complete all15 attempts of this round even if a candidate succeeds early.
+Then update task_analysis.md, findings.md (Root causes observed; What fixed
+them; Generalizable patterns; Blocked seeds), and attempts/seed_N_BLOCKED.md
+for every exhausted seed without a current-phase pass. If a current-phase
+bundle has a normal oracle success, copy that exact tested policy/config into
+fix_code.py/fix_streaming_config.json and `select --reason` it. A crashed
+task_completed=1 is NOT a pass. With no normal success leave selection empty.
+End this session after the round; do not loop over rejected extra trials.
+
+The DLC outer controller independently reviews round2 and opens round3 without
+waiting for the chat. You cannot approve or consume reviews. Round3 is the last
+round; after it the outer runner checks all handling/selection/freeze conditions.
+Only the selected same bundle's normal success in this new phase can qualify
+held-out1–50. With no qualifying bundle, held-out is skipped. The new phase's
+14-hour clock is recorded once; ordinary resume never resets it or the counts.
+"""
+    if sp.autonomous.repair_start(case):
+        return (sp.autonomous.repair_start_section(case, context, lines)
+                + "\nRead `docs/visible-held-placement.md` for the generic public geometry API.\n")
+    if case["supervised_repair"].get("independent_start"):
+        return f"""
+## Fresh independent development with automatic round reviews
+
+Study `{case['supervised_repair']['study_id']}`, this cell only. This is a fresh
+independent repeat: no parent ledger, code, task configuration, feedback or
+historical successes are supplied. Generate your own program from the public
+initial scene and allowed API documentation. Never read any other repeat.
+The bound start manifest `{manifest}` records zero prior attempts and no files.
+
+This session is ROUND {context['round']} of 3. Each round allows ONE charged
+attempt per seed51–65, at most45 total. Crashes, timeouts and infrastructure
+errors stay charged. Run `status` first and cover only the remaining seeds.
+{ROUND_ONE.replace('You may base the initial program on your own earlier code.', 'Generate the initial program independently.') if context['round'] == 1 else ROUND_LATER}
+
+After all15 attempts, update task_analysis.md, findings.md and exhausted-seed
+BLOCKED notes, then end this session. Select only an exact tested bundle with
+its OWN normal oracle success; a crash after task_completed=1 is not success.
+With no such bundle leave selection empty. The outer controller reviews your
+own development evidence with an independent same-local-Qwen session and
+opens the next round automatically. You cannot write or consume approvals.
+Read the resulting reviews and summaries before revising your own program:
+{chr(10).join(lines) or '(none yet: round1)'}
+
+After round3, the normal selection, handling and freeze checks still apply.
+Only a qualifying selected bundle can enter held-out1–50; otherwise skip it.
+The 14-hour development clock starts once and resume never resets budgets.
+"""
+    section = SUPERVISED_SECTION.format(
+        study_id=case["supervised_repair"]["study_id"], round=context["round"],
+        round_rule=ROUND_ONE if context["round"] == 1 else ROUND_LATER,
+        grace=(closeout.config(case)["report_grace_seconds"] if closeout.config(case)
+               else sp.rounds.grace_seconds(case)), prior_dir=manifest.parent, prior_manifest=manifest,
+        reviews="\n".join(lines) if lines else "- (no outer review yet: this is round 1)")
+    return section
+
+
+def worker_prompt(case: dict, repo: Path, rounds_context: dict | None = None) -> str:
     s = shim(case, repo)
     text = legacy.worker_prompt(s, repo)
     task_dir = str(Path(case["control"]).resolve() / "cell")
@@ -313,16 +522,27 @@ No task solution or scene inventory is supplied. Derive your own decomposition
 from this cell's actual public observations. Include `parts` in the authored
 streaming config, with stable identity, hypothesized semantic, parent (or null),
 tracked (boolean) and optional motion hypotheses. `objects` specifies only the
-tracked nodes' public SAM3 prompts, scores and optional image_x/image_y rank
-selector; untracked parent nodes organize the graph without inventing geometry.
+tracked nodes' public SAM3 prompts, scores, optional image_x/image_y rank
+selector and optional `alternative_prompts` (distinct public prompts tried in
+order only when earlier prompts find no candidate; they never break ambiguity);
+untracked parent nodes organize the graph without inventing geometry.
+Near-duplicate candidate masks (IoU >= 0.85) count as one candidate. Seeding
+failures are typed missing/ambiguous/rank_unavailable/identity_conflict with
+public candidate evidence; nothing is chosen arbitrarily.
 Semantic labels and motion hypotheses are uncertain, not measured truth.
 
 Use the injected goto_pose_report to inspect requested TCP arrival and the
-effective IK target. It does not prove grasp/contact or task success. Public
-robot_cartesian_pos is robot_base/panda_hand; the added robot_hand_pose_world is
-world/panda_hand; goto_pose requests world/TCP and applies its existing offset.
-Never compare positions from different control points. Motion stagnation is
-not arrival. A quaternion argument contains exactly one WXYZ quaternion.
+effective IK target. It does not prove grasp/contact or task success. Read the
+generic frame contract `docs/robot-frame-contract.md`. Camera pose_mat, World
+object geometry, solve_ik/goto_pose targets and motion reports all use the
+robot_base frame; goto_pose requests a robot_base TCP and applies its existing
+panda_hand offset. robot_cartesian_pos is robot_base/panda_hand [XYZ, WXYZ,
+gripper opening at index 7]; robot_hand_pose_base and robot_gripper_opening name
+the same values. robot_hand_pose_world is the simulator world/panda_hand, not
+comparable with robot_base positions. World robot facts include frame_view with
+robot_base hand/TCP pose and gripper opening. Never compare positions from
+different frames or control points. Motion stagnation is not arrival. A
+quaternion argument contains exactly one WXYZ quaternion.
 
 The public helpers world_set_focus, world_refresh, world_require_relation,
 world_begin_interaction, world_finish_interaction and world_revise_structure
@@ -331,7 +551,14 @@ part observations and authored evidence-based relation predicates. Do not
 interpret a closed gripper as contact. If execution/contact is unverified,
 update that diagnosis before revising the object's structure. When structure
 changes, cite recorded visual evidence and preserve IDs/lineage. Reacquisition
-rejects conflicting or ambiguous instances. World resets per episode; no other
+rejects conflicting or ambiguous instances; a moved instance beyond the 0.06 m
+gate is accepted only with unique coherent current RGB-D correspondences.
+world_recovery_status() reports state (armed/unseeded/tracking_lost/
+reacquire_failed/structure_grounding_failed/closed), reason, evidence and
+motion_permitted. While motion is not permitted, or a focused part is unknown
+or stale, the next motor or gripper step is refused BEFORE it executes; catch
+the error, inspect the status and call reacquire_world() (or world_refresh()
+for stale focus) before commanding motion again. World resets per episode; no other
 cell or evaluation seed supplies generated code, feedback or learned structure.
 All executions, including diagnostics, still consume the original ledger.
 """
@@ -355,22 +582,51 @@ evidence; unchanged visible centre does not prove a rotation succeeded.
 world_predict_joint(child,q) predicts within the observed range by default;
 explicit extrapolate=True marks further predictions as unvalidated. Neither
 reports joint limits or task completion. world_review_pending() only handles
-existing events; it cannot invent evidence or force an extra query. Freeze
+existing events; it cannot invent evidence or force an extra query. Initial
+model reviews without informative measured motion are deferred without a
+Qwen call and re-armed when such motion is registered. Freeze
 prompts, model templates, numerical thresholds, request settings and update
 rules with the policy/config. Runtime updates reset every episode and never
 repair a frozen program, choose a program per seed, or use scoring feedback.
 """
+    if "execution_contract" in case["streaming"]:
+        # Engineering opt-in only; absent leaves every earlier prompt unchanged.
+        text += """
+This cell additionally runs the engineering checked-execution contract
+checked-motion-v1. Read docs/checked-execution-contract.md for exact helper
+signatures, frames and units. A gripper change is refused BEFORE it takes
+effect unless the arm has not moved this episode or the last arm motion was a
+goto_pose_report with reached=true and target_modified=false: reach first,
+then grasp or release. A clipped or orientation-fallback target is not
+executed unless execute_modified=True, and even then never permits a gripper
+change. motion_workspace(), motion_contract_status(), world_visible_geometry,
+geometry_from_points, world_bind_held/world_held_state/world_release_held and
+tcp_target_for_feature describe public visible geometry and held relations
+only; unknown stays unknown and nothing proves contact or success. The
+contract is a method factor, not a task strategy: derive targets from this
+cell's own public observations.
+"""
+    if "continuation" in case:
+        text += continuation_section(case)
+    if "supervised_repair" in case:
+        text += supervised_section(case, rounds_context)
+        if closeout.config(case):
+            # Opt-in only; absent leaves every earlier prompt unchanged.
+            text += closeout.ROUND_SECTION.format(schema=closeout.config(case)["schema"],
+                                                  grace=closeout.config(case)["report_grace_seconds"])
     return text
 
 
 def coordinator_prompt(case: dict, prompt_path: Path) -> str:
-    return legacy.COORDINATOR.format(cell=case["id"], suite=case["suite"], task=case["task"],
+    text = legacy.COORDINATOR.format(cell=case["id"], suite=case["suite"], task=case["task"],
                                      prompt_path=prompt_path,
                                      promotion=legacy.PROMOTION_C.strip(), protocol=PROTOCOL)
+    return text + SUPERVISED_COORDINATOR if "supervised_repair" in case else text
 
 
-def write_prompts(case: dict, repo: Path, control: Path) -> tuple[Path, Path]:
-    rendered = worker_prompt(case, repo)
+def write_prompts(case: dict, repo: Path, control: Path,
+                  rounds_context: dict | None = None) -> tuple[Path, Path]:
+    rendered = worker_prompt(case, repo, rounds_context)
     prompt_path = control / "worker-prompt.md"
     prompt_path.write_text(rendered)
     (control / "worker-prompt.diff").write_text("".join(difflib.unified_diff(
@@ -419,7 +675,337 @@ def development_deadline(task_dir: Path) -> float:
     return float(ledger["phase_clock"]["development"]["deadline"])
 
 
-def run(case_path: Path, *, resume: bool = False, heldout: bool = True, clock=time.time) -> int:
+def read_json_file(path: Path) -> dict:
+    try:
+        value = json.loads(Path(path).read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return value if isinstance(value, dict) else {}
+
+
+# --- supervised repair study (opt-in; docs/streaming-supervised-repair.md) ----------
+
+
+def read_ledger(task_dir: Path) -> dict:
+    return json.loads((task_dir / "development_state.json").read_text())
+
+
+def trial_lock_free(task_dir: Path) -> bool:
+    with (task_dir / ".trial.lock").open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return False
+        fcntl.flock(lock, fcntl.LOCK_UN)
+    return True
+
+
+def settle_running(case_path, repo, env, control, task_dir, record) -> None:
+    """After a session ended: settle rows whose trial process is gone (still charged)."""
+    running = [r["directory"] for r in read_ledger(task_dir)["trials"] if r["status"] == "running"]
+    if not running or not trial_lock_free(task_dir):
+        return
+    settled = record["supervised"].setdefault("settled_interrupted", [])
+    for directory in running:
+        step = outer_step(case_path, repo, env, control, f"resolve_{len(settled) + 1:02d}",
+                          PROTOCOL, "resolve-interrupted", "--directory", directory)
+        settled.append({"directory": directory, "exit_code": step["exit_code"]})
+
+
+def boundary_watch(task_dir: Path, round_: int, grace: float, info: dict, poll: float = 15.0,
+                   *, report_grace: bool = False):
+    """on_start hook: stop the native session `grace` seconds after its round completed.
+
+    With the opt-in closeout, `grace` is the closeout report grace: the trials are
+    complete, the session may still be writing its reports, and a stop at the
+    limit is recorded as such; closeout completion is verified afterwards.
+    """
+    def on_start(process):
+        def watch():
+            reached = None
+            while process.poll() is None:
+                time.sleep(poll)
+                try:
+                    complete = sp.rounds.round_complete(read_ledger(task_dir), round_)
+                except (OSError, ValueError, KeyError):
+                    continue
+                if not complete:
+                    continue
+                if reached is None:
+                    reached = time.monotonic()
+                    info["round_boundary_reached_at"] = time.time()
+                    if report_grace:
+                        info["round_state"] = "trials_complete"
+                if time.monotonic() - reached >= grace:
+                    info["stopped_at_report_grace" if report_grace else "stopped_at_round_boundary"] = True
+                    try:
+                        os.killpg(process.pid, signal.SIGTERM)
+                    except ProcessLookupError:
+                        pass
+                    return
+        threading.Thread(target=watch, daemon=True).start()
+    return on_start
+
+
+def rounds_context(case: dict, data: dict) -> dict:
+    sup, control = data["supervised"], Path(case["control"]).resolve()
+    closed = [r["round"] for r in sup["rounds"] if r.get("evidence_sha256")]
+    return {"round": sup["current_round"],
+            "reviews": [r["review"]["path"] for r in sup["rounds"] if r.get("review")],
+            "summaries": [str(control / "supervised" / f"round_{n}" / "summary.json") for n in closed]}
+
+
+def round_session(case, case_path, repo, env, control, task_dir, record, state_path, info,
+                  session, settings, clock) -> None:
+    """One fresh native CC session for the current round, stopped at its boundary."""
+    data = read_ledger(task_dir)
+    r = data["supervised"]["current_round"]
+    if session is None:  # every later session gets its own append-only directory
+        used = [int(d.name) for d in (control / "sessions").glob("[0-9]*") if d.name.isdigit()]
+        session = control / "sessions" / f"{max(used, default=0) + 1:02d}"
+        session.mkdir(parents=True, exist_ok=False)
+        info = {"session": str(session), "resume": True, "started_at": clock(),
+                "continues_round": r}
+        record["sessions"].append(info)
+        atomic_json(session / "worker-settings.json", settings)
+    info["supervised_round"] = r
+    prompt_path, coordinator_path = write_prompts(case, repo, session, rounds_context(case, data))
+    remaining = int(development_deadline(task_dir) - clock())
+    info["solver_timeout"] = max(0, remaining)
+    record["status"] = "running"
+    atomic_json(state_path, record)
+    s = shim(case, repo)
+    command = legacy.native_command(s, coordinator_path.read_text(), settings,
+                                    agents=legacy.worker_agent(s, prompt_path))
+    atomic_json(session / "native-command.json",
+                {"argv": command_record(command, coordinator_path, session / "worker-settings.json"),
+                 "cwd": str(repo), "dangerously_skip_permissions": False, "supervised_round": r})
+    plan = closeout.config(case)
+    grace = plan["report_grace_seconds"] if plan else sp.rounds.grace_seconds(case)
+    info["solver_exit_code"] = run_native_cc(
+        command, cwd=repo, env=env, stdout_path=session / "coordinator.stdout.jsonl",
+        stderr_path=session / "coordinator.stderr.log", timeout=max(1, remaining),
+        on_start=boundary_watch(task_dir, r, grace, info, report_grace=plan is not None))
+    info["finished_at"] = clock()
+    verify_runtime(case, repo)
+    atomic_json(state_path, record)
+
+
+def await_review(case, case_path, repo, env, control, task_dir, record, state_path, round_,
+                 clock, sleep) -> bool:
+    """Short non-model file wait for the root-owned review; False at the deadline."""
+    path = sp.rounds.review_path(case, round_)
+    sup = record["supervised"]
+    rejected = sup.setdefault("rejected_reviews", [])
+    seen = {x["sha256"] for x in rejected if x["round"] == round_}
+    deadline = development_deadline(task_dir)
+    summary = control / "supervised" / f"round_{round_}" / "summary.json"
+    sup["awaiting"] = {"round": round_, "review_path": str(path), "summary": str(summary),
+                       "evidence_sha256": read_ledger(task_dir)["supervised"]["rounds"][round_ - 1][
+                           "evidence_sha256"], "since": clock(), "deadline": deadline}
+    record.update(status="awaiting_review", blocker=None)
+    atomic_json(state_path, record)
+    while clock() < deadline:
+        try:
+            sha = sp.file_sha256(path) if path.is_file() else None
+        except OSError as exc:
+            sha = f"unreadable: {exc}"
+        if sha and sha not in seen:
+            step = outer_step(case_path, repo, env, control, f"consume_review_r{round_}_{len(rejected) + 1:02d}",
+                              PROTOCOL, "consume-review", "--review", str(path))
+            if step["exit_code"] == 0:
+                sup["consumed"] = sup.get("consumed", []) + [{"round": round_, "sha256": sha,
+                                                              "at": clock()}]
+                sup.pop("awaiting", None)
+                atomic_json(state_path, record)
+                return True
+            seen.add(sha)
+            rejected.append({"round": round_, "sha256": sha, "at": clock(),
+                             "error": (step.get("result") or {}).get("error") or step["stderr_tail"]})
+            atomic_json(state_path, record)
+        sleep(max(1, min(sp.rounds.poll_seconds(case), deadline - clock())))
+    return False
+
+
+def closeout_store(record: dict, round_: int) -> dict:
+    """Persisted closeout state of one round; a resume continues it, never resets it."""
+    return record["supervised"].setdefault("closeout", {}).setdefault(
+        str(round_), {"round": round_, "state": "trials_complete", "sessions": [], "verifications": []})
+
+
+def previous_reports(record: dict, round_: int) -> dict | None:
+    done = [v for k, v in (record["supervised"].get("closeout") or {}).items()
+            if int(k) < round_ and v.get("state") == "complete"]
+    return max(done, key=lambda v: v["round"])["reports"] if done else None
+
+
+def closeout_session(case, repo, env, control, task_dir, record, state_path, settings, clock,
+                     result, store, timeout) -> None:
+    """One restricted native closeout session of this cell: reports and select only."""
+    used = [int(d.name) for d in (control / "sessions").glob("[0-9]*") if d.name.isdigit()]
+    session = control / "sessions" / f"{max(used, default=0) + 1:02d}"
+    session.mkdir(parents=True, exist_ok=False)
+    info = {"session": str(session), "kind": "closeout", "closeout_round": result["round"],
+            "started_at": clock(), "solver_timeout": timeout}
+    record["sessions"].append(info)
+    store["sessions"].append(str(session))
+    store["state"] = "closeout_session"
+    atomic_json(session / "worker-settings.json", settings)
+    context = rounds_context(case, read_ledger(task_dir))
+    prompt = closeout.session_prompt(case, task_dir, result, context["reviews"] + context["summaries"])
+    (session / "closeout-prompt.md").write_text(prompt)
+    command = legacy.native_command(shim(case, repo), prompt, settings)
+    atomic_json(session / "native-command.json",
+                {"argv": command_record(command, session / "closeout-prompt.md",
+                                        session / "worker-settings.json"),
+                 "cwd": str(repo), "dangerously_skip_permissions": False,
+                 "closeout_round": result["round"]})
+    atomic_json(state_path, record)
+    info["solver_exit_code"] = run_native_cc(
+        command, cwd=repo, env=env, stdout_path=session / "coordinator.stdout.jsonl",
+        stderr_path=session / "coordinator.stderr.log", timeout=max(1, timeout),
+        on_start=closeout.session_watch(task_dir, store["boundary"], info))
+    info["finished_at"] = clock()
+    verify_runtime(case, repo)
+    atomic_json(state_path, record)
+
+
+def round_closeout(case, case_path, repo, env, control, task_dir, record, state_path, settings,
+                   clock) -> tuple[str, str] | None:
+    """Opt-in: None once the complete round's closeout is verified, else a terminal end.
+
+    Bounded by max_sessions restricted sessions and the unchanged deadline; no
+    trial, refund or clock change. A failed verification never closes the round.
+    """
+    plan, data = closeout.config(case), read_ledger(task_dir)
+    r = data["supervised"]["current_round"]
+    store = closeout_store(record, r)
+    if store["state"] == "complete":
+        return None
+    store.setdefault("trials_complete_at", clock())
+    store.setdefault("boundary", closeout.boundary(data, task_dir, r))
+    out = control / "supervised" / f"round_{r}"
+    out.mkdir(parents=True, exist_ok=True)
+    while True:
+        step = outer_step(case_path, repo, env, control,
+                          f"closeout_status_r{r}_{len(store['verifications']) + 1:02d}", PROTOCOL, "status")
+        if step["exit_code"] or not isinstance(step["result"], dict):
+            store["state"] = "incomplete"
+            atomic_json(out / "closeout.json", store)
+            return ("development_incomplete",
+                    f"round {r} closeout: protocol status failed: {step['result'] or step['stderr_tail']}")
+        result = closeout.verify(read_ledger(task_dir), step["result"], task_dir, r, store["boundary"],
+                                 previous_reports(record, r))
+        store["verifications"].append({**{k: result[k] for k in (
+            "complete", "errors", "violations", "reports", "selected", "fix_bundle_sha256")},
+            "at": clock()})
+        if result["complete"]:
+            store.update(state="complete", completed_at=clock(), reports=result["reports"])
+        elif result["violations"]:
+            store["state"] = "violated"
+        remaining = development_deadline(task_dir) - clock()
+        exhausted = len(store["sessions"]) >= plan["max_sessions"] or remaining <= 0
+        if not result["complete"] and not result["violations"] and exhausted:
+            store["state"] = "incomplete"
+        atomic_json(out / "closeout.json", store)
+        atomic_json(state_path, record)
+        if result["complete"]:
+            return None
+        if result["violations"]:
+            return ("development_incomplete",
+                    f"round {r} closeout integrity violation: {'; '.join(result['violations'])}")
+        if exhausted:
+            return ("development_incomplete",
+                    f"round {r} trials are complete but its closeout is not, after "
+                    f"{len(store['sessions'])} restricted session(s)"
+                    f"{' and at the development deadline' if remaining <= 0 else ''}: "
+                    f"{'; '.join(result['errors'])}")
+        closeout_session(case, repo, env, control, task_dir, record, state_path, settings, clock,
+                         result, store, int(min(plan["session_timeout_seconds"], remaining)))
+
+
+def supervised_end(case, control, record, data, status: str, reason: str) -> str:
+    """A terminal development outcome without held-out: recorded, no OUTER marker."""
+    record.update(status=status, heldout="skipped", blocker=reason)
+    atomic_json(control / "supervised" / "heldout_skipped.json", {
+        "cell": case["id"], "study_id": case["supervised_repair"]["study_id"], "status": status,
+        "reason": reason, "supervised": data.get("supervised"),
+        "study_successes": sp.rounds.study_successes(data),
+        "charged_attempts_used": sum(1 for r in data["trials"] if r.get("spends_retry")),
+        "heldout": "skipped: no outer marker was created and no held-out seed ran"})
+    return status
+
+
+def supervised_development(case, case_path, repo, env, control, task_dir, record, state_path,
+                           info, session, settings, clock, sleep) -> str | None:
+    """Rounds, boundaries and reviews. None means: closed with a new success, go finalize."""
+    record.setdefault("supervised", {})
+    (control / "supervised").mkdir(exist_ok=True)
+    first = (info, session)
+    while True:
+        settle_running(case_path, repo, env, control, task_dir, record)
+        data = read_ledger(task_dir)
+        sup = data["supervised"]
+        r = sup["current_round"]
+        if sup["state"] == "closed":
+            break
+        if clock() >= development_deadline(task_dir):
+            if (closeout.config(case) and sup["state"] == "open" and sp.rounds.round_complete(data, r)
+                    and closeout_store(record, r)["state"] != "complete"):
+                return supervised_end(case, control, record, data, "development_incomplete",
+                                      f"development deadline passed during round {r} closeout "
+                                      f"({closeout_store(record, r)['state']}); the round was not closed")
+            if not sp.rounds.study_successes(data):
+                return supervised_end(case, control, record, data, "development_failed",
+                                      "development deadline passed with no new oracle success")
+            return supervised_end(case, control, record, data, "development_incomplete",
+                                  f"development deadline passed in round {r} ({sup['state']}); "
+                                  "a timeout is never an outer review")
+        if sup["state"] == "awaiting_review":
+            if not await_review(case, case_path, repo, env, control, task_dir, record, state_path,
+                                r, clock, sleep):
+                continue  # deadline reached: handled above
+            continue
+        if sp.rounds.round_complete(data, r):
+            if closeout.config(case):
+                # Opt-in: trials complete != closeout complete; close only after the latter.
+                ended = round_closeout(case, case_path, repo, env, control, task_dir, record,
+                                       state_path, settings, clock)
+                if ended:
+                    return supervised_end(case, control, record, read_ledger(task_dir), *ended)
+            step = outer_step(case_path, repo, env, control, f"close_round_{r}", PROTOCOL,
+                              "close-round")
+            if step["exit_code"]:
+                raise LaunchRefused(f"close-round {r} failed: {step['result'] or step['stderr_tail']}")
+            continue
+        before = len(sp.rounds.round_rows(data, r))
+        round_session(case, case_path, repo, env, control, task_dir, record, state_path,
+                      *(first if first[1] is not None else ({}, None)), settings, clock)
+        first = ({}, None)
+        settle_running(case_path, repo, env, control, task_dir, record)
+        after = read_ledger(task_dir)
+        if not sp.rounds.round_complete(after, r) and len(sp.rounds.round_rows(after, r)) == before:
+            # Visible and resumable (--resume); never silently re-launched in a loop.
+            owed = sorted(set(after["identity"]["dev_seeds"])
+                          - {row["seed"] for row in sp.rounds.round_rows(after, r)})
+            record.update(status="stage1_incomplete",
+                          blocker=f"the round {r} session ended without a new attempt; seeds "
+                                  f"{owed} remain owed this round (resume explicitly)")
+            return "stage1_incomplete"
+    closure = sup.get("closure") or {}
+    if not sp.rounds.study_successes(data):
+        return supervised_end(case, control, record, data, "development_failed",
+                              f"no normal oracle success in this study ({closure.get('reason')}); "
+                              "held-out is skipped")
+    if closure.get("reason") == "outer_stop":
+        return supervised_end(case, control, record, data, "development_stopped",
+                              f"the outer review of round {closure.get('round')} stopped the study")
+    record["supervised"]["closure"] = closure
+    return None
+
+
+def run(case_path: Path, *, resume: bool = False, heldout: bool = True, clock=time.time,
+        sleep=time.sleep) -> int:
     case_path = case_path.resolve()
     case, repo, task_dir = load(case_path)
     control = Path(case["control"]).resolve()
@@ -438,7 +1024,9 @@ def run(case_path: Path, *, resume: bool = False, heldout: bool = True, clock=ti
     # Who runs this and on what runtime are checked before anything is written.
     user, isolated = runtime_user(), isolation(case, repo)
     record = previous or {"cell": case["id"], "profile": case["profile"], "sessions": [],
-                          "started_at": datetime.now(timezone.utc).isoformat()}
+                          "started_at": datetime.now(timezone.utc).isoformat(),
+                          # Opt-in repair continuation: `init` imports this bound parent.
+                          **({"continuation": case["continuation"]} if "continuation" in case else {})}
     # Sessions are append-only: a new index after every directory already on disk.
     used = [int(d.name) for d in (control / "sessions").glob("[0-9]*") if d.name.isdigit()]
     session = control / "sessions" / f"{max(used, default=0) + 1:02d}"
@@ -481,7 +1069,13 @@ def run(case_path: Path, *, resume: bool = False, heldout: bool = True, clock=ti
         record["status"] = "running"
         atomic_json(state_path, record)
         transcript = session / "coordinator.stdout.jsonl"
-        if remaining > 0:
+        if "supervised_repair" in case:
+            # Opt-in: one native session per round, outer review between rounds.
+            ended = supervised_development(case, case_path, repo, env, control, task_dir, record,
+                                           state_path, info, session, settings, clock, sleep)
+            if ended:
+                return finish(record, state_path)
+        elif remaining > 0:
             command = legacy.native_command(s, coordinator_path.read_text(), settings,
                                             agents=legacy.worker_agent(s, prompt_path))
             atomic_json(session / "native-command.json",
@@ -514,6 +1108,13 @@ def run(case_path: Path, *, resume: bool = False, heldout: bool = True, clock=ti
                                   f"{json.dumps(record['finalize']['result'])}")
             return finish(record, state_path)
         record["status"] = "stage1_finalized"
+        if heldout and "supervised_repair" in case and (read_json_file(
+                task_dir / "stage1_result.json").get("supervised_repair") or {}).get(
+                "heldout_gate") != "passed":
+            # finalize enforces the gate; the outer marker is never written without it.
+            record.update(status="development_failed", heldout="skipped",
+                          blocker="stage-1 result records no passed supervised held-out gate")
+            return finish(record, state_path)
         if heldout:
             # The solver session has exited; only now is the outer marker created.
             atomic_json(control / "outer_heldout_authorization.json",

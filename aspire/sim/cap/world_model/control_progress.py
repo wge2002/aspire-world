@@ -11,7 +11,11 @@ class MotionInterrupted(RuntimeError):
 
 class ControlProgress:
     def __init__(self):
-        self._callbacks = {"progress": [], "reset": [], "close": []}
+        # "gate" callbacks run BEFORE every actual motor/gripper step; progress
+        # callbacks run after it. A gate refuses the step by raising.
+        # "gripper_gate" callbacks (opt-in execution contract) run before a
+        # gripper command changes; they receive (requested, current) fractions.
+        self._callbacks = {"progress": [], "reset": [], "close": [], "gate": [], "gripper_gate": []}
         self.suspended = False
 
     @property
@@ -26,6 +30,23 @@ class ControlProgress:
             if callback in self._callbacks[kind]:
                 self._callbacks[kind].remove(callback)
         return remove
+
+    def before_step(self):
+        """Pre-step boundary: any registered gate may refuse the next step.
+
+        Reset settling (``reset_scope``) is not policy motion and is not gated.
+        """
+        if self.suspended:
+            return
+        for gate in tuple(self._callbacks["gate"]):
+            gate()
+
+    def before_gripper(self, requested, current):
+        """Pre-command boundary for gripper changes; a gate refuses by raising."""
+        if self.suspended:
+            return
+        for gate in tuple(self._callbacks["gripper_gate"]):
+            gate(requested, current)
 
     def publish(self, robot, captured_at, frame_id):
         if self.suspended:

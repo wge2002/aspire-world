@@ -15,6 +15,7 @@ import urllib.request
 
 from .semantic_world import validate_parts
 from .articulated_world import validate_joints
+from .identity_evidence import valid_alternative_prompts
 
 PROMPT = """You review a robot's uncertain public scene representation.
 Use only the supplied current RGB image, public evidence and motion reports.
@@ -31,7 +32,9 @@ Return one JSON object, with no code or prose outside it:
 For revise, also supply the complete parts graph, complete objects list of
 public text prompts, and optional lineage mapping old IDs to new IDs. Each part
 has identity,parent,semantic,tracked,hypotheses. Each object has identity,prompt,
-optional min_seed_score and optional selector {axis:image_x|image_y,rank:integer}.
+optional min_seed_score, optional selector {axis:image_x|image_y,rank:integer}
+and optional alternative_prompts (distinct public prompts tried in order only
+when earlier prompts find no candidate; never to break ambiguity).
 Use revise only when part boundaries, identity or connections need to change.
 Use select_models for an existing graph. Retain/defer/reacquire omit joints.
 Evidence IDs must cite supplied observations supporting this decision. If
@@ -71,10 +74,11 @@ def validate_reply(reply, packet):
         objects = reply.get("objects")
         if not isinstance(objects, list) or not objects:
             raise ValueError("revision needs nonempty public object prompts")
-        keys = {"identity", "prompt", "min_seed_score", "selector"}
+        keys = {"identity", "prompt", "min_seed_score", "selector", "alternative_prompts"}
         for obj in objects:
             if (not isinstance(obj, dict) or set(obj)-keys or not all(isinstance(obj.get(k), str) and obj[k].strip() for k in ("identity", "prompt"))):
                 raise ValueError("invalid public object definition")
+            valid_alternative_prompts(obj.get("alternative_prompts"), obj["prompt"])
             score = obj.get("min_seed_score", .5)
             if isinstance(score, bool) or not isinstance(score, (int, float)) or not 0 <= score <= 1:
                 raise ValueError("invalid public seed score")

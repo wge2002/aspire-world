@@ -9,7 +9,7 @@ import pytest
 from aspire.sim.cap.world_model.joint_models import evaluate, fit_models, rotation
 from aspire.sim.cap.world_model.rigid_tracking import PublicRigidTracker, rigid_registration
 from aspire.sim.cap.world_model.articulated_world import ArticulatedWorld, ARTICULATION_MODE, validate_joints
-from aspire.sim.cap.world_model.qwen_world_review import QwenWorldReviewer, validate_reply
+from aspire.sim.cap.world_model.qwen_world_review import QwenWorldReviewer, ReviewRejected, validate_reply
 from aspire.sim.cap.world_model.World import PublicFrame
 from aspire.sim.cap.world_model.streaming_replay import StreamingReplay
 from aspire.sim.cap.world_model.control_progress import MotionInterrupted
@@ -250,8 +250,12 @@ def replay_v3(tmp_path, monkeypatch, responses):
     def review(self, packet, **kwargs):
         calls.append(copy.deepcopy(packet))
         reply = responses[len(calls)-1](packet)
-        validate_reply(reply, packet)
-        return reply, {"decision": reply, "duration_seconds": .01}
+        receipt = {"usage": {"input_tokens": 7}, "duration_seconds": .01, "response_sha256": "f"*64}
+        try:
+            validate_reply(reply, packet)
+        except ValueError as exc:  # mirrors QwenWorldReviewer: data errors are ReviewRejected
+            raise ReviewRejected(str(exc), {**receipt, "status": "rejected"}) from exc
+        return reply, {**receipt, "decision": reply, "status": "accepted"}
     monkeypatch.setattr(QwenWorldReviewer, "review", review)
     scope = {"segment_sam3_text_prompt": lambda *_: [{"mask": mask(), "score": .9}]}
     env = SimpleNamespace(cfg=SimpleNamespace(privileged=False), low_level_env=motor, _exec_globals=scope)
@@ -270,10 +274,15 @@ def retain(packet):
 
 def test_events_call_qwen_once_and_do_not_poll_each_frame(tmp_path, monkeypatch):
     session, scope, motor, calls = replay_v3(tmp_path, monkeypatch, [retain])
-    assert len(calls) == 1 and calls[0]["events"][0]["reason"] == "initial_model_review"
+    # Uninformative initial review: explicit deferral, no Qwen call or receipt.
+    assert not calls and not session.world.review_history
+    deferred = [e for e in session.journal.events if e["event"] == "world_review_deferred_no_call"]
+    assert len(deferred) == 1 and deferred[0]["qwen_called"] is False and "usage" not in deferred[0]
+    assert session.world.review_requests[0]["status"] == "deferred_no_call"
+    session.world._request_review("identity_conflict", "part", list(session.world._evidence))
     scope["world_review_pending"]()
     session._semantic_checkpoint(session.world.snapshot(at=0))
-    assert len(calls) == 1
+    assert len(calls) == 1 and [e["reason"] for e in calls[0]["events"]] == ["identity_conflict"]
     assert scope["world_query_joint"]("part")["status"] == "unknown"
     session.world.reset()
     assert not session.world.review_history and not session.world.joints
@@ -287,10 +296,10 @@ def test_credible_event_revises_structure_with_current_masks(tmp_path, monkeypat
                 {"identity": "part2", "parent": "base", "tracked": True}],
             "objects": [{"identity": "part2", "prompt": "current public part"}],
             "lineage": {"part": ["part2"]}, "joints": [{"child": "part2", "parent": "base", "family": "sliding"}]}
-    session, scope, motor, calls = replay_v3(tmp_path, monkeypatch, [retain, revise])
+    session, scope, motor, calls = replay_v3(tmp_path, monkeypatch, [revise])
     session.world._request_review("effect_contradiction", "part", list(session.world._evidence))
     scope["world_review_pending"]()
-    assert len(calls) == 2 and session.world.structure_revision == 2
+    assert len(calls) == 1 and session.world.structure_revision == 2
     assert session.world.joints["part2"]["family"] == "sliding"
     assert session.world.structure_history[-1]["lineage"] == {"part": ["part2"]}
     assert session.world.joint_query("part2", at=0)["status"] == "unknown"
@@ -298,7 +307,7 @@ def test_credible_event_revises_structure_with_current_masks(tmp_path, monkeypat
 
 
 def test_rejected_review_keeps_a_valid_world_without_mutating_graph(tmp_path, monkeypatch):
-    session, scope, motor, calls = replay_v3(tmp_path, monkeypatch, [retain, lambda p: {**retain(p), "evidence_ids": ["invented"]}])
+    session, scope, motor, calls = replay_v3(tmp_path, monkeypatch, [lambda p: {**retain(p), "evidence_ids": ["invented"]}])
     original = copy.deepcopy(session.world.parts)
     session.world._request_review("identity_conflict", "part", list(session.world._evidence))
     result = scope["world_review_pending"]()
@@ -354,7 +363,7 @@ def test_new_representation_interrupts_an_ongoing_motor_trajectory(tmp_path,monk
     def models(packet):
         return {"action":"select_models","reason":"public candidate family",
             "evidence_ids":packet["evidence_ids"],"joints":[{"child":"part","parent":"base","family":"sliding"}]}
-    session,scope,motor,calls=replay_v3(tmp_path,monkeypatch,[retain,models])
+    session,scope,motor,calls=replay_v3(tmp_path,monkeypatch,[models])
     session.world._request_review("effect_contradiction","part",list(session.world._evidence))
     with pytest.raises(MotionInterrupted):
         motor.move_to_joints_blocking(np.ones(7),max_steps=10)

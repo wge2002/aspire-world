@@ -7,6 +7,8 @@ does not promise wall-clock real time. The authored policy owns interruption.
 """
 from __future__ import annotations
 
+import copy
+
 from .World import PublicFrame, TrackingError
 
 
@@ -53,12 +55,17 @@ class StreamingJournal:
                 "robot_first_at": self.robot_first_at, "robot_last_at": self.robot_last_at}
 
 
+RECOVERY_STATES = ("unseeded", "armed", "tracking_lost", "reacquire_failed",
+                   "structure_grounding_failed", "closed")
+
+
 class StreamingWorldBridge:
     def __init__(self, env, world, *, on_checkpoint=None, verify_relations=None, journal=None):
         if world.clock != "simulation":
             raise ValueError("LIBERO bridge requires its simulation acquisition clock")
         for name in ("get_observation", "get_current_time_s", "add_control_progress_callback",
-                     "add_streaming_reset_callback", "add_streaming_close_callback"):
+                     "add_streaming_reset_callback", "add_streaming_close_callback",
+                     "add_motion_gate_callback"):
             if not callable(getattr(env, name, None)):
                 raise TypeError(f"environment lacks public streaming integration: {name}")
         self._env, self.world = env, world
@@ -68,11 +75,15 @@ class StreamingWorldBridge:
         self._camera_id = 0
         self._armed = False
         self._closed = False
+        self._recovery = {"state": "unseeded", "reason": "explicit same-frame seeding has not occurred",
+                          "frame_id": None, "captured_at": None, "evidence": {}}
+        self.motion_refusals = 0
 
     def __enter__(self):
         if self._closed or self._removers:
             raise RuntimeError("bridge cannot be entered twice")
         try:
+            self._removers.append(self._env.add_motion_gate_callback(self._gate))
             self._removers.append(self._env.add_control_progress_callback(self._progress))
             self._removers.append(self._env.add_streaming_reset_callback(self._reset))
             self._removers.append(self._env.add_streaming_close_callback(self.close))
@@ -80,6 +91,50 @@ class StreamingWorldBridge:
             self.close()
             raise
         return self
+
+    # --- recovery state -------------------------------------------------------
+
+    def disarm(self, state, reason, *, frame=None, evidence=None):
+        """Withdraw motion permission until an explicit valid reseed succeeds."""
+        if state not in RECOVERY_STATES or state in ("armed", "closed"):
+            raise ValueError(f"invalid disarmed recovery state {state!r}")
+        self._armed = False
+        self._recovery = {"state": state, "reason": str(reason),
+                          "frame_id": None if frame is None else frame.frame_id,
+                          "captured_at": None if frame is None else frame.captured_at,
+                          "evidence": copy.deepcopy(dict(evidence or {}))}
+
+    def _armed_after(self, frame, how):
+        previous = self._recovery
+        self._armed = True
+        self._recovery = {"state": "armed", "reason": how, "frame_id": frame.frame_id,
+                          "captured_at": frame.captured_at, "evidence": {},
+                          "recovered_from": None if previous["state"] in ("armed", "unseeded")
+                          else copy.deepcopy(previous)}
+
+    def recovery_status(self):
+        """Detached public recovery report; motion_permitted mirrors the pre-step gate."""
+        state = copy.deepcopy(self._recovery)
+        if self._closed:
+            state.update(state="closed", reason="streaming World is closed")
+        state["motion_permitted"] = bool(self._armed and not self._closed)
+        state["motion_refusals"] = self.motion_refusals
+        state["required_action"] = (None if state["motion_permitted"] else
+            "none (closed)" if self._closed else "reacquire_world() with valid current public seeds")
+        return state
+
+    def _gate(self):
+        if self._armed:
+            return
+        self.motion_refusals += 1
+        status = self.recovery_status()
+        if self.journal is not None:
+            self.journal.counts["motion_refused"] = self.journal.counts.get("motion_refused", 0) + 1
+            self.journal.record("motion_refused", state=status["state"], reason=status["reason"],
+                                captured_at=self._env.get_current_time_s())
+        raise TrackingError(f"motion refused before the next step: streaming World is "
+                            f"{status['state']} ({status['reason']}); explicit valid reseeding "
+                            "(reacquire_world) is required")
 
     def capture(self):
         if self._closed:
@@ -92,11 +147,15 @@ class StreamingWorldBridge:
         self._camera_id += 1
         return frame
 
-    def seed(self, frame, masks):
+    def seed(self, frame, masks, **kwargs):
         if self._closed or not self._removers:
             raise RuntimeError("enter the bridge before seeding")
-        self.world.seed(frame, masks)
-        self._armed = True
+        try:
+            self.world.seed(frame, masks, **kwargs)
+        except Exception as exc:
+            self.disarm("reacquire_failed", f"tracker seeding failed: {type(exc).__name__}: {exc}", frame=frame)
+            raise
+        self._armed_after(frame, "explicit same-frame public seeding")
         self._log_objects("seed", frame)
 
     def refresh(self):
@@ -106,7 +165,7 @@ class StreamingWorldBridge:
         try:
             self.world.observe_frame(frame)
         except TrackingError as exc:
-            self._armed = False
+            self.disarm("tracking_lost", str(exc), frame=frame)
             if self.journal is not None:
                 self.journal.counts["tracking_lost"] += 1
                 self._log_objects("tracking_lost", frame, error=str(exc))
@@ -182,6 +241,8 @@ class StreamingWorldBridge:
         if self.journal is not None:
             self.journal.record("episode_reset", previous_episode_id=self.world.episode_id)
         self._armed = False
+        self._recovery = {"state": "unseeded", "reason": "episode reset; explicit same-frame seeding required",
+                          "frame_id": None, "captured_at": None, "evidence": {}}
         self._camera_id = 0
         self.world.reset()
 

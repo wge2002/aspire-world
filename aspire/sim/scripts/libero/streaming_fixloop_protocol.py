@@ -32,6 +32,10 @@ executions per development seed (smoke/initial/repair/diagnostic, timeouts and
 crashes included), one uncharged public scene snapshot, no global revision
 limit and no action/query/recovery caps. Seeds 1-50 are refused here; held-out
 evaluation belongs to a separate outer stage.
+
+A case may opt into an explicit repair continuation of its own incomplete parent
+ledger (`continuation`, see streaming_fixloop_continuation.py); without it,
+nothing here behaves differently.
 """
 from __future__ import annotations
 
@@ -49,6 +53,9 @@ from native_world_fixloop_state import (RETRY_LIMIT, NativeWorldState, ProtocolE
                                        bundle_identity, code_hash, report_errors, valid_program)
 from native_world_protocol import (authored_path, check_policy, gate_module, parse_result,
                                    read_json, runtime_env)
+import streaming_fixloop_continuation as continuation  # noqa: E402
+import streaming_fixloop_autonomous as autonomous  # noqa: E402
+import streaming_fixloop_rounds as rounds  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "common"))
 from native_cc_freeze import RuntimeChanged, verify_runtime
@@ -57,6 +64,7 @@ from native_cc_trial_process import run_replay
 if str(Path(__file__).resolve().parents[4]) not in sys.path:
     sys.path.append(str(Path(__file__).resolve().parents[4]))
 from aspire.sim.cap.integrations.libero import initial_states as ist  # noqa: E402
+from aspire.sim.cap.world_model.execution_contract import validate_contract_config  # noqa: E402
 
 PROFILE = "sam2-streaming-native-v1"
 PROTOCOL_ID = "libero-pro-common-v1"
@@ -88,19 +96,31 @@ ENGINEERED_WORLD_FILES = ("cap/world_model/World.py", "cap/world_model/sam2_stre
                           "cap/world_model/streaming_replay.py",
                           "cap/world_model/control_progress.py",
                           "cap/world_model/semantic_world.py",
+                          "cap/world_model/identity_evidence.py",
                           "cap/world_model/motion_feedback.py",
+                          "cap/world_model/robot_frames.py",
+                          "docs/robot-frame-contract.md",
                           "cap/world_model/joint_models.py",
                           "cap/world_model/rigid_tracking.py",
                           "cap/world_model/articulated_world.py",
                           "cap/world_model/qwen_world_review.py",
                           "docs/articulation-streaming-world.md",
                           "docs/semantic-streaming-world.md",
+                          "cap/integrations/franka/common.py",
                           "cap/integrations/franka/libero_reduced.py",
                           "cap/envs/simulators/libero.py", "scripts/libero/replay_trial.py",
                           "cap/integrations/libero/__init__.py",
-                          "cap/integrations/libero/initial_states.py")
+                          "cap/integrations/libero/initial_states.py",
+                          "cap/world_model/execution_contract.py",
+                          "cap/world_model/geometry_queries.py",
+                          "cap/world_model/held_geometry.py",
+                          "cap/world_model/held_surface.py",
+                          "docs/visible-held-placement.md",
+                          "docs/checked-execution-contract.md")
 PROTOCOL_SOURCES = ("streaming_fixloop_protocol.py", "native_world_fixloop_state.py",
-                    "native_world_protocol.py")
+                    "native_world_protocol.py", "streaming_fixloop_continuation.py",
+                    "streaming_fixloop_rounds.py", "streaming_fixloop_autonomous.py",
+                    "streaming_fixloop_closeout.py")
 AUTHORED_CONFIG_KEYS = {"objects", "cadence", "notes"}
 OBJECT_KEYS = {"identity", "prompt", "min_seed_score"}
 SAM2_KEYS = ("source_root", "config_file", "checkpoint", "device")
@@ -211,6 +231,26 @@ def validate_case(case: dict) -> None:
                     "initial_state_manifest", "initial_state_manifest_sha256"):
             if not case.get(key):
                 errors.append(f"a formal run requires {key}")
+    if "continuation" in case:
+        # Opt-in only (docs/streaming-repair-continuation.md); absent means unchanged.
+        errors += continuation.contract_errors(case)
+    if "supervised_repair" in case:
+        # Opt-in study (docs/streaming-supervised-repair.md); it runs with the
+        # checked execution contract and is never combined with a continuation.
+        errors += rounds.contract_errors(case, DEV_SEEDS)
+        if "execution_contract" not in case.get("streaming", {}):
+            errors.append("supervised_repair runs with streaming.execution_contract checked-motion-v1")
+    if "execution_contract" in case.get("streaming", {}):
+        # Engineering opt-in (docs/checked-execution-contract.md); never authored.
+        try:
+            # Present means enabled: an explicit null would alter identity yet run legacy.
+            if validate_contract_config(case["streaming"]["execution_contract"]) is None:
+                raise ValueError('execution_contract must be {"version": "checked-motion-v1"}; '
+                                 "omit the key for legacy behaviour")
+        except ValueError as exc:
+            errors.append(f"streaming.{exc}")
+        if case.get("profile") not in (SEMANTIC_PROFILE, ARTICULATION_PROFILE):
+            errors.append("streaming.execution_contract requires the semantic v2 or articulation v3 profile")
     if errors:
         raise ProtocolError("; ".join(errors))
 
@@ -311,11 +351,11 @@ def initial_state_identity(case: dict) -> dict:
     return {"evidence": "frozen", **verified}
 
 
-def identity(case: dict, repo: Path) -> dict:
+def identity(case: dict, repo: Path, *, verify_prior: bool = False) -> dict:
     """Everything a resume must reproduce exactly. Budgets and clocks are data."""
     here = Path(__file__).resolve().parent
     world = engineered_world(repo)
-    return {
+    current = {
         "harness": "claude-code", "harness_version": case["claude_version"],
         "profile": case["profile"], "protocol_id": PROTOCOL_ID,
         "method_differences": case.get("method_differences", []),
@@ -344,6 +384,17 @@ def identity(case: dict, repo: Path) -> dict:
         **({"runtime_manifest_sha256": verify_runtime(case, repo)}
            if case.get("runtime_manifest") or case.get("require_runtime_freeze") else {}),
     }
+    if "execution_contract" in case["streaming"]:
+        # Present only when opted in, so earlier identities reproduce exactly.
+        current["execution_contract"] = case["streaming"]["execution_contract"]
+    if "continuation" in case:
+        # The bound parent (re-hashed every time) is part of the new identity.
+        current["continuation"] = continuation.provenance(case, current)
+    if "supervised_repair" in case:
+        # New study identity: study id, rounds, gate, review dir and the bound
+        # prior-input manifest (its files are re-hashed at init only).
+        current["supervised_repair"] = rounds.provenance(case, verify_files=verify_prior, identity=current)
+    return current
 
 
 class StreamingFixLoopState(NativeWorldState):
@@ -392,12 +443,37 @@ class StreamingFixLoopState(NativeWorldState):
                                   "and the remaining budget stays unspent")
         super().validate_admission(phase, seed, digest)
 
+    def validate_bundle(self, phase: str, bundle: dict, components: dict) -> None:
+        """Bundle-level admission rule; only a repair continuation adds one."""
+
+    def continuation_summary(self) -> dict | None:
+        return None
+
+    def check_waivers(self) -> set[str]:
+        """Progress keys `check` does not block on; only a supervised freeze waives any."""
+        return set()
+
+    def supervised_errors(self) -> list[str]:
+        return []
+
     def budget(self) -> dict:
         used = sum(self.retries_used(s) for s in self.seeds)
         return {"charged_attempts_used": used,
                 "charged_attempts_limit": RETRY_LIMIT * len(self.seeds),
                 "phase_clock": self.data["phase_clock"],
                 "development_seconds_remaining": max(0.0, self.remaining())}
+
+
+class ContinuationFixLoopState(continuation.ContinuationMixin, StreamingFixLoopState):
+    """A repair continuation: parent history imported once, new phase clock and rows."""
+
+
+class SupervisedFixLoopState(rounds.SupervisedMixin, StreamingFixLoopState):
+    """A supervised repair study: three outer-reviewed rounds and the current-success gate."""
+
+
+class RemainingRoundsFixLoopState(autonomous.ContinuationMixin, SupervisedFixLoopState):
+    """Keep parent round 1 charged; only current-phase rounds 2/3 are candidates."""
 
 
 def streaming_config_errors(text: str, profile=PROFILE) -> list[str]:
@@ -411,7 +487,7 @@ def streaming_config_errors(text: str, profile=PROFILE) -> list[str]:
     errors = []
     semantic = profile in (SEMANTIC_PROFILE, ARTICULATION_PROFILE)
     allowed = AUTHORED_CONFIG_KEYS | ({"parts"} if semantic else set()) | ({"joints"} if profile == ARTICULATION_PROFILE else set())
-    object_keys = OBJECT_KEYS | ({"selector"} if semantic else set())
+    object_keys = OBJECT_KEYS | ({"selector", "alternative_prompts"} if semantic else set())
     frozen = set(config) - allowed
     if frozen:
         errors.append(f"streaming config may set only {sorted(allowed)}; "
@@ -434,6 +510,12 @@ def streaming_config_errors(text: str, profile=PROFILE) -> list[str]:
         if selector is not None and (not isinstance(selector, dict) or set(selector) != {"axis", "rank"}
                 or selector["axis"] not in ("image_x", "image_y") or type(selector["rank"]) is not int or selector["rank"] < 0):
             errors.append("selector requires image_x/image_y axis and a nonnegative integer rank")
+        if "alternative_prompts" in item:
+            from aspire.sim.cap.world_model.identity_evidence import valid_alternative_prompts
+            try:
+                valid_alternative_prompts(item["alternative_prompts"], item["prompt"])
+            except ValueError as exc:
+                errors.append(str(exc))
     if len(set(identities)) != len(identities) or "robot" in identities:
         errors.append("object identities must be unique and may not be 'robot'")
     if semantic:
@@ -529,6 +611,8 @@ def materialize_config(case: dict, directory: Path, authored: Path) -> Path:
         runtime.update(review=review_config(case))
         if "joints" in config:
             runtime["joints"] = config["joints"]
+    if "execution_contract" in case["streaming"]:
+        runtime["execution_contract"] = case["streaming"]["execution_contract"]
     (directory / "authored_streaming_config.json").write_bytes(authored.read_bytes())
     path = directory / "streaming_world_config.json"
     path.write_text(json.dumps(runtime, indent=2) + "\n")
@@ -593,6 +677,7 @@ def _run_trial(case, repo, state, phase, seed, code, streaming) -> dict:
                                              "streaming_config": str(streaming) if streaming else None})
         raise
     state.validate_admission(phase, seed, bundle_identity(bundle))
+    state.validate_bundle(phase, bundle, components)
     record = state.begin_trial(phase, seed, bundle, sources)
     started = state.clock()
     timeout = min(case["trial_timeout"], max(1, int(state.remaining())))
@@ -684,9 +769,12 @@ def selected_bundle(case, state) -> tuple[dict, dict]:
 def check(case, repo, state) -> dict:
     progress = state.progress()
     expired = state.remaining() <= 0
+    waived = state.check_waivers()
     errors = [f"{key}: {progress[key]}" for key in (
         "seeds_needing_initial", "seeds_exhausted_without_graded_evidence",
-        "seeds_pending_repair", "blocked_notes_required") if progress[key]]
+        "seeds_pending_repair", "blocked_notes_required") if progress[key] and key not in waived]
+    # Supervised study only: closed development, a new oracle success, graded seeds.
+    errors += state.supervised_errors()
     if state.unresolved():
         errors.append("an attempt is still running; the outer coordinator must resolve it")
     if not progress["graded_executions"]:
@@ -721,7 +809,10 @@ def check(case, repo, state) -> dict:
             "selected": state.data.get("selected"),
             "coverage": state.final_coverage(bundle) if bundle else [],
             # Reported, never blocking: timeouts and runner failures stay charged.
-            "infrastructure_errors": progress["infrastructure_errors"]}
+            "infrastructure_errors": progress["infrastructure_errors"],
+            **({"continuation": progress["continuation"]} if "continuation" in progress else {}),
+            **({"supervised": progress["supervised"], "waived": sorted(waived)}
+               if "supervised" in progress else {})}
 
 
 def select(case, repo, state, reason: str) -> dict:
@@ -869,8 +960,46 @@ def finalize(case, repo, state, transcripts: list[Path], worker_settings: Path |
         "replay_invocations": status["progress"]["replay_invocations"],
         "transcripts": [str(p) for p in transcripts],
     }
+    summary = state.continuation_summary()
+    if summary is not None:
+        # Parent provenance and historical totals, kept apart from the corrected-
+        # runtime evidence above (tested bundles, coverage, graded executions).
+        result["continuation"] = summary
+    if isinstance(state, SupervisedFixLoopState):
+        # check() already refused anything but a closed study whose selected
+        # bundle has its own oracle success; the held-out freeze re-checks rows.
+        result["supervised_repair"] = {**state.supervised_summary(), "heldout_gate": "passed",
+                                       "selected_bundle_successes": [
+                                           s for s in rounds.study_successes(state.data)
+                                           if s["bundle_sha256"] == bundle_identity(bundle)]}
     (state.task_dir / "stage1_result.json").write_text(json.dumps(result, indent=2) + "\n")
     return result
+
+
+def round_transition(case: dict, state, action: str, review: Path | None) -> dict:
+    """Outer runner: close the complete round, or consume its root-owned review.
+
+    Held under the trial lock, so no trial can be admitted concurrently. Closing
+    writes the round's public development summary to
+    <control>/supervised/round_<r>/summary.json; nothing runs a simulator.
+    """
+    if not isinstance(state, SupervisedFixLoopState):
+        raise ProtocolError(f"{action} exists only in a supervised repair study")
+    with (state.task_dir / ".trial.lock").open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError as exc:
+            raise ProtocolError("a trial is running; a round transition waits for it") from exc
+        state.data = json.loads(state.path.read_text())
+        if action == "consume-review":
+            return {"consumed": state.consume_review(case, review),
+                    "supervised": state.supervised_summary()}
+        evidence = state.close_round()
+        out = Path(case["control"]).resolve() / "supervised" / f"round_{evidence['round']}"
+        out.mkdir(parents=True, exist_ok=True)
+        (out / "summary.json").write_text(json.dumps(evidence, indent=2) + "\n")
+        return {"closed_round": evidence["round"], "evidence_sha256": evidence["evidence_sha256"],
+                "summary": str(out / "summary.json"), "supervised": state.supervised_summary()}
 
 
 def read_json_line(line: str) -> dict:
@@ -883,8 +1012,26 @@ def read_json_line(line: str) -> dict:
 
 def open_state(case_path: Path, action: str, clock=time.time):
     case, repo, task_dir = load_case(case_path)
-    state = StreamingFixLoopState(task_dir, identity(case, repo), resume=action != "init",
-                                  clock=clock)
+    current = identity(case, repo, verify_prior=action == "init")
+    if "supervised_repair" in case:
+        if autonomous.enabled(case):
+            parent = autonomous.parent_and_seed(case, current)
+            return case, repo, RemainingRoundsFixLoopState(task_dir, current, parent=parent,
+                                                           resume=action != "init", clock=clock)
+        return case, repo, SupervisedFixLoopState(task_dir, current, resume=action != "init",
+                                                  clock=clock)
+    if "continuation" not in case:
+        return case, repo, StreamingFixLoopState(task_dir, current, resume=action != "init",
+                                                 clock=clock)
+    # Explicit, bound continuation: `init` imports the parent once into a fresh
+    # ledger; every later action resumes that ledger with the identical identity.
+    parent, sha = continuation.read_parent(case)
+    if action == "init":
+        problems = continuation.import_permission_errors(case)
+        if problems:
+            raise continuation.ContinuationRefused("; ".join(problems))
+    state = ContinuationFixLoopState(task_dir, current, parent=parent, parent_sha256=sha,
+                                     resume=action != "init", clock=clock)
     return case, repo, state
 
 
@@ -903,6 +1050,9 @@ def main(argv: list[str] | None = None, clock=time.time) -> int:
     sub.add_parser("alias-smoke").add_argument("--seed", type=int, required=True)
     sub.add_parser("select").add_argument("--reason", required=True)
     sub.add_parser("resolve-interrupted").add_argument("--directory", required=True)
+    # Outer runner only (supervised study): never solver subcommands.
+    sub.add_parser("close-round")
+    sub.add_parser("consume-review").add_argument("--review", type=Path, required=True)
     final = sub.add_parser("finalize")
     final.add_argument("--transcript", type=Path, action="append", required=True)
     final.add_argument("--worker-settings", type=Path, required=True,
@@ -925,6 +1075,9 @@ def main(argv: list[str] | None = None, clock=time.time) -> int:
             result = select(case, repo, state, args.reason)
         elif args.action == "resolve-interrupted":
             result = resolve_interrupted(case, repo, state, args.directory)
+        elif args.action in ("close-round", "consume-review"):
+            result = round_transition(case, state, args.action,
+                                      getattr(args, "review", None))
         elif args.action == "finalize":
             result = finalize(case, repo, state, args.transcript, args.worker_settings, args.probe)
         elif args.action == "check":

@@ -59,6 +59,16 @@ class FrankaLiberoApiReduced(ApiBase):
     """Robot control helpers for Franka.
     """
     _TCP_OFFSET = np.array([0.0, 0.0, -0.1], dtype=np.float64)
+    # Software TCP workspace clip in robot_base (meters) applied by solve_ik
+    # before IK, and the orientation fallback order tried after the requested
+    # orientation fails. Published unchanged by workspace_contract().
+    _WORKSPACE_LOW = (-0.1, -0.5, 0.005)
+    _WORKSPACE_HIGH = (0.75, 0.5, 0.9)
+    _ORIENTATION_FALLBACKS = (
+        ("top-down", (0.0, 1.0, 0.0, 0.0)),
+        ("45-tilt", (0.707, 0.707, 0.0, 0.0)),
+        ("side-approach", (0.707, 0.0, 0.707, 0.0)),
+    )
 
     def __init__(self, env: BaseEnv) -> None:
         super().__init__(env)
@@ -135,13 +145,19 @@ class FrankaLiberoApiReduced(ApiBase):
                 - ["agentview"]["images"]["rgb"]: Current color camera image as a numpy array of shape (H, W, 3), dtype uint8.
                 - ["agentview"]["images"]["depth"]: Current depth camera image as a numpy array of shape (H, W), dtype float32.
                 - ["agentview"]["intrinsics"]: Camera intrinsic matrix as a numpy array of shape (3, 3), dtype float64.
-                - ["agentview"]["pose_mat"]: Camera extrinsic matrix as a numpy array of shape (4, 4), dtype float64.
+                - ["agentview"]["pose_mat"]: Camera-to-robot_base transform as a numpy array of shape (4, 4), dtype float64 (OpenCV optical axes: +x right, +y down, +z forward). Points back-projected with it are in the robot_base frame, the same frame used by solve_ik/goto_pose.
+                - ["agentview"]["pose_frame"]: "robot_base", the frame pose_mat maps into.
                 - ["robot0_eye_in_hand"]["images"]["rgb"]: Current wrist camera image as a numpy array of shape (H, W, 3), dtype uint8.
                 - ["robot0_eye_in_hand"]["images"]["depth"]: Current wrist camera depth image as a numpy array of shape (H, W), dtype float32.
                 - ["robot0_eye_in_hand"]["intrinsics"]: Wrist camera intrinsic matrix as a numpy array of shape (3, 3), dtype float64.
-                - ["robot0_eye_in_hand"]["pose_mat"]: Wrist camera extrinsic matrix as a numpy array of shape (4, 4), dtype float64.
-                - ["robot_cartesian_pos"]: Current end-effector (panda_hand) pose in the robot/world frame as a numpy array of shape (8,), dtype float64. The first 3 elements are the robot's end-effector XYZ, the next 4 elements are the quaternion wxyz, and the last element is the gripper position normalized, 0 (closed) to 1 (open).
-                - ["robot_joint_pos"]: Current joint positions as a numpy array of shape (7,), dtype float64. The last element is the gripper position normalized, 0 (closed) to 1 (open).
+                - ["robot0_eye_in_hand"]["pose_mat"]: Wrist camera-to-robot_base transform, shape (4, 4), same convention as agentview.
+                - ["robot_cartesian_pos"]: shape (8,), dtype float64, in robot_base: [0:3] panda_hand XYZ, [3:7] panda_hand quaternion WXYZ, [7] gripper opening normalized 0 (closed) to 1 (open). Index 6 is the quaternion z component, not the gripper.
+                - ["robot_hand_pose_base"]: shape (7,), panda_hand [XYZ, WXYZ] in robot_base (same values as robot_cartesian_pos[:7]).
+                - ["robot_gripper_opening"]: float, gripper opening normalized 0 (closed) to 1 (open).
+                - ["robot_hand_pose_world"]: shape (7,), panda_hand [XYZ, WXYZ] in the simulator world frame; do not compare it with robot_base targets or geometry.
+                - ["robot_base_pose_world"]: shape (7,), robot_base [XYZ, WXYZ] in the simulator world frame.
+                - ["robot_joint_pos"]: shape (8,), dtype float64: [0:7] arm joint positions in radians, [7] gripper opening normalized 0 (closed) to 1 (open).
+            The panda_hand is not the TCP: solve_ik/goto_pose TCP = hand_position - R(hand_quaternion) @ [0, 0, -0.1].
         """
         obs = self._env.get_observation()
         obs[self.camera_name]["images"]["depth"] = obs[self.camera_name]["images"]["depth"].squeeze(-1)
@@ -230,24 +246,43 @@ class FrankaLiberoApiReduced(ApiBase):
         """
         return self.molmo_point_fn(Image.fromarray(image), objects=[text_prompt])
 
-    def get_oriented_bounding_box_from_3d_points(self, points: np.ndarray) -> dict[str, Any]:
+    def get_oriented_bounding_box_from_3d_points(
+        self, points: np.ndarray, up: np.ndarray | tuple[float, float, float] = (0.0, 0.0, 1.0)
+    ) -> dict[str, Any]:
         """Get the oriented bounding box from 3D points.
 
         Args:
             points: np.ndarray: The 3D points to get the oriented bounding box from.
                 Shape: (N, 3), dtype float64.
+            up: Gravity-up direction in the points' frame. Default +z, which is
+                gravity-up in robot_base (the frame of mask_to_world_points).
 
         Returns:
             dict[str, Any]: The oriented bounding box. The dictionary contains the following keys:
                 - "center": np.ndarray: The center of the oriented bounding box in point cloud frame.
-                - "extent": np.ndarray: The extent of the oriented bounding box.
-                - "R": np.ndarray: The rotation matrix of the oriented bounding box in point cloud frame.
+                - "extent": np.ndarray: Full box lengths; extent[i] is along R[:, i].
+                - "R": np.ndarray: The rotation matrix of the oriented bounding box in point cloud
+                  frame, unchanged from Open3D. Its COLUMNS are the box axes; rows are NOT axes.
+                - "axes": np.ndarray (3, 3) or None: the box axes as rows, axes[i] == R[:, i].
+                - "long_axis": np.ndarray (3,) or None: unit axis of the largest extent (sign
+                  arbitrary), only when "long_axis_status" == "known". "ambiguous" means the
+                  two largest extents are within the declared ratio (no long axis is implied);
+                  "unknown" means the box is degenerate.
+                - "long_axis_index", "long_axis_extent", "elongation_ratio".
+                - "long_axis_tilt_from_up": float rad, 0 = along `up`, pi/2 = horizontal.
+                - "long_axis_orientation": "vertical", "horizontal", "oblique" or None.
+                - "axis_convention", "coordinate_frame" (same frame as `points`), "up",
+                  "reason", "caveats".
+            The box spans only the given points. From visible-surface points, occluded parts are
+            missing: extents and long axis describe the visible surface, not the full object.
 
         Example:
             >>> points = np.random.randn((100, 3))
             >>> obb = get_oriented_bounding_box_from_3d_points(points)
+            >>> if obb["long_axis_status"] == "known":
+            ...     lying = obb["long_axis_orientation"] == "horizontal"
         """
-        return _get_obb(points)
+        return _get_obb(points, up=up)
 
     # --------------------------------------------------------------------- #
     # Grasp planner (Contact-GraspNet)
@@ -359,12 +394,17 @@ class FrankaLiberoApiReduced(ApiBase):
     ) -> np.ndarray:
         """Solve inverse kinematics for the panda_hand link.
 
+        The target is the TCP; the panda_hand target is offset by 0.1 m along
+        the hand's -Z axis. Coordinates are in the robot_base frame, the frame
+        of camera pose_mat and points back-projected with it (historically
+        called "world" in this API; it is not the simulator world frame).
+
         Args:
             position:
-                Target position in world frame.
+                Target TCP position in the robot_base frame.
                 Shape: (3,), dtype float64.
             quaternion_wxyz:
-                Target orientation as a unit quaternion in world frame.
+                Target orientation as a unit quaternion in the robot_base frame.
                 Shape: (4,), [w, x, y, z], dtype float64.
 
         Returns:
@@ -382,17 +422,13 @@ class FrankaLiberoApiReduced(ApiBase):
         requested_pos = pos.copy()
         self._last_ik_report = None
         # Clamp to reachable workspace to avoid IK timeouts
-        pos = np.clip(pos, [-0.1, -0.5, 0.005], [0.75, 0.5, 0.9])
+        pos = np.clip(pos, self._WORKSPACE_LOW, self._WORKSPACE_HIGH)
         quat_wxyz = np.asarray(quaternion_wxyz, dtype=np.float64).reshape(4)
         offset_pos = apply_tcp_offset(pos, quat_wxyz, self._TCP_OFFSET)
 
         # Try requested orientation first, then fallbacks
-        orientations = [
-            ("requested", quat_wxyz),
-            ("top-down", np.array([0.0, 1.0, 0.0, 0.0], dtype=np.float64)),
-            ("45-tilt", np.array([0.707, 0.707, 0.0, 0.0], dtype=np.float64)),
-            ("side-approach", np.array([0.707, 0.0, 0.707, 0.0], dtype=np.float64)),
-        ]
+        orientations = [("requested", quat_wxyz)] + [
+            (label, np.array(q, dtype=np.float64)) for label, q in self._ORIENTATION_FALLBACKS]
 
         for label, quat in orientations:
             try:
@@ -409,7 +445,10 @@ class FrankaLiberoApiReduced(ApiBase):
                     "effective_quaternion_wxyz": quat.tolist(),
                     "position_clipped": bool(not np.array_equal(pos, requested_pos)),
                     "orientation_fallback": label != "requested", "orientation_choice": label,
-                    "position_reference": "world/TCP", "ik_link": "panda_hand"}
+                    # Same frame as camera pose_mat and public geometry.
+                    "position_reference": "robot_base/TCP",
+                    "hand_position_reference": "robot_base/panda_hand",
+                    "tcp_offset_hand": self._TCP_OFFSET.tolist(), "ik_link": "panda_hand"}
                 return extract_arm_joints(self.cfg)
             except Exception:
                 logger.warning("IK failed with orientation '%s', trying next fallback", label)
@@ -471,8 +510,8 @@ class FrankaLiberoApiReduced(ApiBase):
         then moves to the final position.
 
         Args:
-            position: (3,) XYZ target in meters (world frame).
-            quaternion_wxyz: (4,) WXYZ unit quaternion (world frame).
+            position: (3,) XYZ TCP target in meters (robot_base frame, as for solve_ik).
+            quaternion_wxyz: (4,) WXYZ unit quaternion (robot_base frame).
             z_approach: Z offset for approach motion (meters). Default 0.0.
 
         Example:
@@ -490,6 +529,28 @@ class FrankaLiberoApiReduced(ApiBase):
         joints = self.solve_ik(pos, quat)
         self.move_to_joints(joints)
     
+    def workspace_contract(self) -> dict[str, Any]:
+        """Public solve_ik/goto_pose target semantics (no simulator state).
+
+        Clipping is a software guard, not a measured reachability limit: a
+        clipped or fallback target is a different target, so arrival there is
+        not arrival at the request.
+        """
+        return {
+            "target_reference": "robot_base/TCP", "units": "meters; quaternion WXYZ",
+            "hand_link": "panda_hand", "tcp_offset_hand": self._TCP_OFFSET.tolist(),
+            "tcp_definition": "hand_position = tcp + R(quaternion) @ tcp_offset_hand",
+            "workspace_low": list(self._WORKSPACE_LOW), "workspace_high": list(self._WORKSPACE_HIGH),
+            "workspace_meaning": ("solve_ik clips the requested TCP per axis into [low, high] before IK; "
+                                  "a clipped request is reported position_clipped and is not physical "
+                                  "unreachability"),
+            "orientation_fallbacks": [{"label": label, "quaternion_wxyz": list(q)}
+                                      for label, q in self._ORIENTATION_FALLBACKS],
+            "orientation_fallback_meaning": ("if IK fails for the requested orientation, these fixed "
+                                             "orientations are tried in order; any fallback is reported "
+                                             "orientation_fallback and changes the executed target"),
+        }
+
     def goto_home_joint_position(self) -> None:
         """Return the arm to its reset joint configuration with high manipulability"""
         home = getattr(self._env, "home_joint_position", None)

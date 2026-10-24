@@ -192,19 +192,26 @@ def test_motion_report_converts_hand_to_requested_tcp_consistently(quat):
     pos = np.array([.3, .1, .2])
     hand = pos + rotation_wxyz(quat) @ [0, 0, -.1]
     row = motion_report(pos, quat, {"robot_hand_pose_world": [*hand, *quat]},
-        ik={"position_clipped": False, "orientation_fallback": False}, joints={"converged": True})
+        ik={"position_clipped": False, "orientation_fallback": False}, joints={"converged": True},
+        frame="world")
     assert row["reached"] is True and row["position_error"] < 1e-8
+    assert row["position_reference"] == "world/TCP"
 
 
 def test_stationary_robot_far_from_target_is_not_arrival():
     row = motion_report([.3, 0, .2], [1, 0, 0, 0],
         {"robot_hand_pose_world": [.5, 0, .1, 1, 0, 0, 0]},
-        ik={"position_clipped": False, "orientation_fallback": False}, joints={"converged": False})
+        ik={"position_clipped": False, "orientation_fallback": False}, joints={"converged": False},
+        frame="world")
     assert row["reached"] is False
 
 
 def test_missing_pose_or_missing_ik_feedback_is_unknown():
     assert motion_report([0, 0, 0], [1, 0, 0, 0], {}, ik={})["reached"] is None
+    # Undeclared target frame is never silently assumed.
+    undeclared = motion_report([0, 0, 0], [1, 0, 0, 0], {"robot_hand_pose_world": [0, 0, .1, 1, 0, 0, 0]},
+                               ik={"position_clipped": False, "orientation_fallback": False})
+    assert undeclared["reached"] is None and "frame" in undeclared["reason"]
     with pytest.raises(ValueError, match="one finite"):
         motion_report([0, 0, 0], [[1, 0, 0, 0]]*3, {})
 

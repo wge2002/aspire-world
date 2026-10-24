@@ -17,6 +17,8 @@ from typing import Mapping
 
 import numpy as np
 
+from .robot_frames import FRAMES, FrameContractError, check_consistency, robot_pose_view
+
 
 class FrameError(ValueError):
     """A frame cannot be associated with the active public observation stream."""
@@ -71,12 +73,15 @@ class PublicFrame:
     rgb: np.ndarray
     depth: np.ndarray
     intrinsics: np.ndarray
-    camera_to_world: np.ndarray
+    camera_to_world: np.ndarray  # camera -> coordinate_frame (historical field name)
     clock: str = "simulation"
+    coordinate_frame: str | None = None  # None: undeclared legacy calibration
 
     def __post_init__(self):
         if not self.episode_id or not self.camera or not self.clock:
             raise FrameError("episode, camera and acquisition clock are required")
+        if self.coordinate_frame is not None and self.coordinate_frame not in FRAMES:
+            raise FrameError(f"unsupported camera pose frame {self.coordinate_frame!r}; frames are {FRAMES}")
         if type(self.frame_id) is not int or self.frame_id < 0:
             raise FrameError("frame_id must be a nonnegative integer")
         if not math.isfinite(self.captured_at) or self.captured_at < 0:
@@ -105,7 +110,8 @@ class PublicFrame:
     def from_observation(cls, obs, *, episode_id, camera, frame_id, captured_at, clock="simulation"):
         view = obs[camera]
         return cls(episode_id, camera, frame_id, captured_at, view["images"]["rgb"],
-                   view["images"]["depth"], view["intrinsics"], view["pose_mat"], clock)
+                   view["images"]["depth"], view["intrinsics"], view["pose_mat"], clock,
+                   view.get("pose_frame"))
 
 
 class World:
@@ -116,9 +122,23 @@ class World:
     the control bridge does not create a background simulator/rendering thread.
     """
 
-    def __init__(self, tracker, *, episode_id: str, camera="agentview", clock="simulation", cadence=None):
+    def __init__(self, tracker, *, episode_id: str, camera="agentview", clock="simulation", cadence=None,
+                 coordinate_frame=None, tcp_offset=None):
+        """coordinate_frame (e.g. "robot_base") makes the frame contract explicit:
+        every camera frame must declare it, and robot facts gain a named
+        ``frame_view`` (hand/TCP pose and gripper opening) in that frame.
+        tcp_offset is the actuating API's panda_hand->TCP offset, if known.
+        """
         if not episode_id or not camera or not clock:
             raise ValueError("episode, camera and clock are required")
+        if coordinate_frame is not None and coordinate_frame not in FRAMES:
+            raise ValueError(f"unsupported coordinate frame {coordinate_frame!r}; frames are {FRAMES}")
+        if tcp_offset is not None:
+            tcp_offset = np.asarray(tcp_offset, dtype=float)
+            if tcp_offset.shape != (3,) or not np.isfinite(tcp_offset).all():
+                raise ValueError("tcp_offset must be one finite XYZ vector")
+            tcp_offset = tuple(tcp_offset.tolist())
+        self.coordinate_frame, self.tcp_offset = coordinate_frame, tcp_offset
         self.tracker = tracker
         self.episode_id, self.camera, self.clock = episode_id, camera, clock
         self._base_episode_id = episode_id
@@ -126,6 +146,9 @@ class World:
         self.cadence = cadence or Cadence()
         self._lock = threading.RLock()
         self._closed = False
+        # Optional episode-local observer of accepted frames (opt-in held
+        # geometry, held_geometry.py); None keeps legacy behaviour unchanged.
+        self.held = None
         self._clear()
 
     def _clear(self):
@@ -138,6 +161,7 @@ class World:
         self._force_verification = False
         self._seeded = False
         self.revision = 0
+        self._geometry_frame = self.coordinate_frame
 
     def _open(self):
         if self._closed:
@@ -169,10 +193,11 @@ class World:
             self._open()
             self._motion_at = max(self._motion_at, at)
 
-    def _fact(self, value, *, frame_id, at, layer="observed", reason="", identity=None):
+    def _fact(self, value, *, frame_id, at, layer="observed", reason="", identity=None, coordinate_frame=None):
         self.revision += 1
         return {"status": "known" if value is not None else "unknown", "value": _finite(value),
                 "identity": identity, "layer": layer, "frame_id": frame_id,
+                "coordinate_frame": coordinate_frame,
                 "captured_at": at, "processed_at_monotonic": time.monotonic(),
                 "evidence_ids": [f"{self.episode_id}:{'robot' if identity == 'robot' else self.camera}:{frame_id}"]
                     if layer == "observed" else [],
@@ -185,7 +210,20 @@ class World:
             self._open()
             if type(frame_id) is not int or frame_id <= self._robot_id or captured_at < self._robot_at:
                 raise FrameError("duplicate or out-of-order robot observation")
-            fact = self._fact(values, frame_id=frame_id, at=captured_at, identity="robot")
+            frame = None
+            if isinstance(values, Mapping):
+                try:
+                    if self.coordinate_frame is not None:
+                        # Additive named view; legacy fields keep their labels.
+                        view = robot_pose_view(values, frame=self.coordinate_frame, tcp_offset=self.tcp_offset)
+                        values = {**values, "frame_view": view}
+                        frame = self.coordinate_frame if view["status"] == "known" else None
+                    else:
+                        check_consistency(values)
+                except FrameContractError as exc:
+                    raise FrameError(f"robot pose metadata violates the frame contract: {exc}") from exc
+            fact = self._fact(values, frame_id=frame_id, at=captured_at, identity="robot",
+                              coordinate_frame=frame)
             self._robot = fact
             self._robot_id, self._robot_at = frame_id, captured_at
 
@@ -195,6 +233,13 @@ class World:
             raise FrameError("episode, camera, or clock mismatch")
         if frame.frame_id <= self._frame_id or frame.captured_at < self._object_at:
             raise FrameError("duplicate or out-of-order RGB-D frame")
+        if self.coordinate_frame is not None and frame.coordinate_frame != self.coordinate_frame:
+            raise FrameError(f"camera pose frame {frame.coordinate_frame!r} is not the World's "
+                             f"declared coordinate frame {self.coordinate_frame!r}")
+        if frame.coordinate_frame is not None:
+            if self._geometry_frame not in (None, frame.coordinate_frame):
+                raise FrameError("camera pose frame changed within one episode")
+            self._geometry_frame = frame.coordinate_frame
 
     def seed(self, frame: PublicFrame, masks: Mapping[str, np.ndarray]):
         """Explicit acquisition/reacquisition; no implicit identity switching."""
@@ -219,6 +264,7 @@ class World:
                 self._seeded = True
             except Exception as exc:
                 self._tracking_failed(frame, exc)
+            self._held_event("seed", frame)
 
     def observe_frame(self, frame: PublicFrame):
         with self._lock:
@@ -230,6 +276,11 @@ class World:
                 self._accept(frame, masks)
             except Exception as exc:
                 self._tracking_failed(frame, exc)
+            self._held_event("frame", frame)
+
+    def _held_event(self, kind, frame):
+        if self.held is not None:
+            self.held.on_event(kind, frame)
 
     def _tracking_failed(self, frame, exc):
         self._seeded = False
@@ -237,6 +288,7 @@ class World:
         for identity in self._identities:
             self._objects[identity] = self._fact(None, frame_id=frame.frame_id,
                 at=frame.captured_at, identity=identity, reason=f"tracking failed: {type(exc).__name__}")
+        self._held_event("tracking_failed", frame)
         raise TrackingError("SAM2 streaming failed; explicit reacquisition required") from exc
 
     def _accept(self, frame, masks):
@@ -275,7 +327,8 @@ class World:
                 elif mask.any():
                     reason = "insufficient valid depth; geometry unknown"
             objects[identity] = self._fact(value, frame_id=frame.frame_id, at=frame.captured_at,
-                                           identity=identity, reason=reason)
+                                           identity=identity, reason=reason,
+                                           coordinate_frame=frame.coordinate_frame)
         self._objects = objects
         self._frame_id, self._object_at = frame.frame_id, frame.captured_at
 
@@ -288,6 +341,7 @@ class World:
             for identity in self._identities:
                 self._objects[identity] = self._fact(None, frame_id=frame.frame_id,
                     at=frame.captured_at, identity=identity, reason=str(reason))
+            self._held_event("invalidated", frame)
 
     def set_prediction(self, identity, value, *, at):
         self._time(at)
@@ -335,6 +389,9 @@ class World:
             if not identities:
                 raise ValueError("relation must name its measured dependencies")
             facts = [self.query(identity, at=at) for identity in identities]
+            frames = {f.get("coordinate_frame") for f in facts} - {None}
+            if len(frames) > 1:
+                raise FrameError(f"relation dependencies use different coordinate frames: {sorted(frames)}")
             ready = all(f["status"] == "known" and f["captured_at"] >= self._motion_at for f in facts)
             times = [f.get("captured_at", -math.inf) for f in facts]
             ready = ready and max(times) - min(times) <= self.cadence.relation_max_skew
@@ -362,6 +419,7 @@ class World:
     def snapshot(self, *, at):
         with self._lock:
             return {"episode_id": self.episode_id, "camera": self.camera, "clock": self.clock,
+                    "coordinate_frame": self._geometry_frame,
                     "revision": self.revision, "robot": self.query("robot", at=at),
                     "observed": {k: self.query(k, at=at) for k in self._objects},
                     "predicted": {k: self.query(k, at=at, layer="predicted") for k in self._predictions},
@@ -378,6 +436,8 @@ class World:
                 self._episode_generation += 1
                 self.episode_id = episode_id or f"{self._base_episode_id}:reset/{self._episode_generation}"
                 self._clear()
+                if self.held is not None:
+                    self.held.reset()
 
     def close(self):
         with self._lock:

@@ -1,5 +1,41 @@
 # 核心源码与 Markdown 对齐
 
+## 2026-10-24：发布 RS 10 月 19 日 wine 修复源码
+
+用户授权将 RS 的最新部署源码同步到本地 `SZ-DEV` 并推送至
+`wge2002/aspire-world` 同名分支。来源为
+`rs:/mnt/data/aspire-world-deployment-20261019-wine-repair/source-overlay/`，
+基线 `63a7fc7382fb258b962372490daaef586fc67fe8`。启动时为含未提交改动的
+`SZ-DEV`；本次发布不追称为历史启动时的 Git 身份。
+
+`source-change-manifest.json` 共 77 个文件：相对本地基线，30 个已有文件
+改变、47 个新增。传输前后逐文件 SHA256 全部一致。来源清单 SHA256：
+`974bbae6390bef6cf2acb88ce63744072bd824ac76d77108bbc6877db67bde2a`；
+配套封存 patch SHA256：
+`9e28165228e0cd2f05831d62ab5e4fafc05e7328cbaaa904113c5eb125e009fe`；
+实际 `runtime-freeze-v2.json` SHA256：
+`71dee4901443f03f16be14c3fed7a3e2ee751b1e985bc89523137ff8494d4e3b`。
+上述清单、patch、冻结树与原始实验产物保留在 RS，不复制进 Git。
+
+源码、测试及配置保持快照字节；发布时仅补充导航、结果记录和停止状态：
+`AGENTS.md`、`README.md`、`docs/LATEST_EXPERIMENTS.md`、
+`docs/DLC_WINE_REPAIR_20261019.md`、`docs/EXPERIMENT_RESULTS{,_DETAILS}.md`、
+`docs/RS_HANDOFF_20261012.md` 和本同步说明。停止记录为 10 月 19 日用户取消，
+18/45 次开发、0 正常成功、held-out 未开始；三份现存开发/campaign/pair 状态
+文件仍与停止时哈希一致。
+
+本次同步不启动服务或实验，不修改 RS 冻结树、账本、时钟或旧输出；日志、
+媒体、权重、凭据、生成策略及原始结果均保留在仓库外。协调端结果文档继续
+受求解器不可读的运行时排除规则约束。
+
+本地验证：52 个 Python 文件通过 AST 解析，示例 JSON 可解析，提交差异格式
+检查通过，未发现明显凭据。17 组目标 CPU 回归实际得到 247 passed、2 skipped；
+另 41 项部署测试在共享夹具 `os.chown(..., 999, 999)` 处因本机非 root 权限
+报错，未进入被测逻辑。这 41 项不能记为本地通过；本次未修改源码绕过权限。
+RS 留存的 311 项核心和 17 项策略验收是历史证据，与本地结果分开记录。
+
+## 历史对齐记录
+
 2026-10-12 当前 RS 线补充：本地工程目录 `/home/zheng/github/aspire-world`，
 服务器工程目录 `rs:/root/github/aspire-world`，GitHub 发布分支 `SZ-DEV`。
 接手状态、验证范围及部署产物地址见 [RS_HANDOFF_20261012.md](RS_HANDOFF_20261012.md)。

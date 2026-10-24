@@ -25,6 +25,8 @@ import open3d as o3d
 from PIL import Image, ImageDraw
 from scipy.spatial.transform import Rotation as SciRotation
 
+from aspire.sim.cap.world_model.geometry_queries import box_axes
+
 # Default TCP offset shared across most Franka APIs
 DEFAULT_TCP_OFFSET = np.array([0.0, 0.0, -0.107], dtype=np.float64)
 
@@ -321,26 +323,53 @@ def select_instance_from_box(
 # Oriented bounding box
 # ---------------------------------------------------------------------------
 
-def get_oriented_bounding_box_from_3d_points(points: np.ndarray) -> dict[str, Any]:
+def get_oriented_bounding_box_from_3d_points(
+    points: np.ndarray, up: np.ndarray | tuple[float, float, float] = (0.0, 0.0, 1.0)
+) -> dict[str, Any]:
     """Compute the oriented bounding box from 3D points.
 
     Adds small noise to avoid degenerate cases, removes outliers, then computes OBB.
 
+    Axis convention: ``R`` is Open3D's ``obb.R`` returned unchanged. Its COLUMNS
+    are the box axes, ``R[:, i]`` pairs with ``extent[i]``; its rows are not box
+    axes. ``axes`` lists the same axes as rows (``axes[i] == R[:, i]``).
+    ``long_axis`` is the canonical-sign unit column with the largest extent,
+    reported only with ``long_axis_status == "known"``; near-equal extents are
+    ``"ambiguous"`` (``long_axis`` None) and invalid boxes ``"unknown"``.
+    ``long_axis_orientation`` is ``"vertical"``/``"horizontal"``/``"oblique"``
+    from ``long_axis_tilt_from_up`` (rad, 0 = along ``up``).
+
+    Everything is in the frame of ``points`` (robot_base for
+    ``mask_to_world_points``); ``up`` is gravity-up in that frame (+z in
+    robot_base). The box spans the points it was given: for a visible-surface
+    point cloud, occluded parts are missing and the extents and long axis are not
+    the complete object's.
+
     Args:
         points: (N, 3) float64 points.
+        up: (3,) gravity-up direction in the points' frame.
 
     Returns:
-        dict with "center", "extent", "R" keys.
+        dict with "center", "extent", "R" (unchanged) plus "axes",
+        "axis_convention", "coordinate_frame", "up", "long_axis",
+        "long_axis_index", "long_axis_status", "long_axis_extent",
+        "elongation_ratio", "long_axis_tilt_from_up", "long_axis_orientation",
+        "reason" and "caveats".
     """
     points = points + np.random.normal(0, 0.0001, points.shape)
     o3d_points = o3d.geometry.PointCloud()
     o3d_points.points = o3d.utility.Vector3dVector(points)
     o3d_points, _ = o3d_points.remove_statistical_outlier(nb_neighbors=20, std_ratio=2.0)
     obb = o3d_points.get_oriented_bounding_box()
+    axes = box_axes(obb.R, obb.extent, up=up)
     return {
         "center": obb.center,
         "extent": obb.extent,
         "R": obb.R,
+        **axes,
+        "axes": None if axes["axes"] is None else np.asarray(axes["axes"]),
+        "long_axis": None if axes["long_axis"] is None else np.asarray(axes["long_axis"]),
+        "coordinate_frame": "same frame as the input points",
     }
 
 

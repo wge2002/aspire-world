@@ -374,6 +374,15 @@ def must_read(dep: dict, case: dict, repo: Path) -> list[str]:
     root = Path(case["initial_state_manifest"]).parent
     entry = states["tasks"][case["task"]]
     paths += [str(root / s["path"]) for s in entry["development"]["states"].values()]
+    supervised = case.get("supervised_repair") or {}
+    continuation = supervised.get("continuation")
+    if continuation:
+        # These are separate, own-cell read-only inputs; never put private
+        # development evidence in the common runtime freeze.
+        parent = Path(continuation["parent"]["ledger"]).parent
+        paths += [str(p) for p in parent.rglob("*") if p.is_file()]
+        paths += [continuation["parent"]["campaign_state"]]
+        paths += [item["path"] for item in continuation["seed_input"].values()]
     return sorted(set(paths))
 
 
@@ -382,6 +391,10 @@ def must_not_write(dep: dict, case: dict, repo: Path) -> list[str]:
              str(Path(case["initial_state_manifest"]).parent), str(Path(case["claude_bin"]).parent),
              case["streaming"]["sam2"]["source_root"],
              str(Path(case["streaming"]["sam2"]["checkpoint"]).parent)]
+    continuation = (case.get("supervised_repair") or {}).get("continuation")
+    if continuation:
+        paths += [continuation["parent"]["ledger"], continuation["parent"]["campaign_state"]]
+        paths += [item["path"] for item in continuation["seed_input"].values()]
     return sorted(set(paths))
 
 
@@ -455,10 +468,11 @@ def hash_files(files: list[tuple[Path, str]], workers: int) -> list[str]:
 
 
 def verify_model(dep: dict, case: dict, mods: SimpleNamespace, *, rehash_weights: bool = True,
-                 workers: int = 8) -> dict:
+                 workers: int = 8, qwen_gpus: str = LAYOUT["qwen"]) -> dict:
     """The fixed Qwen service descriptor, its weights, env versions and CUDA 13 toolchain.
 
-    Shared by every cell of a node, so it is checked once per node."""
+    Shared by every cell of a node, so it is checked once per node. `qwen_gpus`
+    is the binding of the layout being verified; the default is this entry's own."""
     record, problems = {}, []
     record["model_service"] = mods.sp.model_service_identity(case)  # bound hash, endpoint, 1M
     qwen_manifest = json.loads(Path(case["model_service"]["server_manifest"]).read_text())
@@ -471,8 +485,8 @@ def verify_model(dep: dict, case: dict, mods: SimpleNamespace, *, rehash_weights
             problems.append(f"Qwen manifest {key} must be {value!r}")
     if qwen_manifest["env"].get("VLLM_PLE_CPU_OFFLOAD") != "1":
         problems.append("Qwen manifest lost VLLM_PLE_CPU_OFFLOAD=1")
-    if qwen_manifest["env"].get("CUDA_VISIBLE_DEVICES") != LAYOUT["qwen"]:
-        problems.append(f"Qwen must stay on GPUs {LAYOUT['qwen']}")
+    if qwen_manifest["env"].get("CUDA_VISIBLE_DEVICES") != qwen_gpus:
+        problems.append(f"Qwen must stay on GPUs {qwen_gpus}")
     # Weights: every file of the recorded revision, by content.
     weights = qwen_manifest["weights_manifest"]
     if sha256_file(Path(weights["path"])) != weights["sha256"]:
@@ -889,7 +903,7 @@ def identity_probe(dep: dict, case: dict, repo: Path, host: Host) -> dict:
 
 
 def device_probe(dep: dict, case: dict, host: Host, expected_gpu: str,
-                 layout: dict = LAYOUT) -> dict:
+                 layout: dict = LAYOUT, gpu_count: int = GPU_COUNT) -> dict:
     env = cell_env(dep, case, host)
     env.update(MUJOCO_GL="egl", PYOPENGL_PLATFORM="egl", CUDA_DEVICE_ORDER="PCI_BUS_ID",
                __EGL_VENDOR_LIBRARY_FILENAMES=str(case["egl_vendor_config"]))
@@ -918,8 +932,8 @@ def device_probe(dep: dict, case: dict, host: Host, expected_gpu: str,
             seen.get("cuda_devices") != [expected_gpu]:
         problems.append(f"CUDA on GPU {layout['simulator']} is not one working {expected_gpu}: "
                         f"{seen.get('cuda_devices')}")
-    if seen.get("egl_devices") != GPU_COUNT:
-        problems.append(f"EGL sees {seen.get('egl_devices')} devices, not {GPU_COUNT}")
+    if seen.get("egl_devices") != gpu_count:
+        problems.append(f"EGL sees {seen.get('egl_devices')} devices, not {gpu_count}")
     renderer = f"{seen.get('gl_vendor')} {seen.get('gl_renderer')}"
     if "NVIDIA" not in str(seen.get("gl_vendor")) or expected_gpu.split()[-1] not in renderer or \
             re.search(r"mesa|llvmpipe|softpipe|swrast", renderer, re.I):
@@ -933,7 +947,7 @@ def device_probe(dep: dict, case: dict, host: Host, expected_gpu: str,
 # --- GPUs, ports, topology --------------------------------------------------------
 
 
-def gpu_inventory(host: Host, expected_gpu: str) -> dict:
+def gpu_inventory(host: Host, expected_gpu: str, count: int = GPU_COUNT) -> dict:
     gpus = host.run(["nvidia-smi", "--query-gpu=index,uuid,name,memory.total,memory.used",
                      "--format=csv,noheader,nounits"])
     apps = host.run(["nvidia-smi", "--query-compute-apps=pid,gpu_uuid", "--format=csv,noheader"])
@@ -944,8 +958,8 @@ def gpu_inventory(host: Host, expected_gpu: str) -> dict:
                 "used_mib": int(r[4])} for r in rows]
     busy = [line.strip() for line in apps.stdout.splitlines() if line.strip()]
     problems = []
-    if [d["index"] for d in devices] != list(range(GPU_COUNT)):
-        problems.append(f"expected GPUs 0-{GPU_COUNT - 1}, got {[d['index'] for d in devices]}")
+    if [d["index"] for d in devices] != list(range(count)):
+        problems.append(f"expected GPUs 0-{count - 1}, got {[d['index'] for d in devices]}")
     if any(d["name"] != expected_gpu for d in devices):
         problems.append(f"every GPU must be {expected_gpu}: {[d['name'] for d in devices]}")
     if busy or any(d["used_mib"] > IDLE_GPU_MIB for d in devices):

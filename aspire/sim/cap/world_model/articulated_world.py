@@ -39,6 +39,38 @@ class ArticulatedWorld(SemanticWorld):
         self.latest_frame = None
         self._joint_pending, self.joint_checks = {}, []
 
+    def seed(self, frame, masks, **kwargs):
+        with self._lock:
+            if self._candidate_parts is None and self._identities:
+                # Explicit reseed after loss/reacquisition: no motion epoch,
+                # joint sample window or pending joint check spans the gap.
+                self.rigid_tracker.reanchor(self._identities)
+            super().seed(frame, masks, **kwargs)
+
+    def informative_motion(self):
+        """Registered evidence IDs of measured motion with real excitation.
+
+        Uses the documented excitation thresholds (>=0.01 m or >=0.1 rad):
+        a parent-relative joint sample departing from its window's first
+        sample, or a part's rigid motion estimate in its current epoch.
+        Empty means no informative public motion has been observed.
+        """
+        def excited(T):
+            return np.linalg.norm(T[:3, 3]) >= .01 or np.linalg.norm(rotvec(T[:3, :3])) >= .1
+        ids = set()
+        for samples in self.joint_samples.values():
+            if len(samples) >= 2:
+                first = transform(samples[0]["relative_transform"])
+                for sample in samples[1:]:
+                    if excited(np.linalg.inv(first) @ transform(sample["relative_transform"])):
+                        ids.update(samples[0]["evidence_ids"])
+                        ids.update(sample["evidence_ids"])
+                        break
+        for key, motion in self.part_motion.items():
+            if motion.get("status") == "estimated" and excited(transform(motion["motion_transform"])):
+                ids.update(self._objects.get(key, {}).get("evidence_ids", []))
+        return sorted(ids & self._evidence)
+
     def configure_joints(self, joints, *, reason, evidence_ids):
         proposed = validate_joints(joints, self.parts)
         if not reason or not evidence_ids or not set(evidence_ids) <= self._evidence:

@@ -47,10 +47,13 @@ READ_DENY = tuple(_B + p for p in (
     r"third_party/LIBERO[^/\s]*(?:/|$|\s)", r"libero_dependencies(?:/|$|\s)",
     r"(?:bddl_files|init_files|init_states)(?:/|$|\s)",
     r"common[-_]initial[-_]states(?:/|$|\s)", r"(?:runtime[-_])?statepack(?:/|$|\s)",
-)) + (r"\.(?:bddl|pruned_init|urdf|mjcf|xml)\b", r"initial_state_manifest\.json\b")
+)) + (r"\.(?:bddl|pruned_init|urdf|mjcf|xml)\b", r"initial_state_manifest\.json\b",
+      # Coordinator-only cross-cell/held-out result records and deployment state.
+      r"EXPERIMENT_RESULTS[^/\s]*\.md", r"preparation-state\.json\b")
 BASH_DENY_TEXT = (
     r"\b(?:replay_trial|run_fix_loop_validation|native_cc_recover_trial|native_world_heldout"
-    r"|streaming_fixloop_heldout|streaming_fixloop_campaign|native_world_protocol"
+    r"|streaming_fixloop_heldout|streaming_fixloop_campaign|streaming_fixloop_review|streaming_fixloop_autonomous"
+    r"|native_world_protocol"
     r"|native_cc_protocol|scene_snapshot|prepare_common_initial_states)\.py\b",
 )
 SOLVER_SUBCOMMANDS = {"status", "check", "snapshot", "trial", "alias-smoke", "select"}
@@ -74,10 +77,30 @@ def settings(case_path: Path, repo: Path) -> dict:
 def _paths(case: dict) -> dict:
     control = Path(case["control"]).resolve()
     statepack = case.get("initial_state_manifest")
+    supervised = case.get("supervised_repair") or {}
+    own = [Path(supervised["review_dir"]).resolve(),
+           Path(supervised["prior_input"]["manifest"]).resolve().parent] if supervised else []
+    continuation = supervised.get("continuation")
+    if continuation:
+        own += [Path(continuation["parent"]["ledger"]).resolve().parent.parent]
+        own += [Path(item["path"]).resolve().parent for item in continuation["seed_input"].values()]
     return {"control": control, "task": control / "cell", "heldout": control / "heldout",
             "marker": control / OUTER_MARKER, "campaigns": control.parent,
             # The common initial-state registry: outer environment input, never solver data.
-            "statepack": Path(statepack).resolve().parent if statepack else None}
+            "statepack": Path(statepack).resolve().parent if statepack else None,
+            # Supervised study: this cell's own read-only prior inputs and outer reviews.
+            "own_inputs": own}
+
+
+def sibling_denial(path: Path, p: dict, repo: Path | None = None) -> str | None:
+    """Another cell's review or prior-input directory next to this cell's own."""
+    keep = [p["control"], *p["own_inputs"], *([repo] if repo else [])]
+    for mine in p["own_inputs"]:
+        if path.is_relative_to(mine.parent) and not path.is_relative_to(mine) and path != mine.parent:
+            top = mine.parent / path.relative_to(mine.parent).parts[0]
+            if not any(k.is_relative_to(top) for k in keep):
+                return "Other cells' reviews and inputs are independent; they are not readable."
+    return None
 
 
 def read_denial(path: Path, case: dict) -> str | None:
@@ -85,6 +108,13 @@ def read_denial(path: Path, case: dict) -> str | None:
     text = str(path)
     if path == p["marker"] or path.is_relative_to(p["heldout"]) or path.name == OUTER_MARKER:
         return "Held-out evaluation and its artifacts belong to the outer coordinator."
+    sibling = sibling_denial(path, p, Path(case["sim"]).resolve() if case.get("sim") else None)
+    if sibling:
+        return sibling
+    if any(path.is_relative_to(mine) for mine in p["own_inputs"]):
+        if any(re.search(pattern, text) for pattern in READ_DENY[-2:]):
+            return "Coordinator result records are never solver inputs."
+        return None  # this cell's own prior inputs and outer reviews: read-only
     if path.is_relative_to(p["campaigns"]) and not path.is_relative_to(p["control"]):
         return "Other cells are independent; their outputs are not readable."
     if any(re.search(pattern, text) for pattern in READ_DENY) or (
@@ -135,8 +165,14 @@ def bash_denial(command: str, case: dict, repo: Path) -> str | None:
         if sub not in SOLVER_SUBCOMMANDS:
             return (f"`{sub}` is an outer coordinator step (init, resolve-interrupted and "
                     "finalize are not solver calls).")
+    for mine in p["own_inputs"]:
+        for word in re.findall(r"/[^\s'\"=:;|&]+", command):
+            if sibling_denial(Path(word), p, repo):
+                return "Other cells' reviews and inputs are independent; they are not readable."
+
     def protected(text: str) -> bool:
-        return str(repo) in text or any(re.search(pattern, text) for pattern in PROTECTED)
+        return (str(repo) in text or any(re.search(pattern, text) for pattern in PROTECTED)
+                or any(str(mine) in text for mine in p["own_inputs"]))
     if (any(re.search(MUTATING, s) and protected(s) for s in re.split(r"[;\n|]|&&", command))
             or any(protected(t) for t in re.findall(REDIRECT_TARGET, command))):
         return "Do not mutate the frozen runtime, ledger or recorded evidence with Bash."

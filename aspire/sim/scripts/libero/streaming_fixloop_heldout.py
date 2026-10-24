@@ -118,6 +118,8 @@ def freeze(task_dir: Path, evaluation: Path, stage1: dict, ledger: dict) -> tupl
         raise ProtocolError("the selected bundle was never tested in development")
     if stage1.get("observation_fallback"):
         raise ProtocolError("this profile has no observation fallback")
+    if "supervised_repair" in ledger["identity"]:
+        supervised_gate(ledger, stage1, digest)
     if first:
         frozen.mkdir(parents=True)
         for key, name in FROZEN_FILES.items():
@@ -142,6 +144,26 @@ def freeze(task_dir: Path, evaluation: Path, stage1: dict, ledger: dict) -> tupl
         "object_inventory": None, "strategy_md": None,
         "development_evidence": [r["directory"] for r in executed]}
     return bundle, kept, manifest
+
+
+def supervised_gate(ledger: dict, stage1: dict, digest: str) -> None:
+    """Supervised repair study: re-derive the gate from the ledger rows themselves.
+
+    The study must be closed by exhausted rounds or an outer freeze, and the
+    frozen bundle must have its own normal oracle success in this study's rows.
+    A stage-1 flag, another bundle's success or a historical one is not enough.
+    """
+    sup = ledger.get("supervised") or {}
+    closure = sup.get("closure") or {}
+    if sup.get("state") != "closed" or closure.get("reason") not in ("rounds_exhausted", "outer_freeze"):
+        raise ProtocolError("supervised development is not closed by exhausted rounds or an outer "
+                            "freeze; no held-out evaluation")
+    own = [r for r in ledger["trials"] if r.get("bundle_sha256") == digest and sp.rounds.passed_row(r)]
+    if not own:
+        raise ProtocolError("development_failed/heldout_skipped: the selected bundle has no oracle "
+                            "success of its own in this study")
+    if (stage1.get("supervised_repair") or {}).get("heldout_gate") != "passed":
+        raise ProtocolError("stage1_result.json does not record a passed supervised held-out gate")
 
 
 def frozen_bundle(identity: dict, kept: dict) -> tuple[dict, dict]:

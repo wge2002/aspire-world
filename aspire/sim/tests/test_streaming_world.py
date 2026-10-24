@@ -245,7 +245,8 @@ tree = ast.parse(SOURCE.read_text())
 methods = next(n for n in tree.body if isinstance(n, ast.ClassDef) and n.name == "FrankaLiberoEnv")
 selected = [n for n in methods.body if isinstance(n, ast.FunctionDef) and n.name in {
     "move_to_joints_blocking", "_step_once", "_set_gripper", "_publish_control_progress",
-    "add_control_progress_callback", "add_streaming_reset_callback", "add_streaming_close_callback"}]
+    "add_control_progress_callback", "add_streaming_reset_callback", "add_streaming_close_callback",
+    "add_motion_gate_callback", "_check_control_permitted"}]
 namespace = {"np": np}
 exec(compile(ast.Module(selected, type_ignores=[]), str(SOURCE), "exec"), namespace)
 
@@ -277,8 +278,10 @@ class MotorEnv:
     def get_observation(self):
         self.reads += 1
         f = frame(min(self._sim_step_count, 7), self.get_current_time_s())
+        # The production driver labels pose_mat as camera -> robot_base.
         return {"agentview": {"images": {"rgb": f.rgb, "depth": f.depth},
-                              "intrinsics": f.intrinsics, "pose_mat": f.camera_to_world}}
+                              "intrinsics": f.intrinsics, "pose_mat": f.camera_to_world,
+                              "pose_frame": "robot_base"}}
 
 
 for name in (n.name for n in selected):

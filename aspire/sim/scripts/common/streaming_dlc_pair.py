@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""One/two-worker DLC entry: per node ONE shared Qwen TP4 and TWO independent cells.
+"""DLC entry: one shared Qwen TP4 and explicitly profiled independent cells.
 
 Operational orchestration only. Each cell is run by the frozen runtime's own
 `streaming_fixloop_campaign.py` as that cell's unprivileged user; this file has
@@ -71,13 +71,198 @@ SLOTS = {
           "egl_device_id": 7, "ports": {"sam3": 8114, "graspnet": 8115, "pyroki": 8116}},
 }
 URL_KEYS = {"sam3": "sam3_url", "graspnet": "graspnet_url", "pyroki": "pyroki_url"}
+# Layout profiles. A deployment without `layout_profile` is the split 8-GPU node
+# above, unchanged. `colocated-unit4-v1` (main 401a5ba, node-layout §1-§4) is an
+# explicit opt-in: one 4-GPU worker, one Qwen TP4 on all four cards, ONE shared
+# stateless SAM3 (card 0) / GraspNet (card 1) / Pyroki (CPU) on 8114-8116, and
+# the two cells' simulators on cards 2 and 3. Only the services are shared; the
+# cells keep their own users, HOME, control, ledger and reviews.
+DEFAULT_PROFILE = "split-node8-v1"
+UNIT4 = "colocated-unit4-v1"
+UNIT4_QWEN = "0,1,2,3"
+UNIT4_PORTS = {"sam3": 8114, "graspnet": 8115, "pyroki": 8116}
+UNIT4_PERCEPTION = {"sam3": "0", "graspnet": "1", "pyroki": ""}
+UNIT4_SLOTS = {
+    "A": {"qwen": UNIT4_QWEN, **UNIT4_PERCEPTION, "simulator": "2", "egl_device_id": 2,
+          "ports": dict(UNIT4_PORTS)},
+    "B": {"qwen": UNIT4_QWEN, **UNIT4_PERCEPTION, "simulator": "3", "egl_device_id": 3,
+          "ports": dict(UNIT4_PORTS)},
+}
+# The map a colocated deployment must declare, byte for byte (`gpu_map`).
+UNIT4_GPU_MAP = {"qwen": {"gpus": UNIT4_QWEN, "port": QWEN_PORT},
+                 "sam3": {"gpu": "0", "port": 8114}, "graspnet": {"gpu": "1", "port": 8115},
+                 "pyroki": {"gpu": "cpu", "port": 8116},
+                 "slots": {"A": {"simulator": "2", "sam2": "2", "egl_device_id": 2},
+                           "B": {"simulator": "3", "sam2": "3", "egl_device_id": 3}}}
+# Qwen engine settings of the colocated unit (401a5ba §1 and §4: util 0.82).
+UNIT4_QWEN_UTIL = "0.82"
+UNIT4_GRASP_PROBE = {"width": 800, "height": 512}
+# One whole node: Qwen has four dedicated cards; the other four cards each
+# host one isolated simulator. The two stateless perception models share 0/1.
+UNIT8_FOUR = "shared-node8-four-v1"
+UNIT8_FOUR_QWEN = "4,5,6,7"
+UNIT8_FOUR_SLOTS = {
+    name: {"qwen": UNIT8_FOUR_QWEN, **UNIT4_PERCEPTION, "simulator": str(gpu),
+           "egl_device_id": gpu, "ports": dict(UNIT4_PORTS)}
+    for gpu, name in enumerate(("A", "B", "C", "D"))
+}
+UNIT8_FOUR_GPU_MAP = {
+    **UNIT4_GPU_MAP, "qwen": {"gpus": UNIT8_FOUR_QWEN, "port": QWEN_PORT},
+    "slots": {name: {"simulator": str(gpu), "sam2": str(gpu), "egl_device_id": gpu}
+              for gpu, name in enumerate(("A", "B", "C", "D"))},
+}
+# A single repair study keeps the same dedicated Qwen/perception assignment.
+# One simulator uses card 2; card 3 is intentionally idle, without dummy cells.
+UNIT8_SINGLE = "shared-node8-single-v1"
+UNIT8_SINGLE_SLOTS = {"A": {**UNIT8_FOUR_SLOTS["C"], "ports": dict(UNIT4_PORTS)}}
+UNIT8_SINGLE_GPU_MAP = {
+    **UNIT8_FOUR_GPU_MAP,
+    "slots": {"A": {"simulator": "2", "sam2": "2", "egl_device_id": 2}},
+}
+PROFILES = {
+    DEFAULT_PROFILE: {"gpus_per_worker": 8, "workers": (1, 2), "slots": SLOTS,
+                      "shared_perception": False},
+    UNIT4: {"gpus_per_worker": 4, "workers": (1,), "slots": UNIT4_SLOTS,
+            "shared_perception": True, "perception": UNIT4_PERCEPTION},
+    UNIT8_FOUR: {"gpus_per_worker": 8, "workers": (1,), "slots": UNIT8_FOUR_SLOTS,
+                 "shared_perception": True, "perception": UNIT4_PERCEPTION},
+    UNIT8_SINGLE: {"gpus_per_worker": 8, "workers": (1,), "slots": UNIT8_SINGLE_SLOTS,
+                   "shared_perception": True, "perception": UNIT4_PERCEPTION},
+}
+SHARED_PREFIX = "shared-"
 MODES = ("fresh", "resume", "migrate")
 HANDOFF = "dlc_migration_handoff.json"
 HANDOFF_KEYS = ("cell", "quiesced", "old_host", "old_pids", "ledger_sha256",
                 "development_started_at", "development_deadline", "quiesced_at")
 # Mirrors streaming_fixloop_campaign.TERMINAL: once stage 1 is finalized, only the
 # outer held-out runner may continue; no solver session is started again.
-TERMINAL = {"stage1_finalized", "complete", "heldout_incomplete", "heldout_refused"}
+TERMINAL = {"stage1_finalized", "complete", "heldout_incomplete", "heldout_refused",
+            "development_failed", "development_stopped", "development_incomplete", "development_review_failed"}
+# Opt-in post-readiness check (`full_resolution_grasp_probe`): one synthetic,
+# task-free depth/mask GraspNet request per slot at the real camera resolution,
+# sent only after every service, Qwen included, is ready. No policy, no trial,
+# no ledger row; it proves the perception GPU has room beside the loaded stack.
+PROBE_KEYS = {"width", "height"}
+
+
+def layout_problems(slots: dict = None) -> list[str]:
+    """Static GPU map: Qwen, each slot's perception and each simulator never overlap."""
+    slots = SLOTS if slots is None else slots
+    devices = lambda value: {d for d in str(value).split(",") if d}  # noqa: E731
+    problems, qwen = [], {frozenset(devices(s["qwen"])) for s in slots.values()}
+    if len(qwen) != 1 or not next(iter(qwen)):
+        problems.append("every slot must share the one nonempty Qwen device set")
+    shared = set(next(iter(qwen))) if qwen else set()
+    owned = {}
+    for name, s in slots.items():
+        mine = devices(s["sam3"]) | devices(s["graspnet"]) | devices(s["simulator"])
+        if mine & shared:
+            problems.append(f"slot {name} perception/simulator GPUs {sorted(mine & shared)} "
+                            "overlap the shared Qwen GPUs")
+        if devices(s["simulator"]) & (devices(s["sam3"]) | devices(s["graspnet"])):
+            problems.append(f"slot {name} simulator shares a GPU with its perception stack")
+        if str(s["egl_device_id"]) not in devices(s["simulator"]):
+            problems.append(f"slot {name} EGL device is not its simulator GPU")
+        for other, theirs in owned.items():
+            if mine & theirs:
+                problems.append(f"slots {other} and {name} share GPUs {sorted(mine & theirs)}")
+        owned[name] = mine
+    return problems
+
+
+def unit4_layout_problems(slots: dict = None) -> list[str]:
+    """The colocated unit: Qwen on all four cards by design, so the split rule does
+    not apply; instead the exact 401a5ba map is required and the cells' simulators
+    stay off the two perception cards and off each other."""
+    slots = UNIT4_SLOTS if slots is None else slots
+    problems = [] if slots == UNIT4_SLOTS else ["colocated slot map must equal the canonical A2/B3 layout"]
+    if sorted(slots) != ["A", "B"]:
+        problems.append("colocated unit has exactly slots A and B")
+    for name, s in slots.items():
+        if s.get("qwen") != UNIT4_QWEN:
+            problems.append(f"slot {name} Qwen must be GPUs {UNIT4_QWEN}")
+        if {k: s.get(k) for k in UNIT4_PERCEPTION} != UNIT4_PERCEPTION or s.get("ports") != UNIT4_PORTS:
+            problems.append(f"slot {name} must bind the one shared SAM3 0 / GraspNet 1 / Pyroki CPU "
+                            "at 8114/8115/8116")
+        if str(s.get("egl_device_id")) != str(s.get("simulator")):
+            problems.append(f"slot {name} EGL device is not its simulator GPU")
+        if s.get("simulator") in (UNIT4_PERCEPTION["sam3"], UNIT4_PERCEPTION["graspnet"]):
+            problems.append(f"slot {name} simulator shares a GPU with the shared perception stack")
+    sims = sorted(str(s.get("simulator")) for s in slots.values())
+    if sims != ["2", "3"]:
+        problems.append(f"colocated simulators must be GPUs 2 (A) and 3 (B), got {sims}")
+    return problems
+
+
+def profile_name(pair: dict) -> str:
+    return pair.get("layout_profile", DEFAULT_PROFILE)
+
+
+def profile_of(pair: dict) -> dict:
+    return PROFILES[profile_name(pair)]
+
+
+def slots_of(pair: dict) -> dict:
+    return profile_of(pair)["slots"]
+
+
+def qwen_profile_problems(pair: dict) -> list[str]:
+    """Engine settings the colocated unit was measured with (401a5ba §1/§4).
+
+    The split profile keeps its frozen manifest as is and is not checked here."""
+    if profile_name(pair) not in (UNIT4, UNIT8_FOUR, UNIT8_SINGLE):
+        return []
+    import qwen_decode_config  # same directory; the conversion this unit was measured with
+    manifest = json.loads(Path(pair["model_service_manifest"]).read_text())
+    argv, env, problems = manifest.get("argv", []), manifest.get("env", {}), []
+    flag = lambda name: argv[argv.index(name) + 1] if name in argv[:-1] else None  # noqa: E731
+    expected_gpus = slots_of(pair)["A"]["qwen"]
+    if env.get("CUDA_VISIBLE_DEVICES") != expected_gpus:
+        problems.append(f"profile Qwen must be on GPUs {expected_gpus}")
+    if flag("--tensor-parallel-size") != "4" or flag("--port") != str(QWEN_PORT):
+        problems.append(f"colocated Qwen must be TP4 at :{QWEN_PORT}")
+    if "--enforce-eager" in argv or "--disable-custom-all-reduce" in argv:
+        problems.append("colocated Qwen must run decode graphs with custom all-reduce "
+                        "(no --enforce-eager / --disable-custom-all-reduce)")
+    try:
+        graphs = argv.count("--compilation-config") == 1 and \
+            json.loads(flag("--compilation-config")) == qwen_decode_config.COMPILATION_CONFIG
+    except (TypeError, ValueError):
+        graphs = False
+    if not graphs:
+        problems.append("colocated Qwen must have exactly one --compilation-config "
+                        f"{qwen_decode_config.COMPILATION_CONFIG}")
+    if flag("--gpu-memory-utilization") != UNIT4_QWEN_UTIL:
+        problems.append(f"colocated Qwen --gpu-memory-utilization must be {UNIT4_QWEN_UTIL}")
+    if any("expandable_segments" in env.get(k, "") for k in ("PYTORCH_CUDA_ALLOC_CONF",
+                                                              "PYTORCH_ALLOC_CONF")):
+        problems.append("colocated Qwen may not use expandable_segments")
+    return problems
+
+
+def grasp_probe_request(url: str, width: int, height: int) -> tuple[str, dict]:
+    """Synthetic plane at 0.6 m with a centred rectangular mask; no task content."""
+    b64 = lambda raw: E.base64.b64encode(raw).decode()  # noqa: E731
+    depth = E.struct.pack("<f", 0.6) * (width * height)
+    x0, x1, y0, y1 = width * 3 // 8, width * 5 // 8, height * 3 // 8, height * 5 // 8
+    one, zero = E.struct.pack("<i", 1), E.struct.pack("<i", 0)
+    row_in = zero * x0 + one * (x1 - x0) + zero * (width - x1)
+    seg = b"".join(row_in if y0 <= y < y1 else zero * width for y in range(height))
+    f = float(width)  # roughly a 53 degree horizontal field of view
+    cam = E.struct.pack("<9f", f, 0.0, width / 2, 0.0, f, height / 2, 0.0, 0.0, 1.0)
+    return f"{url.rstrip('/')}/plan", {
+        "depth_base64": b64(E.npy("<f4", (height, width), depth)),
+        "cam_K_base64": b64(E.npy("<f4", (3, 3), cam)),
+        "segmap_base64": b64(E.npy("<i4", (height, width), seg)), "segmap_id": 1}
+
+
+def full_resolution_probe(probe: dict, slot: dict, host) -> dict:
+    url, payload = grasp_probe_request(slot["case"]["graspnet_url"], probe["width"], probe["height"])
+    status, body = host.http(url, payload, timeout=600)
+    ok = status == 200 and isinstance(body, dict) and "grasps_base64" in body
+    return {"ok": ok, "status": status, "width": probe["width"], "height": probe["height"],
+            "request": "synthetic depth plane + rectangular mask (task-free, no trial)",
+            **({} if ok else {"body": str(body)[:500]})}
 DIST_KEYS = ("WORLD_SIZE", "RANK", "LOCAL_RANK", "NODE_RANK", "LOCAL_WORLD_SIZE", "GROUP_RANK",
              "MASTER_ADDR", "MASTER_PORT")
 PAIR_KEYS = ("schema", "workers", "gpus_per_worker", "runtime_root", "source_checkout_prefix",
@@ -111,12 +296,38 @@ def load_pair(path: Path) -> tuple[dict, str]:
     E.require(problems)
     if pair["schema"] != SCHEMA:
         problems.append(f"schema must be {SCHEMA}")
-    if type(pair["workers"]) is not int or pair["workers"] not in (1, 2) or pair["gpus_per_worker"] != E.GPU_COUNT:
-        problems.append("this entry supports 1 or 2 workers, each with exactly 8 GPUs")
+    if profile_name(pair) == DEFAULT_PROFILE:
+        problems += layout_problems()
+    probe = pair.get("full_resolution_grasp_probe")
+    if probe is not None and (not isinstance(probe, dict) or set(probe) != PROBE_KEYS or any(
+            type(probe[k]) is not int or not 64 <= probe[k] <= 4096 for k in PROBE_KEYS)):
+        problems.append("full_resolution_grasp_probe must be {width, height} integers in [64, 4096]")
+    name = profile_name(pair)
+    if name not in PROFILES:
+        problems.append(f"layout_profile must be one of {sorted(PROFILES)}, not {name!r}")
+        E.require(problems)
+    if name == DEFAULT_PROFILE:
+        if type(pair["workers"]) is not int or pair["workers"] not in (1, 2) or pair["gpus_per_worker"] != E.GPU_COUNT:
+            problems.append("this entry supports 1 or 2 workers, each with exactly 8 GPUs")
+    else:
+        expected_count = PROFILES[name]["gpus_per_worker"]
+        expected_map = {UNIT4: UNIT4_GPU_MAP, UNIT8_FOUR: UNIT8_FOUR_GPU_MAP,
+                        UNIT8_SINGLE: UNIT8_SINGLE_GPU_MAP}[name]
+        if type(pair["workers"]) is not int or pair["workers"] != 1 or \
+                type(pair["gpus_per_worker"]) is not int or pair["gpus_per_worker"] != expected_count:
+            problems.append(f"{name} is exactly one worker with exactly {expected_count} GPUs")
+        if pair.get("gpu_map") != expected_map:
+            problems.append(f"{name} requires gpu_map exactly {json.dumps(expected_map)}")
+        if probe != UNIT4_GRASP_PROBE:
+            problems.append(f"{name} requires full_resolution_grasp_probe {UNIT4_GRASP_PROBE}")
+        if name == UNIT4:
+            problems += unit4_layout_problems()
+        E.require(problems)
+        problems += qwen_profile_problems(pair)
     E.require(problems)
     if sorted(pair["ranks"]) != [str(r) for r in range(pair["workers"])] or \
-            any(sorted(v) != ["A", "B"] for v in pair["ranks"].values()):
-        problems.append("ranks must match declared workers, each with slots A and B")
+            any(sorted(v) != sorted(slots_of(pair)) for v in pair["ranks"].values()):
+        problems.append(f"ranks must match declared workers, each with slots {sorted(slots_of(pair))}")
     E.require(problems)
     group = pair["runtime_group"]
     if not isinstance(group, dict) or set(group) != {"name", "gid"} or group["gid"] == 0:
@@ -311,7 +522,7 @@ def perception_equivalent(descriptor: dict, manifest: dict) -> list[str]:
 
 
 def preflight_slot(pair, rank, slot, mods, host, recorded) -> dict:
-    layout = SLOTS[slot]
+    layout = slots_of(pair)[slot]
     cell = pair["ranks"][str(rank)][slot]
     dep = slot_dep(pair, rank, slot)
     case, repo, task_dir, case_sha = E.check_case(dep, mods, layout)
@@ -435,8 +646,11 @@ def launch(path: Path, host: PairHost | None = None) -> int:
 def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int:
     attempt["subreaper"] = E.set_subreaper()
     expected_gpu = pair.get("expected_gpu_name", "NVIDIA L20Z")
+    layout = slots_of(pair)
+    shared = profile_of(pair)["shared_perception"]
+    model_kwargs = {"qwen_gpus": layout["A"]["qwen"]} if shared else {}
     slots = {}
-    for name in ("A", "B"):
+    for name in layout:
         cell_id = pair["ranks"][str(rank)][name]["cell"]
         try:
             slots[name] = preflight_slot(pair, rank, name, mods, host, state["cells"].get(cell_id))
@@ -453,19 +667,24 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
         raise EntryRefused("no cell of this rank passed preflight")
     first = viable[0]
     model = E.verify_model(first["dep"], first["case"], mods, rehash_weights=True,
-                           workers=pair.get("hash_workers", 8))
+                           workers=pair.get("hash_workers", 8), **model_kwargs)
     attempt["model"] = model
     E.require(model["problems"])
-    attempt["gpus"] = E.gpu_inventory(host, expected_gpu)
+    attempt["gpus"] = E.gpu_inventory(host, expected_gpu, count=profile_of(pair)["gpus_per_worker"])
     qwen = E.qwen_spec(first["dep"], first["case"], node / "cache")
-    E.check_specs([qwen], first["dep"], SLOTS["A"])
+    E.check_specs([qwen], first["dep"], slots_of(pair)["A"])
+    shared_specs = []
+    if shared:
+        shared_specs = E.perception_specs(first["dep"], first["case"], first["repo"],
+            node / "cache", first["layout"], pair["perception_descriptor"], prefix_name=SHARED_PREFIX)
+        E.check_specs(shared_specs, first["dep"], first["layout"])
     for slot in viable:
         cache = Path(slot["dep"]["entry_dir"]) / "cache"
-        slot["specs"] = E.perception_specs(slot["dep"], slot["case"], slot["repo"], cache,
-                                           slot["layout"], pair["perception_descriptor"],
-                                           prefix_name=f"{slot['slot']}-")
+        slot["specs"] = [] if shared else E.perception_specs(
+            slot["dep"], slot["case"], slot["repo"], cache, slot["layout"],
+            pair["perception_descriptor"], prefix_name=f"{slot['slot']}-")
         E.check_specs(slot["specs"], slot["dep"], slot["layout"])
-    every = [qwen, *(s for slot in viable for s in slot["specs"])]
+    every = [qwen, *shared_specs, *(s for slot in viable for s in slot["specs"])]
     missing = E.missing_spec_paths(every)
     if missing:
         raise EntryRefused(f"recorded service paths are missing on this node: {missing[:8]}")
@@ -478,7 +697,7 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
             slot["setup"] = E.ensure_identity(slot["dep"], slot["case"], host)
             slot["identity_probe"] = E.identity_probe(slot["dep"], slot["case"], slot["repo"], host)
             slot["device_probe"] = E.device_probe(slot["dep"], slot["case"], host, expected_gpu,
-                                                  slot["layout"])
+                                                  slot["layout"], gpu_count=profile_of(pair)["gpus_per_worker"])
         except (EntryRefused, StartupFailed) as exc:
             slot.update(status="startup_failed", blocker=str(exc))
         attempt["slots"][slot["slot"]] = public(slot)
@@ -491,7 +710,7 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
     seed = qwen["seed_cache"]
     if not Path(seed["to"]).exists():
         E.shutil.copytree(seed["from"], seed["to"], symlinks=True)  # this node's own copy
-    for spec, slot in [(qwen, None), *((s, slot) for slot in viable for s in slot["specs"])]:
+    def start_service(spec, slot):
         record = {k: spec[k] for k in ("name", "argv", "cwd", "port", "gpu", "adaptations",
                                        "descriptor")}
         record["env"] = spec["env"]
@@ -502,6 +721,9 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
         services[spec["name"]] = {"spec": spec, "slot": slot, "record": record,
                                   "watch": mods.runtime.Service(spec["name"], process,
                                                                 Path(record["log"]), "")}
+    # Finish Qwen's memory profiling before loading colocated perception.
+    for spec, owner in [(qwen, None), *((s, slot) for slot in viable for s in slot["specs"])]:
+        start_service(spec, owner)
     attempt["services"] = {n: s["record"] for n, s in services.items()}
     E.write_json(attempt_dir / "services.json", attempt["services"])
 
@@ -519,13 +741,13 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
             try:
                 svc["watch"].check()
             except mods.runtime.ServiceFailure as exc:
-                if slot is None:  # Qwen: every campaign depends on it
+                if slot is None:  # Every campaign depends on shared services
                     for other in viable:
                         if other["status"] in ("preflight_ok", "campaign_running"):
-                            other.update(status="service_failed", blocker=f"shared Qwen: {exc}")
+                            other.update(status="service_failed", blocker=f"shared {'Qwen' if name == 'qwen' else name}: {exc}")
                             attempt["slots"][other["slot"]] = public(other)
                     E.write_json(node / "pair_state.json", state)
-                    raise StartupFailed(f"shared Qwen failed: {exc}") from exc
+                    raise StartupFailed(f"shared {'Qwen' if name == 'qwen' else name} failed: {exc}") from exc
                 fail_slot(slot, "service_failed" if slot.get("campaign") else "startup_failed",
                           f"{name} failed: {exc}")
         attempt["health_checked_at"] = E.now()
@@ -534,7 +756,8 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
     start = host.clock()
     timeout = float(pair["service_ready_timeout_seconds"])
     pending = set(services)
-    while pending:
+    shared_started = not shared
+    while pending or not shared_started:
         check_services()
         for name in sorted(pending):
             svc = services[name]
@@ -550,14 +773,47 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
                 pending.discard(name)
         if pending and host.clock() - start > timeout:
             late = sorted(pending)
-            if "qwen" in late:
-                raise StartupFailed(f"shared Qwen not ready after {timeout:.0f}s")
+            common_late = [n for n in late if services[n]["slot"] is None]
+            if common_late:
+                for slot in viable:
+                    if slot["status"] == "preflight_ok":
+                        slot.update(status="startup_failed", blocker=f"shared services not ready: {common_late}")
+                        attempt["slots"][slot["slot"]] = public(slot)
+                raise StartupFailed(f"shared {'Qwen' if common_late == ['qwen'] else common_late} "
+                                    f"not ready after {timeout:.0f}s")
             for slot in viable:
                 if any(s["name"] in late for s in slot["specs"]):
                     fail_slot(slot, "startup_failed", f"services not ready after {timeout:.0f}s")
             pending.clear()
+        if not pending and not shared_started:
+            for spec in shared_specs:
+                start_service(spec, None)
+            shared_started = True
+            pending.update(s["name"] for s in shared_specs)
+            attempt["services"] = {n: s["record"] for n, s in services.items()}
+            E.write_json(attempt_dir / "services.json", attempt["services"])
         if pending:
             host.sleep(10)
+    probe = pair.get("full_resolution_grasp_probe")
+    if probe:
+        # Qwen and every perception stack are ready: now load each GraspNet at the
+        # real resolution once. A slot that cannot is stopped before its campaign.
+        attempt["full_resolution_probe"] = {}
+        for slot in viable[:1] if shared else viable:
+            if slot["status"] != "preflight_ok":
+                continue
+            result = full_resolution_probe(probe, slot, host)
+            attempt["full_resolution_probe"][slot["slot"]] = result
+            if not result["ok"]:
+                if shared:
+                    for other in viable:
+                        other.update(status="startup_failed", blocker=f"shared full-resolution GraspNet probe failed: {result}")
+                        attempt["slots"][other["slot"]] = public(other)
+                    raise StartupFailed(f"shared full-resolution GraspNet probe failed: {result}")
+                fail_slot(slot, "startup_failed",
+                          f"full-resolution GraspNet probe failed: {result}")
+        E.write_json(node / "pair_state.json", state)
+        check_services()
     attempt["gpu_placement"] = E.gpu_placement(host, attempt["gpus"])
     attempt["services"] = {n: s["record"] for n, s in services.items()}
     E.write_json(attempt_dir / "services.json", attempt["services"])
@@ -601,6 +857,8 @@ def _run(pair, rank, host, mods, node, state, attempt, attempt_dir, life) -> int
                     active = True
                     continue
                 finish_campaign(slot, code)
+                if shared:
+                    life.stop({f"{slot['slot']}-campaign"})
                 remember_clock(state, slot["case"]["id"], slot["ledger_after"])
                 attempt["slots"][slot["slot"]] = public(slot)
                 E.write_json(node / "pair_state.json", state)
@@ -619,6 +877,14 @@ def start_campaign(slot: dict, host: PairHost, life: E.Lifecycle) -> None:
     argv = E.as_user(dep, [str(repo / ".venv-libero/bin/python3"), "-u", E.CAMPAIGN,
                            "--case", str(Path(dep["case"])), *(["--resume"] if resume else []),
                            *([] if dep.get("heldout", True) else ["--no-heldout"])])
+    if "autonomous_review" in (slot["case"].get("supervised_repair") or {}):
+        # Separate root wrapper per slot: model/campaign children are runuser,
+        # while only this wrapper can validate and seal a review. Pair health
+        # monitoring and the other slot continue during a model review.
+        argv = [str(repo / ".venv-libero/bin/python3"), "-u",
+                "scripts/libero/streaming_fixloop_autonomous.py", "--case", str(Path(dep["case"])),
+                "--user", dep["identity"]["user"], *(["--resume"] if resume else []),
+                *([] if dep.get("heldout", True) else ["--no-heldout"])]
     env = E.cell_env(dep, slot["case"], host)
     slot["campaign"] = {"argv": argv, "cwd": str(repo), "env_keys": sorted(env),
                         "env": {k: env[k] for k in ("HOME", "PATH", "PYTHONPATH",
@@ -665,9 +931,9 @@ def validate_only(path: Path, *, rehash_weights: bool, host: PairHost | None = N
                 result = preflight_slot(pair, rank, slot, mods, host, None)
                 specs = E.perception_specs(result["dep"], result["case"], result["repo"],
                                            Path(result["dep"]["entry_dir"]) / "cache",
-                                           SLOTS[slot], pair["perception_descriptor"],
-                                           prefix_name=f"{slot}-")
-                E.check_specs(specs, result["dep"], SLOTS[slot])
+                                           slots_of(pair)[slot], pair["perception_descriptor"],
+                                           prefix_name=SHARED_PREFIX if profile_of(pair)["shared_perception"] else f"{slot}-")
+                E.check_specs(specs, result["dep"], slots_of(pair)[slot])
                 entry = {"status": "passed", "mode": result["mode"],
                          "services": [{k: s[k] for k in ("name", "argv", "port", "gpu",
                                                          "adaptations")} for s in specs],
@@ -690,9 +956,11 @@ def validate_only(path: Path, *, rehash_weights: bool, host: PairHost | None = N
             first = {"dep": slot_dep(pair, 0, "A"), "case": json.loads(Path(cell["case"]).read_text())}
         if first:
             model = E.verify_model(first["dep"], first["case"], mods,
-                                   rehash_weights=rehash_weights, workers=pair.get("hash_workers", 8))
+                                   rehash_weights=rehash_weights, workers=pair.get("hash_workers", 8),
+                                   **({"qwen_gpus": slots_of(pair)["A"]["qwen"]}
+                                      if profile_of(pair)["shared_perception"] else {}))
             qwen = E.qwen_spec(first["dep"], first["case"], Path(pair["entry_root"]) / "rank0/cache")
-            E.check_specs([qwen], first["dep"], SLOTS["A"])
+            E.check_specs([qwen], first["dep"], slots_of(pair)["A"])
             report["model"] = model
             report["qwen_service"] = {k: qwen[k] for k in ("argv", "port", "gpu", "adaptations")}
             report["qwen_missing_paths"] = E.missing_spec_paths([qwen])

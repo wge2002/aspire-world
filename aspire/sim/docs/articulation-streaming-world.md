@@ -85,6 +85,23 @@ control. Focused unknown parts still interrupt at the normal checkpoint.
 Rejected proposals are omitted from subsequent inference packets. Defer awaits
 further evidence; the policy can inspect the review and obtain observations.
 
+Phase-2 repair (event-local review): the packet carries the complete current
+graph, current observed/robot/relation facts, current joint edges/fits and
+part motion, the last four motion reports, interaction checks citing the event
+evidence, and ONLY registered evidence IDs cited by the events, current facts,
+fits and those checks; revision/model/receipt history is omitted. A reply may
+cite only these IDs. Request parameters (Qwen3.8-Flash-Next, xhigh, 1M/64K,
+900 s) are unchanged and no token/action cap is added. Initial model reviews
+with no informative measured motion (>= 0.01 m or >= 0.1 rad) are marked
+`deferred_no_call` with journal `world_review_deferred_no_call`
+(`qwen_called: false`, no usage/duration) and re-armed
+(`world_review_rearmed`) when such motion is registered. Each actual call is
+journaled once: `qwen_world_review` with usage/duration/hashes and
+`outcome` accepted | action_rejected (valid World unchanged) |
+grounding_failed (World disarmed, control interrupted); malformed data is one
+`qwen_world_review_rejected` (`data_rejected`); a transport/service failure is
+`qwen_world_review_outage` and interrupts control.
+
 Public helpers: `world_query_joint(child)`,
 `world_predict_joint(child,q,extrapolate=False)`, `world_review_pending()` plus all v2 helpers.
 `world_begin_joint_interaction(child,delta_q)` records a validated model's

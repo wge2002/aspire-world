@@ -124,6 +124,7 @@ class FrankaLiberoEnv(BaseEnv):
 
         self.home_joint_position: np.ndarray | None = None
         self._streaming_progress = ControlProgress()
+        self.arm_motion_count = 0  # monotonic; see move_to_joints_blocking
 
         # Viser debugging
         self.viser_debug = viser_debug
@@ -221,6 +222,21 @@ class FrankaLiberoEnv(BaseEnv):
     def add_streaming_close_callback(self, callback):
         return self._streaming_progress.add("close", callback)
 
+    def add_motion_gate_callback(self, callback):
+        """Trusted pre-step gate; raising refuses the next actual motor/gripper step."""
+        return self._streaming_progress.add("gate", callback)
+
+    def add_gripper_gate_callback(self, callback):
+        """Trusted pre-command gate for gripper changes: callback(requested, current)."""
+        return self._streaming_progress.add("gripper_gate", callback)
+
+    def _check_control_permitted(self):
+        # Runs BEFORE handle.step: a disarmed streaming World refuses the next
+        # step itself (progress callbacks only observe a step already taken).
+        hooks = getattr(self, "_streaming_progress", None)
+        if hooks is not None:
+            hooks.before_step()
+
     def _publish_control_progress(self):
         hooks = getattr(self, "_streaming_progress", None)
         if hooks is not None and hooks.active:
@@ -248,6 +264,9 @@ class FrankaLiberoEnv(BaseEnv):
             max_steps: Maximum simulation steps to reach target
         """
         target = np.asarray(joints, dtype=np.float64).reshape(7)
+        # Monotonic public count of commanded arm motions (never reset): lets an
+        # opt-in execution contract see any arm motion after its checked report.
+        self.arm_motion_count = getattr(self, "arm_motion_count", 0) + 1
         self._current_joints = target
         self._last_motion_report = {"converged": False, "status": "running",
                                     "target_joints": target.tolist()}
@@ -271,6 +290,7 @@ class FrankaLiberoEnv(BaseEnv):
             action[-1] = 1.0 - action[-1] * 2.0
 
             # Step the environment
+            self._check_control_permitted()
             self._current_obs, self._current_reward, self._current_done, self._current_info = (
                 self.handle.step(action)
             )
@@ -309,7 +329,13 @@ class FrankaLiberoEnv(BaseEnv):
         Args:
             fraction: 0.0 (closed) to 1.0 (open)
         """
-        self._gripper_fraction = float(np.clip(fraction, 0.0, 1.0))
+        # A refused gripper command must not linger and actuate on a later step.
+        self._check_control_permitted()
+        requested = float(np.clip(fraction, 0.0, 1.0))
+        hooks = getattr(self, "_streaming_progress", None)
+        if hooks is not None and hasattr(hooks, "before_gripper"):
+            hooks.before_gripper(requested, self._gripper_fraction)
+        self._gripper_fraction = requested
 
     def _step_once(self) -> None:
         """Execute one simulation step with current control state."""
@@ -318,6 +344,7 @@ class FrankaLiberoEnv(BaseEnv):
         # Map gripper: 1.0 (open) -> -1.0, 0.0 (closed) -> 1.0
         action[-1] = 1.0 - action[-1] * 2.0
 
+        self._check_control_permitted()
         self._current_obs, self._current_reward, self._current_done, self._current_info = (
             self.handle.step(action)
         )
@@ -510,6 +537,11 @@ class FrankaLiberoEnv(BaseEnv):
                 ]
             )
             obs[camera_name]["pose_mat"] = cam_robot_tf.as_matrix()
+            # pose/pose_mat map OpenCV camera coordinates into robot_base, the
+            # policy/IK frame (cap/world_model/robot_frames.py).
+            obs[camera_name]["pose_frame"] = "robot_base"
+            obs[camera_name]["pose_convention"] = (
+                "camera_to_robot_base; OpenCV optical axes (+x right, +y down, +z forward)")
 
             cam_id = self.handle.env.sim.model.camera_name2id(camera_name)
             fovy = self.handle.env.sim.model.cam_fovy[cam_id]
@@ -537,7 +569,14 @@ class FrankaLiberoEnv(BaseEnv):
         return obs
 
     def get_robot_observation(self) -> dict[str, Any]:
-        """Public proprioception only, without RGB-D acquisition or evaluator data."""
+        """Public proprioception only, without RGB-D acquisition or evaluator data.
+
+        Frame contract (cap/world_model/robot_frames.py): robot_base is the
+        policy/IK frame shared with camera pose_mat; world is the simulator
+        frame. Poses are panda_hand [XYZ, WXYZ]; the public panda_hand is the
+        gripper site rotated by Rz(pi/2) and offset -0.107 m along its Z.
+        robot_cartesian_pos = [XYZ(0:3), WXYZ(3:7), gripper opening(7)].
+        """
         obs = {}
         gripper_robot_base = (
             vtf.SE3(wxyz_xyz=self.base_link_wxyz_xyz).inverse()
@@ -547,24 +586,31 @@ class FrankaLiberoEnv(BaseEnv):
                 translation=np.array([0, 0, -0.107]),
             )
         )
+        opening = float(self._current_obs["robot0_gripper_qpos"][0] / self.gripper_metric_length)
         obs["robot_joint_pos"] = np.concatenate(
             [
                 self._current_obs["robot0_joint_pos"],
-                [self._current_obs["robot0_gripper_qpos"][0] / self.gripper_metric_length],
+                [opening],
             ]
         )
-        obs["robot_cartesian_pos"] = np.concatenate(
-            [
-                gripper_robot_base.translation(),
-                gripper_robot_base.rotation().wxyz,
-                [self._current_obs["robot0_gripper_qpos"][0] / self.gripper_metric_length],
-            ]
-        )
-        hand_world = vtf.SE3(wxyz_xyz=self.base_link_wxyz_xyz) @ gripper_robot_base
+        hand_base = np.concatenate(
+            [gripper_robot_base.translation(), gripper_robot_base.rotation().wxyz])
+        obs["robot_cartesian_pos"] = np.concatenate([hand_base, [opening]])
+        base_world = vtf.SE3(wxyz_xyz=self.base_link_wxyz_xyz)
+        hand_world = base_world @ gripper_robot_base
         obs["robot_hand_pose_world"] = np.concatenate(
             [hand_world.translation(), hand_world.rotation().wxyz])
         obs["robot_cartesian_reference"] = "robot_base/panda_hand"
         obs["robot_hand_pose_reference"] = "world/panda_hand"
+        # Named, explicitly labeled views of the same public measurements.
+        obs["robot_cartesian_layout"] = "xyz[0:3], quaternion_wxyz[3:7], gripper_opening[7]"
+        obs["robot_hand_pose_base"] = hand_base.copy()
+        obs["robot_hand_pose_base_reference"] = "robot_base/panda_hand"
+        obs["robot_base_pose_world"] = np.concatenate(
+            [base_world.translation(), base_world.rotation().wxyz])
+        obs["robot_base_pose_world_reference"] = "world/robot_base"
+        obs["robot_gripper_opening"] = opening
+        obs["robot_gripper_opening_meaning"] = "normalized finger opening: 0 closed, 1 open"
         return obs
 
     def get_current_time_s(self) -> float:
